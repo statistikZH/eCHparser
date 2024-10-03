@@ -1,12 +1,12 @@
 Package: eCHPaRserPolitics
-Title: What the Package Does (One Line, Title Case)
+Title: Parse eCH Politics XML
 Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Authors@R: c(
+    person("Simon", "Graf", , "simon.graf@statistik.ji.zh.ch", role = c("aut", "cre")),
+    person("Thomas", "Knecht", , "thomas.knecht@statistik.ji.zh.ch", role = "aut")
+    )
+Description: Parser for XML files in (various) eCH formats of the political rights domain.
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
