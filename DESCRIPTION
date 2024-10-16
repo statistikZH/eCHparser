@@ -1,4 +1,4 @@
-Package: eCHPaRserPolitics
+Package: eCHparser
 Title: Parse eCH Politics XML
 Version: 0.0.0.9000
 Authors@R: c(
