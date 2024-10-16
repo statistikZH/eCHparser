@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-Use the eCHparser package to convert XML files in various eCH standard formats of the political rights domain to simple to use dataframes. 
+Convert XML files containing data in the eCH-0252 standard format to easy-to-use dataframes using the eCHparser package.
 
 ## Installation
 
@@ -32,9 +32,10 @@ devtools::install_github("statistikZH/eCHparser")
 
 ## Example: eCH-0252
 
-The [eCH-0252 standard](https://www.ech.ch/de/ech/ech-0252/1.0.0) is used to feed information from cantonal IT systems to the voteInfo API, which then uses the data to display live counting information on votes, for example via the voteInfo App or the [Results and Information Plattform](https://app.statistik.zh.ch/wahlen_abstimmungen/prod/Actual) of the Canton of Zurich. This data is not yet publicly available in this form but will be starting in 2025. There are examples of the files available in this package (see example bellow)
+The [eCH-0252 standard](https://www.ech.ch/de/ech/ech-0252/1.0.0) is used to feed voting data from cantonal IT systems to the voteInfo API, which then uses the data to display live vote counting information, for example via the voteInfo App or the [Results and Information Plattform](https://app.statistik.zh.ch/wahlen_abstimmungen/prod/Actual) of the Canton of Zurich. This data will be publicly available in this format starting in 2025. However, example files are already available in this package (see example bellow).
 
-The function `parse_eCH_0252()` allows user to transform these XML files to simple to use dataframes.
+The function `parse_eCH_0252()` allows users to transform these XML files to easy-to-use dataframes.
+
 
 ```{r example, eval=FALSE}
 library(eCHparser)
@@ -53,4 +54,3 @@ filepath <- system.file("extdata", testfiles[file], package = "eCHparser")
 vote_df <- parse_eCH_0252(filepath, doi = c("CH", "CT"))
 
 ```
-
