@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(eCHPaRserPolitics)
+library(eCHparser)
 
-test_check("eCHPaRserPolitics")
+test_check("eCHparser")
