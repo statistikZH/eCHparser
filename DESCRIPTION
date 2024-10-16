@@ -1,6 +1,6 @@
 Package: eCHparser
 Title: Parse eCH Politics XML
-Version: 0.0.0.9000
+Version: 0.0.1.9000
 Authors@R: c(
     person("Simon", "Graf", , "simon.graf@statistik.ji.zh.ch", role = c("aut", "cre")),
     person("Thomas", "Knecht", , "thomas.knecht@statistik.ji.zh.ch", role = "aut")
