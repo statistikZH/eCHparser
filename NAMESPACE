@@ -2,5 +2,3 @@
 
 export(parse_eCH_0252)
 export(read_voteInfo)
-export(to_df)
-export(to_wide)

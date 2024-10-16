@@ -27,8 +27,9 @@ used to feed information from cantonal IT systems to the voteInfo API,
 which then uses the data to display live counting information on votes,
 for example via the voteInfo App or the [Results and Information
 Plattform](https://app.statistik.zh.ch/wahlen_abstimmungen/prod/Actual)
-of the Canton of Zurich. This data is publicly available on XXXXXXXXXXXX
-and is updated every five minutes on a voting Sunday.
+of the Canton of Zurich. This data is not yet publicly available in this
+form but will be starting in 2025. There are examples of the files
+available in this package (see example bellow)
 
 The function `parse_eCH_0252()` allows user to transform these XML files
 to simple to use dataframes.
@@ -36,5 +37,16 @@ to simple to use dataframes.
 ``` r
 library(eCHparser)
 
-# vote_df <- parse_eCH_0252("URL_to_publicly_available_eCH-0252.xml", doi = c("CH", "CT"))
+# list all sample files
+example_files <- system.file("extdata", package = "eCHparser") |>
+  list.files()
+
+# pick a random sample file
+file <- sample(seq_along(example_files), 1)
+
+# define filepath to sample file
+filepath <- system.file("extdata", testfiles[file], package = "eCHparser")
+
+# parse file, using only federal and cantonal votes
+vote_df <- parse_eCH_0252(filepath, doi = c("CH", "CT"))
 ```

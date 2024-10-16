@@ -7,7 +7,7 @@
 to_df(data, names)
 }
 \arguments{
-\item{data}{XXXXXXXXXXXXXXX}
+\item{data}{A dataframe}
 
 \item{names}{Variable names}
 }
