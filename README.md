@@ -5,6 +5,8 @@
 # eCHparser
 
 <!-- badges: start -->
+
+[![tic](https://github.com/statistikZH/eCHparser/workflows/tic/badge.svg?branch=main)](https://github.com/statistikZH/eCHparser/actions)
 <!-- badges: end -->
 
 Convert XML files containing data in the eCH-0252 standard format to
