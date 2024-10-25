@@ -5,6 +5,10 @@
 # eCHparser
 
 <!-- badges: start -->
+
+[![tic](https://github.com/statistikZH/eCHparser/workflows/tic/badge.svg?branch=main)](https://github.com/statistikZH/eCHparser/actions)
+[![License:
+MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <!-- badges: end -->
 
 Convert XML files containing data in the eCH-0252 standard format to
