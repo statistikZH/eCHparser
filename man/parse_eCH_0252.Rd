@@ -12,6 +12,7 @@ parse_eCH_0252(file, doi = c("CH", "CT"))
 \item{doi}{Domains of influence of the votes that you want included.
 \href{https://www.ech.ch/de/ech/ech-0155/4.1}{eCH-0155} defines the following domains of influence:
 \itemize{
+\item CH = Bund
 \item CT = Kanton
 \item BZ = Bezirk / Amt / Verwaltungskreis
 \item MU = Gemeinde

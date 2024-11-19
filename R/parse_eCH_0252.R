@@ -7,6 +7,7 @@
 #' @param file Path to your XML file
 #' @param doi Domains of influence of the votes that you want included.
 #' [eCH-0155](https://www.ech.ch/de/ech/ech-0155/4.1) defines the following domains of influence:
+#' * CH = Bund
 #' * CT = Kanton
 #' * BZ = Bezirk / Amt / Verwaltungskreis
 #' * MU = Gemeinde
