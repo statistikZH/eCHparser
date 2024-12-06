@@ -118,20 +118,118 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day){
     dplyr::filter(!grepl("vote\\.", var)) |>
     to_wide()
 
-  # deal with nested namedElement nodes (seem to exist to add additional non-defined information that cannot be put in an element of the standard)
-  if ("namedElement_elementName" %in% names(vote_result)){
+  # deal with nested nodes (seem to exist to add additional non-defined information that cannot be put in an element of the standard)
+  if ("namedElement_elementName" %in% names(vote_result) || "subtotalInfo_countOfVoters" %in% names(vote_result)){
 
-    element_name <- vote_result |>
-      dplyr::select(unique_id, namedElement_elementName, namedElement_text) |>
-      tidyr::unnest_longer(everything()) |>
-      tidyr::pivot_wider(names_from = namedElement_elementName, values_from = namedElement_text) |>
-      tidyr::unnest_longer(everything())
+    # handle namedElement
+    if ("namedElement_elementName" %in% names(vote_result)) {
 
-    vote_result_full <- vote_result |>
-      dplyr::select(-namedElement_elementName, -namedElement_text) |>
-      tidyr::unnest_longer(everything(), keep_empty = TRUE) |>
-      dplyr::mutate(vote_voteIdentification = vote_info$vote_voteIdentification) |>
-      dplyr::left_join(element_name, by = "unique_id")
+      element_name <- vote_result |>
+        dplyr::select(unique_id, namedElement_elementName, namedElement_text) |>
+        tidyr::unnest_longer(everything()) |>
+        tidyr::pivot_wider(names_from = namedElement_elementName, values_from = namedElement_text) |>
+        tidyr::unnest_longer(everything())
+
+      vote_result_full <- vote_result |>
+        dplyr::select(-namedElement_elementName, -namedElement_text) |>
+        tidyr::unnest_longer(everything(), keep_empty = TRUE) |>
+        dplyr::mutate(vote_voteIdentification = vote_info$vote_voteIdentification) |>
+        dplyr::left_join(element_name, by = "unique_id")
+
+    }
+
+    if ("subtotalInfo_countOfVoters" %in% names(vote_result)) {
+
+      voter_type_sex <- vote_result |>
+        dplyr::select(unique_id, subtotalInfo_countOfVoters, subtotalInfo_voterType, subtotalInfo_sex) |>
+        tidyr::unnest_longer(everything()) #|>
+      #   tidyr::pivot_wider(names_from = namedElement_elementName, values_from = namedElement_text) |>
+      #   tidyr::unnest_longer(everything())
+      #
+      # vote_result_full <- vote_result |>
+      #   dplyr::select(-namedElement_elementName, -namedElement_text) |>
+      #   tidyr::unnest_longer(everything(), keep_empty = TRUE) |>
+      #   dplyr::mutate(vote_voteIdentification = vote_info$vote_voteIdentification) |>
+      #   dplyr::left_join(element_name, by = "unique_id")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      count_of_voters_info <- xml2::xml_find_first(xml_node, "//eCH-0252:countOfVotersInformation")
+
+      # Extract total count
+      total_count <- xml2::xml_text(xml2::xml_find_first(count_of_voters_info, "./eCH-0252:countOfVotersTotal"))
+
+      # Extract all "subtotalInfo" nodes
+      subtotal_nodes <- xml2::xml_find_all(count_of_voters_info, "./eCH-0252:subtotalInfo")
+
+      # Define desired structure
+      desired_columns <- c("countOfVoters", "voterType", "sex")
+
+      subtotal_info_list <- list(
+        data.frame(
+          countOfVoters = NA_character_,
+          voterType = NA_character_,
+          sex = NA_character_
+        )
+      )
+
+      # Parse each "subtotalInfo" node into a data frame
+      parse_subtotal <- function(node, columns) {
+        # Extract all children of the node
+        children <- xml2::xml_children(node)
+
+        # Create a named list with element names as keys and their text as values
+        data <- setNames(xml2::xml_text(children), xml2::xml_name(children))
+
+        # Turn into data frame
+        data_tbl <- as.data.frame(t(data), stringsAsFactors = FALSE)
+
+      }
+
+      # Apply parsing function to all "subtotalInfo" nodes
+      subtotal_info_list <- c(subtotal_info_list, lapply(subtotal_nodes, parse_subtotal, columns = desired_columns))
+
+      # Unlist
+      subtotal_info <- do.call(dplyr::bind_rows, subtotal_info_list)
+
+      # Drop first row
+      subtotal_info <- subtotal_info[-1, ]
+
+
+
+      # Add total count to the table
+      result <- subtotal_info %>%
+        dplyr::mutate(countOfVotersTotal = total_count)
+
+      # View the final table
+      print(result)
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
 
   } else {
 
