@@ -69,7 +69,8 @@ parse_eCH_0252 <- function(file, doi = c("CH", "CT")){
       node_voteBaseDelivery,
       x,
       canton_id,
-      polling_day
+      polling_day,
+      ns0252
     )
 
   })
@@ -98,7 +99,7 @@ parse_eCH_0252 <- function(file, doi = c("CH", "CT")){
 #' \dontrun{
 #' read_voteInfo(node_voteBaseDelivery, c(3, 4), 1, "2024-09-22")
 #' }
-read_voteInfo <- function(xml_node, index, canton_id, polling_day){
+read_voteInfo <- function(xml_node, index, canton_id, polling_day, ns0252 = ns0252){
 
   # get voteInfo element
   voteInfo_xml <- xml2::xml_child(xml_node, index)
@@ -159,11 +160,13 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day){
       # get the index of the rows containing results (+ 1 because the the first element of voteInfo contains no results but information on the vote itself)
       voter_info_index <- which(!is.na(vote_result$subtotalInfo_countOfVoters)) + 1
 
+      # unpack all voter information
       out_list <- lapply(voter_info_index, function(y) {
 
         unpack_voters(
           voteInfo_xml,
-          y
+          y,
+          ns0252
         )
 
       })
@@ -177,9 +180,10 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day){
         tidyr::unnest_longer(everything())
 
 
-      # join with result df
+      # join with result df and add voteTitle
       vote_result_full <- vote_result_full |>
-        dplyr::left_join(out_df)
+        dplyr::left_join(out_df) |>
+        dplyr::mutate(vote_voteIdentification = vote_info$vote_voteIdentification)
 
     }
 
@@ -217,13 +221,15 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day){
 #'
 unpack_voters <- function(data, index, ns0252 = ns0252){
 
-  count_of_voters_info <- xml2::xml_find_first(data, paste0(".//", ns0252, ":countOfVotersInformation"))
+  node_of_interest <- xml2::xml_child(data, index)
+
+  count_of_voters_info <- xml2::xml_find_first(node_of_interest, paste0(".//", ns0252, ":countOfVotersInformation"))
 
   # Extract total count
   total_count <- xml2::xml_text(xml2::xml_find_first(count_of_voters_info, paste0(".//", ns0252, ":countOfVotersTotal")))
 
   # Extract counting circle ID
-  municipality <- xml2::xml_text(xml2::xml_find_first(data, paste0(".//", ns0252, ":countingCircleId")))
+  municipality <- xml2::xml_text(xml2::xml_find_first(node_of_interest, paste0(".//", ns0252, ":countingCircleId")))
 
   # Extract all "subtotalInfo" nodes
   subtotal_nodes <- xml2::xml_find_all(count_of_voters_info, paste0(".//", ns0252, ":subtotalInfo"))
@@ -238,19 +244,6 @@ unpack_voters <- function(data, index, ns0252 = ns0252){
       sex = NA_character_
     )
   )
-
-  # Parse each "subtotalInfo" node into a data frame
-  parse_subtotal <- function(node, columns) {
-    # Extract all children of the node
-    children <- xml2::xml_children(node)
-
-    # Create a named list with element names as keys and their text as values
-    data <- setNames(xml2::xml_text(children), xml2::xml_name(children))
-
-    # Turn into data frame
-    data_tbl <- as.data.frame(t(data), stringsAsFactors = FALSE)
-
-  }
 
   # Apply parsing function to all "subtotalInfo" nodes
   subtotal_info_list <- c(subtotal_info_list, lapply(subtotal_nodes, parse_subtotal, columns = desired_columns))
@@ -284,12 +277,38 @@ unpack_voters <- function(data, index, ns0252 = ns0252){
       names_from = names(subtotal_info)[2]
     ) |>
     dplyr::mutate(
-      voteTitleInformation_voteTitleShort = vote_info$voteTitleInformation_voteTitleShort,
       countingCircle_countingCircleId = municipality
     )
 
   # View the final table
   return(subtotal_info)
+
+}
+
+
+
+
+#' Parse "subtotalInfo" nodes into a data frame
+#'
+#' @param node description
+#' @param columns description
+#'
+#' @return A dataframe
+#'
+#' @examples
+#' # example code
+#'
+#'
+parse_subtotal <- function(node, columns) {
+
+  # Extract all children of the node
+  children <- xml2::xml_children(node)
+
+  # Create a named list with element names as keys and their text as values
+  data <- setNames(xml2::xml_text(children), xml2::xml_name(children))
+
+  # Turn into data frame
+  data_tbl <- as.data.frame(t(data), stringsAsFactors = FALSE)
 
 }
 
