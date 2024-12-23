@@ -63,7 +63,16 @@ parse_eCH_0252 <- function(file, doi = c("CH", "CT")){
   }
 
   # transform relevant data to list
-  out_list <- lapply(relevant, function(x) read_voteInfo(node_voteBaseDelivery, x, canton_id, polling_day))
+  out_list <- lapply(relevant, function(x) {
+
+    read_voteInfo(
+      node_voteBaseDelivery,
+      x,
+      canton_id,
+      polling_day
+    )
+
+  })
 
   # transform relevant data to df
   out_df <- dplyr::bind_rows(out_list)
@@ -91,8 +100,11 @@ parse_eCH_0252 <- function(file, doi = c("CH", "CT")){
 #' }
 read_voteInfo <- function(xml_node, index, canton_id, polling_day){
 
+  # get voteInfo element
+  voteInfo_xml <- xml2::xml_child(xml_node, index)
+
   # get structure of the indexed node as a list
-  voteInfo <- xml2::xml_child(xml_node, index) |>
+  voteInfo <- voteInfo_xml|>
     xml2::as_list()
 
   # number the names to create unique names
@@ -116,7 +128,11 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day){
   # define vote results
   vote_result <- voteInfo_df_long |>
     dplyr::filter(!grepl("vote\\.", var)) |>
-    to_wide()
+    to_wide() |>
+    as.data.frame()
+
+  # Replace all NULL with NA
+  vote_result[vote_result == "NULL"] <- NA
 
   # deal with nested nodes (seem to exist to add additional non-defined information that cannot be put in an element of the standard)
   if ("namedElement_elementName" %in% names(vote_result) || "subtotalInfo_countOfVoters" %in% names(vote_result)){
@@ -140,93 +156,30 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day){
 
     if ("subtotalInfo_countOfVoters" %in% names(vote_result)) {
 
-      voter_type_sex <- vote_result |>
-        dplyr::select(unique_id, subtotalInfo_countOfVoters, subtotalInfo_voterType, subtotalInfo_sex) |>
-        tidyr::unnest_longer(everything()) #|>
-      #   tidyr::pivot_wider(names_from = namedElement_elementName, values_from = namedElement_text) |>
-      #   tidyr::unnest_longer(everything())
-      #
-      # vote_result_full <- vote_result |>
-      #   dplyr::select(-namedElement_elementName, -namedElement_text) |>
-      #   tidyr::unnest_longer(everything(), keep_empty = TRUE) |>
-      #   dplyr::mutate(vote_voteIdentification = vote_info$vote_voteIdentification) |>
-      #   dplyr::left_join(element_name, by = "unique_id")
+      # get the index of the rows containing results (+ 1 because the the first element of voteInfo contains no results but information on the vote itself)
+      voter_info_index <- which(!is.na(vote_result$subtotalInfo_countOfVoters)) + 1
 
+      out_list <- lapply(voter_info_index, function(y) {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      count_of_voters_info <- xml2::xml_find_first(xml_node, "//eCH-0252:countOfVotersInformation")
-
-      # Extract total count
-      total_count <- xml2::xml_text(xml2::xml_find_first(count_of_voters_info, "./eCH-0252:countOfVotersTotal"))
-
-      # Extract all "subtotalInfo" nodes
-      subtotal_nodes <- xml2::xml_find_all(count_of_voters_info, "./eCH-0252:subtotalInfo")
-
-      # Define desired structure
-      desired_columns <- c("countOfVoters", "voterType", "sex")
-
-      subtotal_info_list <- list(
-        data.frame(
-          countOfVoters = NA_character_,
-          voterType = NA_character_,
-          sex = NA_character_
+        unpack_voters(
+          voteInfo_xml,
+          y
         )
-      )
 
-      # Parse each "subtotalInfo" node into a data frame
-      parse_subtotal <- function(node, columns) {
-        # Extract all children of the node
-        children <- xml2::xml_children(node)
+      })
 
-        # Create a named list with element names as keys and their text as values
-        data <- setNames(xml2::xml_text(children), xml2::xml_name(children))
+      # unpack list
+      out_df <- dplyr::bind_rows(out_list) |>
+        dplyr::distinct()
 
-        # Turn into data frame
-        data_tbl <- as.data.frame(t(data), stringsAsFactors = FALSE)
-
-      }
-
-      # Apply parsing function to all "subtotalInfo" nodes
-      subtotal_info_list <- c(subtotal_info_list, lapply(subtotal_nodes, parse_subtotal, columns = desired_columns))
-
-      # Unlist
-      subtotal_info <- do.call(dplyr::bind_rows, subtotal_info_list)
-
-      # Drop first row
-      subtotal_info <- subtotal_info[-1, ]
+      vote_result_full <- vote_result |>
+        dplyr::select(-dplyr::contains("subtotalInfo_")) |>
+        tidyr::unnest_longer(everything())
 
 
-
-      # Add total count to the table
-      result <- subtotal_info %>%
-        dplyr::mutate(countOfVotersTotal = total_count)
-
-      # View the final table
-      print(result)
-
-
-
-
-
-
-
-
-
-
-
+      # join with result df
+      vote_result_full <- vote_result_full |>
+        dplyr::left_join(out_df)
 
     }
 
@@ -246,6 +199,98 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day){
                   pollingDay = polling_day)
 
   return(vote_data_complete)
+}
+
+
+
+
+
+#' Unpack voter information
+#'
+#' @param data description
+#' @param index description
+#'
+#' @return A dataframe
+#'
+#' @examples
+#' # example code
+#'
+unpack_voters <- function(data, index, ns0252 = ns0252){
+
+  count_of_voters_info <- xml2::xml_find_first(data, paste0(".//", ns0252, ":countOfVotersInformation"))
+
+  # Extract total count
+  total_count <- xml2::xml_text(xml2::xml_find_first(count_of_voters_info, paste0(".//", ns0252, ":countOfVotersTotal")))
+
+  # Extract counting circle ID
+  municipality <- xml2::xml_text(xml2::xml_find_first(data, paste0(".//", ns0252, ":countingCircleId")))
+
+  # Extract all "subtotalInfo" nodes
+  subtotal_nodes <- xml2::xml_find_all(count_of_voters_info, paste0(".//", ns0252, ":subtotalInfo"))
+
+  # Define desired structure
+  desired_columns <- c("countOfVoters", "voterType", "sex")
+
+  subtotal_info_list <- list(
+    data.frame(
+      countOfVoters = NA_character_,
+      voterType = NA_character_,
+      sex = NA_character_
+    )
+  )
+
+  # Parse each "subtotalInfo" node into a data frame
+  parse_subtotal <- function(node, columns) {
+    # Extract all children of the node
+    children <- xml2::xml_children(node)
+
+    # Create a named list with element names as keys and their text as values
+    data <- setNames(xml2::xml_text(children), xml2::xml_name(children))
+
+    # Turn into data frame
+    data_tbl <- as.data.frame(t(data), stringsAsFactors = FALSE)
+
+  }
+
+  # Apply parsing function to all "subtotalInfo" nodes
+  subtotal_info_list <- c(subtotal_info_list, lapply(subtotal_nodes, parse_subtotal, columns = desired_columns))
+
+  # Unlist
+  subtotal_info <- do.call(dplyr::bind_rows, subtotal_info_list)
+
+  # Drop first row
+  subtotal_info <- subtotal_info[-1, ]
+
+  # Replace all NA with 0
+  subtotal_info[is.na(subtotal_info)] <- 0
+
+  # Paste all values of the typology columns
+  subtotal_info$new_var <- apply(subtotal_info[, names(subtotal_info)[-1]], 1, paste, collapse = "_")
+
+  # Dynamically define new variable name as pasted names of the typology columns
+  names(subtotal_info)[length(names(subtotal_info))] <- paste(names(subtotal_info)[c(-1, -length(names(subtotal_info)))], collapse = "_")
+
+  # Drop all columns but the combination column
+  subtotal_info <- subtotal_info[, c(1, length(names(subtotal_info)))]
+
+  # Add column name to all values in the combination column
+  subtotal_info[, length(names(subtotal_info))] <- paste(names(subtotal_info)[length(names(subtotal_info))], subtotal_info[, length(names(subtotal_info))], sep = "_")
+
+  # Widen data and add ID variables
+  subtotal_info <- subtotal_info |>
+    dplyr::distinct() |>
+    tidyr::pivot_wider(
+      values_from = names(subtotal_info)[1],
+      names_from = names(subtotal_info)[2]
+    ) |>
+    dplyr::mutate(
+      voteTitleInformation_voteTitleShort = vote_info$voteTitleInformation_voteTitleShort,
+      countingCircle_countingCircleId = municipality
+    )
+
+  # View the final table
+  return(subtotal_info)
+
 }
 
 
