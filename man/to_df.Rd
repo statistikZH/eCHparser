@@ -7,12 +7,12 @@
 to_df(data, names)
 }
 \arguments{
-\item{data}{A dataframe}
+\item{data}{A dataframe.}
 
-\item{names}{Variable names}
+\item{names}{A string of variable names.}
 }
 \value{
-A dataframe
+A dataframe.
 }
 \description{
 Unlist list to dataframe

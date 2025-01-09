@@ -7,7 +7,7 @@
 parse_eCH_0252(file, doi = c("CH", "CT"))
 }
 \arguments{
-\item{file}{Path to your XML file}
+\item{file}{Path to your XML file.}
 
 \item{doi}{Domains of influence of the votes that you want included.
 \href{https://www.ech.ch/de/ech/ech-0155/4.1}{eCH-0155} defines the following domains of influence:
@@ -25,7 +25,7 @@ parse_eCH_0252(file, doi = c("CH", "CT"))
 }}
 }
 \value{
-A dataframe
+A dataframe.
 }
 \description{
 \code{parse_eCH_0252()} turns an eCH-0252 XML file for a vote into a dataframe.
@@ -34,7 +34,7 @@ applications VOTING and VeWork.
 }
 \examples{
 \dontrun{
-filepath <- system.file("inst/extdata", "eCH_0252_vote_partial_abraxas.xml", package = "eCHparser")
+filepath <- system.file("extdata", "eCH_0252_vote_partial_abraxas.xml", package = "eCHparser")
 votedata <- parse_eCH_0252(filepath, doi = c("CH", "CT", "MU"))
 }
 }
