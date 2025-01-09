@@ -126,6 +126,21 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day, ns0252 = ns02
     dplyr::select(-unique_id) |>
     tidyr::unnest_longer(everything())
 
+  # handle nested otherIdentification element
+  if ("otherIdentification_idName" %in% names(vote_info) && "otherIdentification_id" %in% names(vote_info)) {
+
+    # create the new column title
+    new_name <- paste0("otherIdentification_", vote_info$otherIdentification_idName[1])
+
+    # replace old name
+    names(vote_info)[names(vote_info) == "otherIdentification_id"] <- new_name
+
+    # remove name column
+    vote_info <- vote_info |>
+      dplyr::select(-otherIdentification_idName)
+
+  }
+
   # define vote results
   vote_result <- voteInfo_df_long |>
     dplyr::filter(!grepl("vote\\.", var)) |>
@@ -144,6 +159,7 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day, ns0252 = ns02
       element_name <- vote_result |>
         dplyr::select(unique_id, namedElement_elementName, namedElement_text) |>
         tidyr::unnest_longer(everything()) |>
+        dplyr::filter(!is.na(namedElement_elementName)) |>
         tidyr::pivot_wider(names_from = namedElement_elementName, values_from = namedElement_text) |>
         tidyr::unnest_longer(everything())
 
