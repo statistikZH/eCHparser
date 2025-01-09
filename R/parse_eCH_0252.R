@@ -78,7 +78,14 @@ parse_eCH_0252 <- function(file, doi = c("CH", "CT")){
   # transform relevant data to df
   out_df <- dplyr::bind_rows(out_list)
 
+  # drop unique_id column
+  if ("unique_id" %in% names(out_df)) {
+    out_df <- out_df |>
+      dplyr::select(-unique_id)
+  }
+
   return(out_df)
+
 }
 
 
@@ -220,6 +227,7 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day, ns0252 = ns02
                   pollingDay = polling_day)
 
   return(vote_data_complete)
+
 }
 
 
@@ -281,6 +289,7 @@ to_df <- function(data, names){
       var_short = gsub(".*\\.(.*\\..*)$", "\\1", var)
     ) |>
     dplyr::mutate(var_short = gsub("\\.", "_", var_short))
+
 }
 
 
