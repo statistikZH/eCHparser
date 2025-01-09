@@ -23,7 +23,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' filepath <- system.file("inst/extdata", "eCH_0252_vote_partial_abraxas.xml", package = "eCHparser")
+#' filepath <- system.file("extdata", "eCH_0252_vote_partial_abraxas.xml", package = "eCHparser")
 #' votedata <- parse_eCH_0252(filepath, doi = c("CH", "CT", "MU"))
 #' }
 parse_eCH_0252 <- function(file, doi = c("CH", "CT")){
@@ -91,6 +91,7 @@ parse_eCH_0252 <- function(file, doi = c("CH", "CT")){
 #' @param index index of the voteInfo nodes of interest.
 #' @param canton_id Canton ID of interest.
 #' @param polling_day Polling day of interest.
+#' @param ns0252 Namespace tag for namespace ns0252.
 #'
 #' @return A dataframe.
 #' @export
@@ -124,7 +125,7 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day, ns0252 = ns02
     dplyr::filter(grepl("vote\\.", var)) |>
     to_wide() |>
     dplyr::select(-unique_id) |>
-    tidyr::unnest_longer(everything())
+    tidyr::unnest_longer(tidyselect::everything())
 
   # handle nested otherIdentification element
   if ("otherIdentification_idName" %in% names(vote_info) && "otherIdentification_id" %in% names(vote_info)) {
@@ -158,14 +159,14 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day, ns0252 = ns02
 
       element_name <- vote_result |>
         dplyr::select(unique_id, namedElement_elementName, namedElement_text) |>
-        tidyr::unnest_longer(everything()) |>
+        tidyr::unnest_longer(tidyselect::everything()) |>
         dplyr::filter(!is.na(namedElement_elementName)) |>
         tidyr::pivot_wider(names_from = namedElement_elementName, values_from = namedElement_text) |>
-        tidyr::unnest_longer(everything())
+        tidyr::unnest_longer(tidyselect::everything())
 
       vote_result_full <- vote_result |>
         dplyr::select(-namedElement_elementName, -namedElement_text) |>
-        tidyr::unnest_longer(everything(), keep_empty = TRUE) |>
+        tidyr::unnest_longer(tidyselect::everything(), keep_empty = TRUE) |>
         dplyr::mutate(vote_voteIdentification = vote_info$vote_voteIdentification) |>
         dplyr::left_join(element_name, by = "unique_id")
 
@@ -193,7 +194,7 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day, ns0252 = ns02
 
       vote_result_full <- vote_result |>
         dplyr::select(-dplyr::contains("subtotalInfo_")) |>
-        tidyr::unnest_longer(everything())
+        tidyr::unnest_longer(tidyselect::everything())
 
 
       # join with result df and add voteTitle
@@ -207,7 +208,7 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day, ns0252 = ns02
   } else {
 
     vote_result_full <- vote_result |>
-      tidyr::unnest_longer(everything(), keep_empty = TRUE) |>
+      tidyr::unnest_longer(tidyselect::everything(), keep_empty = TRUE) |>
       dplyr::mutate(vote_voteIdentification = vote_info$vote_voteIdentification)
 
   }
@@ -388,7 +389,7 @@ parse_subtotal <- function(node, columns) {
   children <- xml2::xml_children(node)
 
   # Create a named list with element names as keys and their text as values
-  data <- setNames(xml2::xml_text(children), xml2::xml_name(children))
+  data <- stats::setNames(xml2::xml_text(children), xml2::xml_name(children))
 
   # Turn into data frame
   data_tbl <- as.data.frame(t(data), stringsAsFactors = FALSE)
