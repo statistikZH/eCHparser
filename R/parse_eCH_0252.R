@@ -350,17 +350,19 @@ unpack_voters <- function(data, index, ns0252 = ns0252){
   # Replace all NA with 0
   subtotal_info[is.na(subtotal_info)] <- 0
 
-  # Paste all values of the typology columns
-  subtotal_info$new_var <- apply(subtotal_info[, names(subtotal_info)[-1]], 1, paste, collapse = "_")
-
-  # Dynamically define new variable name as pasted names of the typology columns
-  names(subtotal_info)[length(names(subtotal_info))] <- paste(names(subtotal_info)[c(-1, -length(names(subtotal_info)))], collapse = "_")
+  # define new variable names in a new column
+  subtotal_info <- subtotal_info |>
+    dplyr::rowwise() |>
+    dplyr::mutate(
+      new_var = paste(
+        dplyr::across(2:length(names(subtotal_info)), ~ paste(dplyr::cur_column(), ., sep = "_")), # cur_column return the name of the current column inside accross()
+        collapse = "_"
+      )
+    ) |>
+      dplyr::ungroup()
 
   # Drop all columns but the combination column
   subtotal_info <- subtotal_info[, c(1, length(names(subtotal_info)))]
-
-  # Add column name to all values in the combination column
-  subtotal_info[, length(names(subtotal_info))] <- paste(names(subtotal_info)[length(names(subtotal_info))], subtotal_info[, length(names(subtotal_info))], sep = "_")
 
   # Widen data and add ID variables
   subtotal_info <- subtotal_info |>
