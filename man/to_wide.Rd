@@ -7,10 +7,10 @@
 to_wide(data)
 }
 \arguments{
-\item{data}{A long dataframe}
+\item{data}{A long dataframe.}
 }
 \value{
-A dataframe
+A dataframe.
 }
 \description{
 Convert long dataframe to wide

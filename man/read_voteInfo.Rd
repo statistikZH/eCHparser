@@ -4,7 +4,7 @@
 \alias{read_voteInfo}
 \title{Read eCH-0252 voteInfo node}
 \usage{
-read_voteInfo(xml_node, index, canton_id, polling_day)
+read_voteInfo(xml_node, index, canton_id, polling_day, ns0252 = ns0252)
 }
 \arguments{
 \item{xml_node}{Node voteBaseDelivery of the XML file.}
@@ -14,9 +14,11 @@ read_voteInfo(xml_node, index, canton_id, polling_day)
 \item{canton_id}{Canton ID of interest.}
 
 \item{polling_day}{Polling day of interest.}
+
+\item{ns0252}{Namespace tag for namespace ns0252.}
 }
 \value{
-A dataframe
+A dataframe.
 }
 \description{
 Read eCH-0252 voteInfo node
