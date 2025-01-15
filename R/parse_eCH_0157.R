@@ -39,14 +39,21 @@ parse_eCH_0157 <- function(file){
   contestDate <- xml2::xml_find_first(node_initialDelivery, paste0(".//", ns0155, ":contestDate")) |>
     xml2::xml_text()
 
+  # Define contest description
+  contestDescription <- read_contestDescription(node_initialDelivery)
+
+  # Join all contest information
+  contest <- data.frame(
+    contestIdentification,
+    contestDate,
+    contestDescription
+  )
 
 
 
 
 
 
-  polling_day <- xml2::xml_find_first(node_voteBaseDelivery, paste0(".//", ns0252, ":pollingDay")) |>
-    xml2::xml_text()
 
   # Define domain of influence types found in data
   domainofOnfluenceType <- xml2::xml_find_all(node_voteBaseDelivery, paste0(".//", ns0252, ":domainOfInfluence")) |>
@@ -98,13 +105,25 @@ read_contestDescription <- function(xml_node = node_initialDelivery) {
   data <- stats::setNames(xml2::xml_text(children), xml2::xml_name(children))
 
   # Turn into data frame
-  data_tbl <- as.data.frame(t(data), stringsAsFactors = FALSE)
+  data_tbl <- data.frame(
+      language = data[names(data) == "language"],
+      contestDescription = data[names(data) == "contestDescription"]
+  )
 
+  # Define new variable names in a new column, then widen data
+  data_tbl <- data_tbl |>
+    dplyr::rowwise() |>
+    dplyr::mutate(
+      new_var = paste(names(data_tbl)[2], dplyr::pull(dplyr::cur_data(), 1), sep = "_")
+    ) |>
+    dplyr::ungroup() |>
+    select(-1) |>
+    tidyr::pivot_wider(
+      names_from = new_var,
+      values_from = 1
+    )
 
-
-
-
-
+  return(data_tbl)
 
 }
 

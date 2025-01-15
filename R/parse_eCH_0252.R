@@ -350,7 +350,7 @@ unpack_voters <- function(data, index, ns0252 = ns0252){
   # Replace all NA with 0
   subtotal_info[is.na(subtotal_info)] <- 0
 
-  # define new variable names in a new column
+  # Define new variable names in a new column
   subtotal_info <- subtotal_info |>
     dplyr::rowwise() |>
     dplyr::mutate(
