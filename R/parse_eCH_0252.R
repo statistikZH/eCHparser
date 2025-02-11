@@ -113,7 +113,7 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day, ns0252 = ns02
   voteInfo_xml <- xml2::xml_child(xml_node, index)
 
   # get structure of the indexed node as a list
-  voteInfo <- voteInfo_xml|>
+  voteInfo <- voteInfo_xml |>
     xml2::as_list()
 
   # number the names to create unique names
@@ -148,6 +148,21 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day, ns0252 = ns02
       dplyr::select(-otherIdentification_idName)
 
   }
+
+
+
+
+
+
+
+  # HERE, WE NEED TO HANDLE MULTIPLE voteTitleInformation elements. Also, check for all other places where we have multilingual elements.
+
+
+
+
+
+
+
 
   # define vote results
   vote_result <- voteInfo_df_long |>
