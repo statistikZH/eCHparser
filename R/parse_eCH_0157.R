@@ -31,7 +31,11 @@ parse_eCH_0157 <- function(file){
   # Load initial delivery part of the file
   node_initialDelivery <- xml2::xml_find_first(xml_data, paste0(".//", ns0157, ":initialDelivery"))
 
-  # Define canton id
+
+  # CONTEST INFORMATION ========================================================
+
+
+  # Define constest id
   contestIdentification <- xml2::xml_find_first(node_initialDelivery, paste0(".//", ns0155, ":contestIdentification")) |>
     xml2::xml_text()
 
@@ -50,6 +54,13 @@ parse_eCH_0157 <- function(file){
   )
 
 
+  # ELECTION INFORMATION =======================================================
+
+
+
+
+
+  # STAND HIER, DA KOMMT JETZT EIN LAPPLY MIT DER FUNKTION UNTEN REIN
 
 
 
@@ -74,6 +85,114 @@ parse_eCH_0157 <- function(file){
 
 
 
+
+
+
+
+#' Read eCH-0157 election information element
+#'
+#' @param xml_node Node XXXXXXXXXXXXXXXXX of the XML file.
+#'
+#' @return A dataframe.
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#'
+#' }
+read_contestDescription <- function(xml_node = node_initialDelivery) {
+
+  # Load electionGroupBallot node
+  node_electionGroupBallot <- xml2::xml_find_first(xml_data, paste0(".//", ns0157, ":electionGroupBallot"))
+
+  # Define domain of influence id
+  domainOfInfluenceIdentification <- xml2::xml_find_first(node_initialDelivery, paste0(".//", ns0157, ":electionInformation")) |>
+    xml2::xml_text()
+
+  # Define election info
+  node_electionInformation <- xml2::xml_find_first(xml_data, paste0(".//", ns0157, ":electionInformation"))
+
+  electionInformation <- node_electionInformation |>
+    xml2::as_list()
+
+
+
+
+  # STAND HIER --> DA KOMMT JETZT DIE LANGUAGE TEXT NODE FUNKTION MIT EINEM LAPPLY REIN
+
+
+
+
+
+}
+
+
+
+
+
+#' Read eCH-0157 nested nodes that define a language.
+#'
+#' @param xml_node A node of the XML file that is nested and contains the element language.
+#'
+#' @return A dataframe.
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#'
+#' }
+read_language_text_node <- function(xml_node, child) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  # Load contest description node
+  node_contestDescription <- xml2::xml_find_first(xml_node, paste0(".//", ns0155, ":contestDescription"))
+
+  # Extract all "subtotalInfo" nodes
+  contestDescriptionInfo_nodes <- xml2::xml_find_all(node_contestDescription, paste0(".//", ns0155, ":contestDescriptionInfo"))
+
+  # Extract all children of the node
+  children <- xml2::xml_children(contestDescriptionInfo_nodes)
+
+  # Create a named list with element names as keys and their text as values
+  data <- stats::setNames(xml2::xml_text(children), xml2::xml_name(children))
+
+  # Turn into data frame
+  data_tbl <- data.frame(
+    language = data[names(data) == "language"],
+    contestDescription = data[names(data) == "contestDescription"]
+  )
+
+  # Define new variable names in a new column, then widen data
+  data_tbl <- data_tbl |>
+    dplyr::rowwise() |>
+    dplyr::mutate(
+      new_var = paste(names(data_tbl)[2], dplyr::pull(dplyr::cur_data(), 1), sep = "_")
+    ) |>
+    dplyr::ungroup() |>
+    select(-1) |>
+    tidyr::pivot_wider(
+      names_from = new_var,
+      values_from = 1
+    )
+
+  return(data_tbl)
+
+}
 
 
 
