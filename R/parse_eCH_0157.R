@@ -184,7 +184,7 @@ read_language_text_node <- function(xml_node, child) {
       new_var = paste(names(data_tbl)[2], dplyr::pull(dplyr::cur_data(), 1), sep = "_")
     ) |>
     dplyr::ungroup() |>
-    select(-1) |>
+    dplyr::select(-1) |>
     tidyr::pivot_wider(
       names_from = new_var,
       values_from = 1
@@ -236,7 +236,7 @@ read_contestDescription <- function(xml_node = node_initialDelivery) {
       new_var = paste(names(data_tbl)[2], dplyr::pull(dplyr::cur_data(), 1), sep = "_")
     ) |>
     dplyr::ungroup() |>
-    select(-1) |>
+    dplyr::select(-1) |>
     tidyr::pivot_wider(
       names_from = new_var,
       values_from = 1
