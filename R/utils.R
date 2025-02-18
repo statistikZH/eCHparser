@@ -20,10 +20,10 @@ read_language_text_node <- function(xml_node) {
   # Define the name of the node
   name_0 <- xml2::xml_name(xml_node)
 
-  # Define the children of the node
+  # Extract the children (level 1) of the node
   children_1 <- xml2::xml_children(xml_node)
 
-  # Extract all children of the node
+  # Extract the children (level 2) of the node
   children_2 <- xml2::xml_children(children_1)
 
   # Stop, if we are not inside of a language text node
@@ -31,7 +31,7 @@ read_language_text_node <- function(xml_node) {
     stop(paste0(name_0, " is not a language text node."))
   }
 
-  # Convert XML nodes to a named list
+  # Convert XML nodes to a named vector
   data_raw <- stats::setNames(xml2::xml_text(children_2), xml2::xml_name(children_2))
 
   # Identify all "language" values and their corresponding indices

@@ -66,11 +66,11 @@ parse_eCH_0252 <- function(file, doi = c("CH", "CT")){
   out_list <- lapply(relevant, function(x) {
 
     read_voteInfo(
-      node_voteBaseDelivery,
-      x,
-      canton_id,
-      polling_day,
-      ns0252
+      xml_node = node_voteBaseDelivery,
+      index = x,
+      canton_id = canton_id,
+      polling_day = polling_day,
+      ns0252 = ns0252
     )
 
   })
@@ -127,12 +127,39 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day, ns0252 = ns02
     dplyr::mutate(unique_id = gsub("^(\\d+)_.*", "\\1", var)) |>
     dplyr::mutate(var_short = gsub("\\d_", "", var_short))
 
+
+
+
+
+
+
+  # HIER MÜSSTE SCHON EIN LANGUAGE PARSER REIN =======================================
+
+  # define language nodes
+  language_nodes <- xml2::xml_find_all(voteInfo_xml, paste0(".//", ns0252, ":language")) |>
+    xml2::xml_parent() |>
+    xml2::xml_name()
+
+
+  # now, the idea is, that I delete all columns of this node in the table i create bellow with to_wide() and recreate them using the utils function
+
+
+
+
+
+
+
+
+
+
   # define vote information
   vote_info <- voteInfo_df_long |>
     dplyr::filter(grepl("vote\\.", var)) |>
     to_wide() |>
     dplyr::select(-unique_id) |>
     tidyr::unnest_longer(tidyselect::everything())
+
+
 
   # handle nested otherIdentification element
   if ("otherIdentification_idName" %in% names(vote_info) && "otherIdentification_id" %in% names(vote_info)) {
