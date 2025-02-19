@@ -135,7 +135,7 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day, ns0252 = ns02
 
   # HIER MÜSSTE SCHON EIN LANGUAGE PARSER REIN =======================================
 
-  # define language nodes
+  # define language nodes (not necessary, since in 0252 language only occurs in voteTitleInformation)
   language_nodes <- xml2::xml_find_all(voteInfo_xml, paste0(".//", ns0252, ":language")) |>
     xml2::xml_parent() |>
     xml2::xml_name()
@@ -152,12 +152,42 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day, ns0252 = ns02
 
 
 
+
   # define vote information
   vote_info <- voteInfo_df_long |>
     dplyr::filter(grepl("vote\\.", var)) |>
     to_wide() |>
     dplyr::select(-unique_id) |>
     tidyr::unnest_longer(tidyselect::everything())
+
+  # check for voteTitleInformation nodes
+  if (length(grep("voteTitleInformation", names(vote_info))) > 0) {
+
+    # Extract all voteTitleInformation nodes
+    vote_nodes <- xml2::xml_find_all(voteInfo_xml, paste0(".//", ns0252, ":vote"))
+
+    # create mu
+    lapply(vote_nodes, function(x) {
+      read_language_text_node(x)
+    }) |>
+      unlist()
+
+
+    # STAND HIER ====================================================================
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

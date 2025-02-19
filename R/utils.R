@@ -31,6 +31,45 @@ read_language_text_node <- function(xml_node) {
     stop(paste0(name_0, " is not a language text node."))
   }
 
+  # Extract only nodes with language children
+  # This needs to be done once for ns0155...
+  language_nodes_0155 <- xml2::xml_find_all(voteInfo_xml, paste0(".//", ns0155, ":language")) |>
+    xml2::xml_parent() |>
+    xml2::xml_name()
+
+  # ...and once for ns0252...
+  language_nodes_0252 <- xml2::xml_find_all(voteInfo_xml, paste0(".//", ns0252, ":language")) |>
+    xml2::xml_parent() |>
+    xml2::xml_name()
+
+  # ...and then combined, since language somehow is part of namespace 01555 and 0252.
+  language_nodes <- c(language_nodes_0155, language_nodes_0252)
+
+  # Get index of relevant nodes
+  relevant <- which(grepl(paste0(language_nodes, collapse = "|"), xml2::xml_name(children_1)))
+
+  # Keep only the relevant children of the node
+  # First, define which ones to drop
+  to_remove <- setdiff(seq_along(children_1), relevant)
+
+  # Redefine the node
+  xml_node_test <- xml2::xml_remove(children_1[to_remove])
+
+
+  xml_node_test <- xml_node
+
+  xml_node[[6]]
+
+  xml2::
+
+
+
+
+
+
+
+
+
   # Convert XML nodes to a named vector
   data_raw <- stats::setNames(xml2::xml_text(children_2), xml2::xml_name(children_2))
 
