@@ -57,10 +57,28 @@ parse_eCH_0157 <- function(file){
   # ELECTION INFORMATION =======================================================
 
 
+  electionGroup_name <- xml2::xml_name(xml2::xml_find_all(node_initialDelivery, paste(".//", ns0157, ":electionGroupBallot")))
+
+  # Define index of electionGroupBallot nodes
+  relevant <- which(grepl(electionGroup_name, node_initialDelivery)) + 1
+
+  # Stop if there are no relevant nodes
+  if (length(relevant) == 0) {
+    stop("There are no elections in your data.")
+  }
+
+  # Apply read_electionGroupBallot function to all relevant children
+  out_list <- lapply(relevant, function(x) {
+
+    read_electionGroupBallot(
+      node_initialDelivery[x] # STAND HIER: Funktion unten fertig schreiben mit der utils function =================================================
+    )
+
+  })
 
 
 
-  # STAND HIER, DA KOMMT JETZT EIN LAPPLY MIT DER FUNKTION UNTEN REIN
+
 
 
 
@@ -100,7 +118,7 @@ parse_eCH_0157 <- function(file){
 #' \dontrun{
 #'
 #' }
-read_contestDescription <- function(xml_node = node_initialDelivery) {
+read_electionGroupBallot <- function(xml_node = node_initialDelivery) {
 
   # Load electionGroupBallot node
   node_electionGroupBallot <- xml2::xml_find_first(xml_data, paste0(".//", ns0157, ":electionGroupBallot"))
@@ -112,9 +130,10 @@ read_contestDescription <- function(xml_node = node_initialDelivery) {
   # Define election info
   node_electionInformation <- xml2::xml_find_first(xml_data, paste0(".//", ns0157, ":electionInformation"))
 
-  electionInformation <- node_electionInformation |>
-    xml2::as_list()
-
+  # # Define election
+  # node_election <- xml2::xml_find_first(xml_data, paste0(".//", ns0157, ":election"))
+  # eigentlich eher alle children definieren und dann darüber applyen
+  # Define children
 
 
 
@@ -123,74 +142,6 @@ read_contestDescription <- function(xml_node = node_initialDelivery) {
 
 
 
-
-}
-
-
-
-
-
-#' Read eCH-0157 nested nodes that define a language.
-#'
-#' @param xml_node A node of the XML file that is nested and contains the element language.
-#'
-#' @return A dataframe.
-#' @export
-#'
-#' @examples
-#' \dontrun{
-#'
-#' }
-read_language_text_node <- function(xml_node, child) {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  # Load contest description node
-  node_contestDescription <- xml2::xml_find_first(xml_node, paste0(".//", ns0155, ":contestDescription"))
-
-  # Extract all "subtotalInfo" nodes
-  contestDescriptionInfo_nodes <- xml2::xml_find_all(node_contestDescription, paste0(".//", ns0155, ":contestDescriptionInfo"))
-
-  # Extract all children of the node
-  children <- xml2::xml_children(contestDescriptionInfo_nodes)
-
-  # Create a named list with element names as keys and their text as values
-  data <- stats::setNames(xml2::xml_text(children), xml2::xml_name(children))
-
-  # Turn into data frame
-  data_tbl <- data.frame(
-    language = data[names(data) == "language"],
-    contestDescription = data[names(data) == "contestDescription"]
-  )
-
-  # Define new variable names in a new column, then widen data
-  data_tbl <- data_tbl |>
-    dplyr::rowwise() |>
-    dplyr::mutate(
-      new_var = paste(names(data_tbl)[2], dplyr::pull(dplyr::cur_data(), 1), sep = "_")
-    ) |>
-    dplyr::ungroup() |>
-    dplyr::select(-1) |>
-    tidyr::pivot_wider(
-      names_from = new_var,
-      values_from = 1
-    )
-
-  return(data_tbl)
 
 }
 
@@ -233,7 +184,7 @@ read_contestDescription <- function(xml_node = node_initialDelivery) {
   data_tbl <- data_tbl |>
     dplyr::rowwise() |>
     dplyr::mutate(
-      new_var = paste(names(data_tbl)[2], dplyr::pull(dplyr::cur_data(), 1), sep = "_")
+      new_var = paste(names(data_tbl)[2], dplyr::pull(dplyr::pick(1)), sep = "_")
     ) |>
     dplyr::ungroup() |>
     dplyr::select(-1) |>

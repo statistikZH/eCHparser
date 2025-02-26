@@ -7,6 +7,7 @@
 #'
 #'
 #' @param xml_node A node of the XML file that contains nested children containing the element language.
+#' The language element must be found on the 3rd level inside the node
 #'
 #' @return A dataframe.
 #' @export
@@ -26,52 +27,77 @@ read_language_text_node <- function(xml_node) {
   # Extract the children (level 2) of the node
   children_2 <- xml2::xml_children(children_1)
 
+  # Extract the children (level 3) of the node
+  children_3 <- xml2::xml_children(children_2)
+
   # Stop, if we are not inside of a language text node
-  if (!"language" %in% xml2::xml_name(children_2)) {
+  if (!"language" %in% xml2::xml_name(children_3)) {
     stop(paste0(name_0, " is not a language text node."))
   }
 
-  # Extract only nodes with language children
+
+  # LANGUAGE CHILDREN NODES ====================================================
+
+
   # This needs to be done once for ns0155...
-  language_nodes_0155 <- xml2::xml_find_all(voteInfo_xml, paste0(".//", ns0155, ":language")) |>
-    xml2::xml_parent() |>
-    xml2::xml_name()
+  if ("ns0155" %in% objects()) {
+    language_nodes_0155 <- xml2::xml_find_all(xml_node, paste0(".//", ns0155, ":language")) |>
+      xml2::xml_parent() |>
+      xml2::xml_parent() |>
+      xml2::xml_name()
+  } else {
+    language_nodes_0155 <- NULL
+  }
 
   # ...and once for ns0252...
-  language_nodes_0252 <- xml2::xml_find_all(voteInfo_xml, paste0(".//", ns0252, ":language")) |>
-    xml2::xml_parent() |>
-    xml2::xml_name()
+  if ("ns0252" %in% objects()) {
+    language_nodes_0252 <- xml2::xml_find_all(xml_node, paste0(".//", ns0252, ":language")) |>
+      xml2::xml_parent() |>
+      xml2::xml_parent() |>
+      xml2::xml_name()
+  } else {
+    language_nodes_0252 <- NULL
+  }
 
   # ...and then combined, since language somehow is part of namespace 01555 and 0252.
   language_nodes <- c(language_nodes_0155, language_nodes_0252)
 
-  # Get index of relevant nodes
+  # Get index of relevant nodes that contain language nodes
   relevant <- which(grepl(paste0(language_nodes, collapse = "|"), xml2::xml_name(children_1)))
 
-  # Keep only the relevant children of the node
-  # First, define which ones to drop
-  to_remove <- setdiff(seq_along(children_1), relevant)
 
-  # Redefine the node
-  xml_node_test <- xml2::xml_remove(children_1[to_remove])
+  # UNNESTED DATA TO DF ========================================================
 
 
-  xml_node_test <- xml_node
+  # Create node for regular unnested info
+  unnested_node <- children_1[setdiff(seq_along(children_1), relevant)]
 
-  xml_node[[6]]
+  # Turn the unnested node to a string
+  unnested_node_unlist <- unnested_node |>
+    xml2::as_list() |>
+    unlist()
 
-  xml2::
+  # Define names
+  names(unnested_node_unlist) <- xml2::xml_name(unnested_node)
+
+  # Transpose and turn to df
+  data_tbl1 <- as.data.frame(t(unnested_node_unlist))
 
 
+  # NESTED DATA TO DF ==========================================================
 
 
+  # Create node for nested language data
+  language_node_node <- children_1[relevant]
 
-
-
-
+  # Define children
+  language_node_children <- xml2::xml_children(language_node_node)
 
   # Convert XML nodes to a named vector
-  data_raw <- stats::setNames(xml2::xml_text(children_2), xml2::xml_name(children_2))
+  data_raw <- stats::setNames(
+    object = xml2::xml_text(xml2::xml_children(language_node_children)),
+    nm = xml2::xml_name(xml2::xml_children(language_node_children))
+  )
 
   # Identify all "language" values and their corresponding indices
   language_values <- data_raw[names(data_raw) == "language"]
@@ -90,7 +116,14 @@ read_language_text_node <- function(xml_node) {
   }
 
   # Convert the structured list into a data frame
-  data_tbl <- as.data.frame(structured_list, stringsAsFactors = FALSE, row.names = NULL)
+  data_tbl2 <- as.data.frame(structured_list, stringsAsFactors = FALSE, row.names = NULL)
+
+
+  # JOIN DATA ==================================================================
+
+
+  data_tbl <- data_tbl1 |>
+    cbind(data_tbl2)
 
   return(data_tbl)
 
