@@ -71,7 +71,7 @@ parse_eCH_0157 <- function(file){
   out_list <- lapply(relevant, function(x) {
 
     read_electionGroupBallot(
-      node_initialDelivery[x] # STAND HIER: Funktion unten fertig schreiben mit der utils function =================================================
+      xml2::xml_children(node_initialDelivery)[x] # STAND HIER: Funktion unten fertig schreiben mit der utils function =================================================
     )
 
   })
@@ -120,15 +120,20 @@ parse_eCH_0157 <- function(file){
 #' }
 read_electionGroupBallot <- function(xml_node = node_initialDelivery) {
 
-  # Load electionGroupBallot node
-  node_electionGroupBallot <- xml2::xml_find_first(xml_data, paste0(".//", ns0157, ":electionGroupBallot"))
-
   # Define domain of influence id
-  domainOfInfluenceIdentification <- xml2::xml_find_first(node_initialDelivery, paste0(".//", ns0157, ":electionInformation")) |>
+  domainOfInfluenceIdentification <- xml2::xml_find_first(xml_node, paste0(".//", ns0157, ":domainOfInfluenceIdentification")) |>
     xml2::xml_text()
 
-  # Define election info
-  node_electionInformation <- xml2::xml_find_first(xml_data, paste0(".//", ns0157, ":electionInformation"))
+  # Define election information node
+  node_electionInformation <- xml2::xml_find_first(xml_node, paste0(".//", ns0157, ":electionInformation"))
+
+  read_language_text_node(xml2::xml_children(node_electionInformation)[1])
+
+
+
+
+
+
 
   # # Define election
   # node_election <- xml2::xml_find_first(xml_data, paste0(".//", ns0157, ":election"))
