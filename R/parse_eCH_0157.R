@@ -16,31 +16,26 @@
 #' }
 parse_eCH_0157 <- function(file){
 
-  # Load file
-  xml_data <- xml2::read_xml(file)
-
-  # Define namespaces
-  namespaces <- xml2::xml_ns(xml_data)
-
-  # Define the prefixes we need (depends on exact file structure)
-  ns0010 <- names(namespaces[grep("0010", namespaces)])[1]
-  ns0058 <- names(namespaces[grep("0058", namespaces)])[1]
-  ns0155 <- names(namespaces[grep("0155", namespaces)])[1]
-  ns0157 <- names(namespaces[grep("0157", namespaces)])[1]
+  # Load file and strip namespaces
+  xml_data <- xml2::read_xml(file) |>
+    xml2::xml_ns_strip()
 
   # Load initial delivery part of the file
-  node_initialDelivery <- xml2::xml_find_first(xml_data, paste0(".//", ns0157, ":initialDelivery"))
+  node_initialDelivery <- xml2::xml_find_first(xml_data, ".//initialDelivery")
 
 
   # CONTEST INFORMATION ========================================================
 
 
+  # THIS ENTIRE NODE SHOULD BE PARSED WITH THE UTILS FUNCTION AS WELL!
+
+
   # Define constest id
-  contestIdentification <- xml2::xml_find_first(node_initialDelivery, paste0(".//", ns0155, ":contestIdentification")) |>
+  contestIdentification <- xml2::xml_find_first(node_initialDelivery, ".//contestIdentification") |>
     xml2::xml_text()
 
   # Define polling day
-  contestDate <- xml2::xml_find_first(node_initialDelivery, paste0(".//", ns0155, ":contestDate")) |>
+  contestDate <- xml2::xml_find_first(node_initialDelivery, ".//contestDate") |>
     xml2::xml_text()
 
   # Define contest description
@@ -57,7 +52,7 @@ parse_eCH_0157 <- function(file){
   # ELECTION INFORMATION =======================================================
 
 
-  electionGroup_name <- xml2::xml_name(xml2::xml_find_all(node_initialDelivery, paste(".//", ns0157, ":electionGroupBallot")))
+  electionGroup_name <- xml2::xml_name(xml2::xml_find_all(node_initialDelivery, ".//electionGroupBallot"))
 
   # Define index of electionGroupBallot nodes
   relevant <- which(grepl(electionGroup_name, node_initialDelivery)) + 1
@@ -85,8 +80,8 @@ parse_eCH_0157 <- function(file){
 
 
   # Define domain of influence types found in data
-  domainofOnfluenceType <- xml2::xml_find_all(node_voteBaseDelivery, paste0(".//", ns0252, ":domainOfInfluence")) |>
-    xml2::xml_find_all(paste0(".//", ns0155, ":domainOfInfluenceType")) |>
+  domainofOnfluenceType <- xml2::xml_find_all(node_voteBaseDelivery, ".//domainOfInfluence") |>
+    xml2::xml_find_all(".//domainOfInfluenceType") |>
     xml2::xml_text()
 
   # Define index of votes with the relevant domain of influence types (must be +2 since the first two nodes are not of interest)
@@ -121,13 +116,25 @@ parse_eCH_0157 <- function(file){
 read_electionGroupBallot <- function(xml_node = node_initialDelivery) {
 
   # Define domain of influence id
-  domainOfInfluenceIdentification <- xml2::xml_find_first(xml_node, paste0(".//", ns0157, ":domainOfInfluenceIdentification")) |>
+  domainOfInfluenceIdentification <- xml2::xml_find_first(xml_node, ".//domainOfInfluenceIdentification") |>
     xml2::xml_text()
 
   # Define election information node
-  node_electionInformation <- xml2::xml_find_first(xml_node, paste0(".//", ns0157, ":electionInformation"))
+  node_electionInformation <- xml2::xml_find_first(xml_node, ".//electionInformation")
 
-  read_language_text_node(xml2::xml_children(node_electionInformation)[1])
+  # Define number of children
+  nodelength <- xml2::xml_children(node_electionInformation) |> length()
+
+  # Run read_language_text_node function across all children
+  out_list <- lapply(seq_along(1:nodelength), function(x) {
+
+    read_language_text_node(
+      xml2::xml_children(node_electionInformation)[x] # STAND HIER: Funktion unten fertig schreiben mit der utils function =================================================
+    )
+
+  })
+
+
 
 
 
@@ -168,10 +175,10 @@ read_electionGroupBallot <- function(xml_node = node_initialDelivery) {
 read_contestDescription <- function(xml_node = node_initialDelivery) {
 
   # Load contest description node
-  node_contestDescription <- xml2::xml_find_first(xml_node, paste0(".//", ns0155, ":contestDescription"))
+  node_contestDescription <- xml2::xml_find_first(xml_node, ".//contestDescription")
 
   # Extract all "subtotalInfo" nodes
-  contestDescriptionInfo_nodes <- xml2::xml_find_all(node_contestDescription, paste0(".//", ns0155, ":contestDescriptionInfo"))
+  contestDescriptionInfo_nodes <- xml2::xml_find_all(node_contestDescription, ".//contestDescriptionInfo")
 
   # Extract all children of the node
   children <- xml2::xml_children(contestDescriptionInfo_nodes)
