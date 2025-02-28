@@ -27,29 +27,35 @@ parse_eCH_0157 <- function(file){
   # CONTEST INFORMATION ========================================================
 
 
-  # THIS ENTIRE NODE SHOULD BE PARSED WITH THE UTILS FUNCTION AS WELL!
+  # Define contest node
+  contest_node <- xml2::xml_find_first(node_initialDelivery, ".//contest")
 
-
-  # Define constest id
-  contestIdentification <- xml2::xml_find_first(node_initialDelivery, ".//contestIdentification") |>
-    xml2::xml_text()
-
-  # Define polling day
-  contestDate <- xml2::xml_find_first(node_initialDelivery, ".//contestDate") |>
-    xml2::xml_text()
-
-  # Define contest description
-  contestDescription <- read_contestDescription(node_initialDelivery)
-
-  # Join all contest information
-  contest <- data.frame(
-    contestIdentification,
-    contestDate,
-    contestDescription
-  )
+  # Parse contest node
+  contest_df <- parse_node(contest_node)
 
 
   # ELECTION INFORMATION =======================================================
+
+
+  # Define election groups
+  electionGroup_nodes <- xml2::xml_find_all(node_initialDelivery, ".//electionGroupBallot")
+
+  # Parse all electionGroupBallot nodes
+  electionGroup_node_list <- lapply(seq_along(electionGroup_nodes), function(index) {
+    parse_node(electionGroup_nodes[index])
+  })
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   electionGroup_name <- xml2::xml_name(xml2::xml_find_all(node_initialDelivery, ".//electionGroupBallot"))
