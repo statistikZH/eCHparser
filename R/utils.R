@@ -48,7 +48,7 @@ parse_node <- function(xml_node) {
   } else {
 
     # Define the names of the nested elements
-    nested_node_names <- children_2 |>
+    nested_node_names <- children_2 |> # could we replace this with just childre_1 |> xml_name()?
       xml2::xml_parent() |>
       xml2::xml_name()
 
@@ -69,7 +69,7 @@ parse_node <- function(xml_node) {
     children_3 <- xml2::xml_children(xml_node_nested)
     children_4 <- xml2::xml_children(children_3)
 
-    # If there are no language elements, define all nodes as other (see else part)
+    # If there are language nodes, split nodes into language and other nodes
     if (length(xml2::xml_find_all(children_3, ".//language"))) {
 
       # Get language nodes indices
@@ -84,6 +84,7 @@ parse_node <- function(xml_node) {
       xml_node_nested_other <- xml_node_nested[setdiff(seq_along(xml_node_nested), xml_node_nested_language_indices)]
       xml_node_nested_language <- xml_node_nested[xml_node_nested_language_indices]
 
+    # If there are no langauge elements, define all nodes as other
     } else {
       xml_node_nested_other <- xml_node_nested
     }
