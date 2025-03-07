@@ -52,12 +52,13 @@ parse_node <- function(xml_node) {
     # Check for language nodes
     if (length(xml2::xml_find_all(children_3, ".//language"))) {
 
-      # Get language nodes indices
+      # Get the names of the multilingual nodes
       xml_node_nested_language_names <- xml2::xml_find_all(children_3, ".//language") |>
         xml2::xml_parent() |>
         xml2::xml_parent() |>
         xml2::xml_name()
 
+      # Then, get their indices (if returns integer(0) it means that there are no multilingual nodes ON THIS LEVEL)
       xml_node_nested_language_indices <- which(grepl(paste0(xml_node_nested_language_names, collapse = "|"), xml2::xml_name(xml_node_nested)))
 
       # Define nested non-language and language nodes
@@ -75,6 +76,15 @@ parse_node <- function(xml_node) {
 
     # Check if we have nested non-language nodes
     if (length(xml_node_nested_other)) {
+
+      # We don't need this since we arrived at the bottom of the nodeset and we are always only looking at and parsing one node with some children. Therefore, no lapply needed.
+      # # Recursively run this function for every one of these nested nodes
+      # other_node_list <- lapply(seq_along(xml_node_nested_other), function(index) {
+      #   parse_node(xml_node_nested_other[index])
+      # })
+      #
+      # # Bind the elements of the list (simple, since in here, there can be no complex structures, we are at the bottom of the node and have no nestings anymore)
+      # other_node_df <- dplyr::bind_cols(other_node_list)
 
       # Recursively call this function again to work through the next level and create a df
       other_node_df <- parse_node(xml_node_nested_other)
@@ -125,160 +135,30 @@ parse_node <- function(xml_node) {
   # HANDLE UNNESTED NODES ======================================================
 
 
-  # Apply parsing function to all elements of xml_node_unnested
-  unnested_node_list <- lapply(seq_along(xml_node_unnested), function(index) {
-    parse_unnested_node(xml_node_unnested[index])
-  })
+  # If there are any...
+  if(length(xml_node_unnested)) {
 
-  # If all names are identical, bind rows, if not, bind cols
-  if (length(unique(xml2::xml_name(xml_node_unnested))) == 1) {
-    unnested_node_df <- dplyr::bind_rows(unnested_node_list)
+    # Parse through the unnested node
+    unnested_node_df <- parse_unnested_node(xml_node_unnested)
+
   } else {
-    unnested_node_df <- dplyr::bind_cols(unnested_node_list) |>
-      dplyr::distinct()
-  }
 
+    # Otherwise, create NULL object
+    unnested_node_df <- NULL
+
+  }
 
 
   # BIND DATA AND RETURN =======================================================
 
 
-  data <- other_node_df |> # Not sure if this works: We might need to handle the issue of dfs of different nrow()s. So maybe work with left_join() (add id first, then join, then delete id)
-    dplyr::bind_cols(language_node_df) |>
-    dplyr::bind_cols(unnested_node_df)
+  # Not sure if this works: We might need to handle the issue of dfs of different nrow()s. So maybe work with left_join() (add id first, then join, then delete id)
+  data <- unnested_node_df |> # start with unnested_node_df since there is certainly something here
+    dplyr::bind_cols(nested_nodes_df)
 
   return(data)
 
 }
-
-
-
-
-#   # Define children
-#   children_1 <- xml2::xml_children(xml_node)
-#   children_2 <- xml2::xml_children(children_1)
-#
-#   # If the node is not nested, we simply parse it
-#   if (!length(children_2)) {
-#
-#
-#     data_list <- lapply(seq_along(xml_node), function(index) {
-#
-#       # Define all children of the node
-#       xml_node_children <- xml2::xml_children(xml_node[index])
-#
-#       # Parse the children of the node
-#       parse_unnested_node(xml_node_children)
-#
-#     })
-#
-#     # If all names are identical, bind rows, if not, bind cols
-#     if (length(unique(xml2::xml_name(xml_node))) == 1) {
-#       data <- dplyr::bind_rows(data_list)
-#     } else {
-#     data <- dplyr::bind_cols(data_list) |>
-#       dplyr::distinct()
-#     }
-#
-#   # However, if the node is nested...
-#   } else {
-#
-#     # Define the names of the nested elements
-#     nested_node_names <- children_2 |> # could we replace this with just childre_1 |> xml_name()?
-#       xml2::xml_parent() |>
-#       xml2::xml_name()
-#
-#     # Define the indices of the nested elements
-#     nested_node_indices <- which(grepl(paste0(nested_node_names, collapse = "|"), children_1))
-#
-#     # Split the node into unnested and nested nodes
-#     xml_node_unnested <- children_1[setdiff(seq_along(children_1), nested_node_indices)]
-#     xml_node_nested <- children_1[nested_node_indices]
-#
-#
-#     # WORK THROUGH NESTED NODES ================================================
-#
-#
-#     ## Split Nodes into Language and Other Nested Nodes ------------------------
-#
-#     # Define children
-#     children_3 <- xml2::xml_children(xml_node_nested)
-#     children_4 <- xml2::xml_children(children_3)
-#
-#     # If there are language nodes, split nodes into language and other nodes
-#     if (length(xml2::xml_find_all(children_3, ".//language"))) {
-#
-#       # Get language nodes indices
-#       xml_node_nested_language_names <- xml2::xml_find_all(children_3, ".//language") |>
-#         xml2::xml_parent() |>
-#         xml2::xml_parent() |>
-#         xml2::xml_name()
-#
-#       xml_node_nested_language_indices <- which(grepl(paste0(xml_node_nested_language_names, collapse = "|"), xml2::xml_name(xml_node_nested)))
-#
-#       # Define nested non-language and language nodes
-#       xml_node_nested_other <- xml_node_nested[setdiff(seq_along(xml_node_nested), xml_node_nested_language_indices)]
-#       xml_node_nested_language <- xml_node_nested[xml_node_nested_language_indices]
-#
-#     # If there are no langauge elements, define all nodes as other
-#     } else {
-#       xml_node_nested_other <- xml_node_nested
-#     }
-#
-#
-#     ## Go to Next Level --------------------------------------------------------
-#
-# # MAYBE INSERT WHILE LOOP INSTEAD OF IF() HERE =====================================================================
-#
-#     if (length(xml_node_nested_other)) {
-#
-#       # by Recursively Calling this function again
-#       other_node_df <- parse_node(xml_node_nested_other)
-#
-#     } else {
-#       other_node_df <- NULL
-#     }
-#
-#
-#     ## Parse the Language Nodes ------------------------------------------------
-#
-#
-#     if (length(xml_node_nested_language)) {
-#
-#       # Apply the parse_language_node() function to all language nodes
-#       language_node_list <- lapply(seq_along(xml_node_nested_language), function(index) {
-#         parse_language_node(xml_node_nested_language[index])
-#       })
-#
-#       # Turn list to df
-#       language_node_df <- dplyr::bind_cols(language_node_list) |>
-#         dplyr::distinct()
-#
-#     } else {
-#       language_node_df <- NULL
-#     }
-#
-#       # PARSE THE UNNESTED NODES ===============================================
-#
-#
-#     if (length(xml_node_unnested)) {
-#       unnested_node_df <- parse_unnested_node(xml_node_unnested)
-#     } else {
-#       unnested_node_df <- NULL
-#     }
-#
-#       # BIND DATA ==============================================================
-#
-#
-#     data <- other_node_df |>
-#       dplyr::bind_cols(language_node_df) |>
-#       dplyr::bind_cols(unnested_node_df)
-#
-#   }
-#
-#   return(data)
-#
-# }
 
 
 
@@ -361,13 +241,13 @@ parse_language_node <- function(language_node) {
 
 
 
-#' Parse through an unnested node.
+#' Parse through one node of unnested nodes.
 #'
 #' @description
-#' This function parses through one unnested node.
+#' This function parses through one node of only unnested nodes.
 #'
 #'
-#' @param unnested_node A node of the XML file that does is not nested (i. e.
+#' @param unnested_node A node of the XML file that is not nested (i. e.
 #' that does not contain grandchildren).
 #'
 #' @return A dataframe.
