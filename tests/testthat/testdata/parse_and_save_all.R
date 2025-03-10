@@ -6,8 +6,8 @@
 
 # PARSE ALL TEST FILES AND SAVE THEM ===========================================
 
-
-testfiles <- list.files(testthat::test_path("testdata/files_unparsed"))
+eCH_type <- svDialogs::dlg_input("Which eCH-type would you like to parse?")$res
+testfiles <- list.files(testthat::test_path(paste0("testdata/eCH-", eCH_type, "/files_unparsed")))
 
 for (i in seq_along(testfiles)) {
 
