@@ -30,8 +30,9 @@ parse_eCH_0157 <- function(file){
   # Define contest node
   contest_node <- xml2::xml_find_first(node_initialDelivery, ".//contest")
 
-  # Parse contest node
-  contest_df <- parse_node(contest_node)
+  # Parse contest node and add join id
+  contest_df <- parse_node(contest_node) |>
+    dplyr::mutate(join_id = 1879)
 
 
   # ELECTION INFORMATION =======================================================
@@ -42,178 +43,72 @@ parse_eCH_0157 <- function(file){
 
   # Parse all electionGroupBallot nodes
   electionGroup_node_list <- lapply(seq_along(electionGroup_nodes), function(index) {
-    parse_node(electionGroup_nodes[index])
+
+    # Define DOI of election group
+    domainOfInfluenceIdentification <- xml2::xml_text(xml2::xml_find_first(electionGroup_nodes[index], ".//domainOfInfluenceIdentification"))
+
+    # List all elections in the current election group
+    electionInformation_nodes <- xml2::xml_find_all(electionGroup_nodes[index], ".//electionInformation")
+
+    # Parse every election and create a list
+    elections_list <- lapply(seq_along(electionInformation_nodes), function(election){
+
+      # Define election and candidate elements
+      election_node <- xml2::xml_find_all(electionInformation_nodes[election], ".//election") # There can only be one election node on this level
+      candidate_nodes <- xml2::xml_find_all(electionInformation_nodes[election], ".//candidate")
+
+      # Stop if there are more than one election
+      if (length(election_node) > 1) {
+        stop(paste0("There seem to be more than one election node in the electionInformation node for DOI ", doi))
+      }
+
+      ## Parse Election Element ------------------------------------------------
+
+
+      election_df <- parse_node(election_node)
+
+
+      ## Parse Candidate Elements ----------------------------------------------
+
+
+      candidate_list <- lapply(seq_along(candidate_nodes), function(candidate){
+        parse_node(candidate_nodes[candidate])
+      })
+
+      # Turn list to df by binding rows
+      candidate_df <- dplyr::bind_rows(candidate_list)
+
+
+      ## Join Election and Candidate Information -------------------------------
+
+
+      # Add id columns
+      election_df <- election_df |>
+        dplyr::mutate(join_id = 1879)
+      candidate_df <- candidate_df |>
+        dplyr::mutate(join_id = 1879)
+
+      # Join
+      election_df <- election_df |>
+        dplyr::right_join(candidate_df, by = "join_id")
+
+    })
+
+    # Bind all elections and add DOI
+    elections_df <- dplyr::bind_rows(elections_list) |>
+      dplyr::mutate(domainOfInfluenceIdentification = domainOfInfluenceIdentification)
+
   })
 
+  elections_groups_df <- dplyr::bind_rows(electionGroup_node_list)
 
 
+  # JOIN CONTEST AND ELECTION INFO ===========================================
 
 
-
-
-
-
-
-
-
-
-
-  # electionGroup_name <- xml2::xml_name(xml2::xml_find_all(node_initialDelivery, ".//electionGroupBallot"))
-  #
-  # # Define index of electionGroupBallot nodes
-  # relevant <- which(grepl(electionGroup_name, node_initialDelivery)) + 1
-  #
-  # # Stop if there are no relevant nodes
-  # if (length(relevant) == 0) {
-  #   stop("There are no elections in your data.")
-  # }
-  #
-  # # Apply read_electionGroupBallot function to all relevant children
-  # out_list <- lapply(relevant, function(x) {
-  #
-  #   read_electionGroupBallot(
-  #     xml2::xml_children(node_initialDelivery)[x] # STAND HIER: Funktion unten fertig schreiben mit der utils function =================================================
-  #   )
-  #
-  # })
-  #
-  #
-  #
-  #
-  #
-  #
-  #
-  #
-  #
-  # # Define domain of influence types found in data
-  # domainofOnfluenceType <- xml2::xml_find_all(node_voteBaseDelivery, ".//domainOfInfluence") |>
-  #   xml2::xml_find_all(".//domainOfInfluenceType") |>
-  #   xml2::xml_text()
-  #
-  # # Define index of votes with the relevant domain of influence types (must be +2 since the first two nodes are not of interest)
-  # relevant <- which(grepl(paste0(doi, collapse = "|"), domainofOnfluenceType)) + 2
-
-
-
-
-
-
-
+  # Join
+  all_elections_df <- contest_df |>
+    dplyr::right_join(elections_groups_df, by = "join_id") |>
+    dplyr::select(-join_id)
 
 }
-
-
-
-
-#'
-#'
-#'
-#' #' Read eCH-0157 election information element
-#' #'
-#' #' @param xml_node Node XXXXXXXXXXXXXXXXX of the XML file.
-#' #'
-#' #' @return A dataframe.
-#' #' @export
-#' #'
-#' #' @examples
-#' #' \dontrun{
-#' #'
-#' #' }
-#' read_electionGroupBallot <- function(xml_node = node_initialDelivery) {
-#'
-#'   # Define domain of influence id
-#'   domainOfInfluenceIdentification <- xml2::xml_find_first(xml_node, ".//domainOfInfluenceIdentification") |>
-#'     xml2::xml_text()
-#'
-#'   # Define election information node
-#'   node_electionInformation <- xml2::xml_find_first(xml_node, ".//electionInformation")
-#'
-#'   # Define number of children
-#'   nodelength <- xml2::xml_children(node_electionInformation) |> length()
-#'
-#'   # Run read_language_text_node function across all children
-#'   out_list <- lapply(seq_along(1:nodelength), function(x) {
-#'
-#'     read_language_text_node(
-#'       xml2::xml_children(node_electionInformation)[x] # STAND HIER: Funktion unten fertig schreiben mit der utils function =================================================
-#'     )
-#'
-#'   })
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'   # # Define election
-#'   # node_election <- xml2::xml_find_first(xml_data, paste0(".//", ns0157, ":election"))
-#'   # eigentlich eher alle children definieren und dann darüber applyen
-#'   # Define children
-#'
-#'
-#'
-#'   # STAND HIER --> DA KOMMT JETZT DIE LANGUAGE TEXT NODE FUNKTION MIT EINEM LAPPLY REIN
-#'
-#'
-#'
-#'
-#'
-#' }
-#'
-#'
-#'
-#'
-#'
-#' #' Read eCH-0157 contest description element
-#' #'
-#' #' @param xml_node Node voteBaseDelivery of the XML file.
-#' #'
-#' #' @return A dataframe.
-#' #' @export
-#' #'
-#' #' @examples
-#' #' \dontrun{
-#' #'
-#' #' }
-#' read_contestDescription <- function(xml_node = node_initialDelivery) {
-#'
-#'   # Load contest description node
-#'   node_contestDescription <- xml2::xml_find_first(xml_node, ".//contestDescription")
-#'
-#'   # Extract all "subtotalInfo" nodes
-#'   contestDescriptionInfo_nodes <- xml2::xml_find_all(node_contestDescription, ".//contestDescriptionInfo")
-#'
-#'   # Extract all children of the node
-#'   children <- xml2::xml_children(contestDescriptionInfo_nodes)
-#'
-#'   # Create a named list with element names as keys and their text as values
-#'   data <- stats::setNames(xml2::xml_text(children), xml2::xml_name(children))
-#'
-#'   # Turn into data frame
-#'   data_tbl <- data.frame(
-#'       language = data[names(data) == "language"],
-#'       contestDescription = data[names(data) == "contestDescription"]
-#'   )
-#'
-#'   # Define new variable names in a new column, then widen data
-#'   data_tbl <- data_tbl |>
-#'     dplyr::rowwise() |>
-#'     dplyr::mutate(
-#'       new_var = paste(names(data_tbl)[2], dplyr::pull(dplyr::pick(1)), sep = "_")
-#'     ) |>
-#'     dplyr::ungroup() |>
-#'     dplyr::select(-1) |>
-#'     tidyr::pivot_wider(
-#'       names_from = new_var,
-#'       values_from = 1
-#'     )
-#'
-#'   return(data_tbl)
-#'
-#' }
-#'
-#'
-#'
