@@ -7,8 +7,7 @@
 parse_unnested_node(unnested_node)
 }
 \arguments{
-\item{unnested_node}{A node of the XML file that is not nested (i. e.
-that does not contain grandchildren).}
+\item{unnested_node}{A node of the XML file that is not nested (i. e. that does not contain grandchildren).}
 }
 \value{
 A dataframe.

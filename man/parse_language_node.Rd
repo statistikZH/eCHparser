@@ -7,18 +7,15 @@
 parse_language_node(language_node)
 }
 \arguments{
-\item{language_node}{A set of nodes of the XML file that contain children
-that in turn contain the element language.}
+\item{language_node}{A nodeset of the XML file that contain children that in turn contain the element language.}
 }
 \value{
 A dataframe.
 }
 \description{
-This function parses through one node that contains multiple nodes that again
-contain the element language. These elements have to be parsed differently
-since they contain the  elements with the same content in different
-languages. Therefore, the content of the language element needs to be put
-into the column names of the the other elements when flattening the data.
+This function parses through one node that contains multiple nodes that again contain the element language.
+These elements have to be parsed differently since they contain the  elements with the same content in different languages.
+Therefore, the content of the language element needs to be put into the column names of the the other elements when flattening the data.
 }
 \examples{
 \dontrun{

@@ -34,7 +34,7 @@ applications VOTING and VeWork.
 }
 \examples{
 \dontrun{
-filepath <- system.file("extdata", "eCH_0252_vote_partial_abraxas.xml", package = "eCHparser")
+filepath <- system.file("extdata", "eCH-0252_abraxas_vote_ZH_counting_2024-11-24.xml", package = "eCHparser")
 votedata <- parse_eCH_0252(filepath, doi = c("CH", "CT", "MU"))
 }
 }
