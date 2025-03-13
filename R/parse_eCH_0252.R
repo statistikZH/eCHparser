@@ -28,57 +28,50 @@
 #' }
 parse_eCH_0252 <- function(file, doi = c("CH", "CT")){
 
-  # load file
-  xml_data <- xml2::read_xml(file)
+  # Load file and strip namespaces
+  xml_data <- xml2::read_xml(file) |>
+    xml2::xml_ns_strip()
 
-  # define namespaces
-  namespaces <- xml2::xml_ns(xml_data)
+  # Load base delivery part of the file
+  node_voteBaseDelivery <- xml2::xml_find_first(xml_data, paste0(".//voteBaseDelivery"))
 
-  # define the prefixes we need (depends on exact file structure)
-  ns0155 <- names(namespaces[grep("155", namespaces)])[1]
-  ns0252 <- names(namespaces[grep("252", namespaces)])[1]
-
-  # load base delivery part of the file
-  node_voteBaseDelivery <- xml2::xml_find_first(xml_data, paste0(".//", ns0252, ":voteBaseDelivery"))
-
-  # define canton id
-  canton_id <- xml2::xml_find_first(node_voteBaseDelivery, paste0(".//", ns0252, ":cantonId")) |>
+  # Define canton id
+  canton_id <- xml2::xml_find_first(node_voteBaseDelivery, paste0(".//cantonId")) |>
     xml2::xml_integer()
 
-  # define polling day
-  polling_day <- xml2::xml_find_first(node_voteBaseDelivery, paste0(".//", ns0252, ":pollingDay")) |>
+  # Define polling day
+  polling_day <- xml2::xml_find_first(node_voteBaseDelivery, paste0(".//pollingDay")) |>
     xml2::xml_text()
 
-  # define domain of influence types found in data
-  domainofOnfluenceType <- xml2::xml_find_all(node_voteBaseDelivery, paste0(".//", ns0252, ":domainOfInfluence")) |>
-    xml2::xml_find_all(paste0(".//", ns0155, ":domainOfInfluenceType")) |>
+  # Define domain of influence types found in data
+  domainofOnfluenceType <- xml2::xml_find_all(node_voteBaseDelivery, paste0(".//domainOfInfluence")) |>
+    xml2::xml_find_all(paste0(".//domainOfInfluenceType")) |>
     xml2::xml_text()
 
-  # define index of votes with the relevant domain of influence types (must be +2 since the first two nodes are not of interest)
+  # Define index of votes with the relevant domain of influence types (must be +2 since the first two nodes are not of interest)
   relevant <- which(grepl(paste0(doi, collapse = "|"), domainofOnfluenceType)) + 2
 
-  # stop if there are no relevant votes
+  # Stop if there are no relevant votes
   if (length(relevant) == 0) {
     stop("There are no votes matching your defined domains of influence (doi).")
   }
 
-  # transform relevant data to list
+  # Transform relevant data to list
   out_list <- lapply(relevant, function(x) {
 
     read_voteInfo(
       xml_node = node_voteBaseDelivery,
       index = x,
       canton_id = canton_id,
-      polling_day = polling_day,
-      ns0252 = ns0252
+      polling_day = polling_day
     )
 
   })
 
-  # transform relevant data to df
+  # Transform relevant data to df
   out_df <- dplyr::bind_rows(out_list)
 
-  # drop unique_id column
+  # Drop unique_id column
   if ("unique_id" %in% names(out_df)) {
     out_df <- out_df |>
       dplyr::select(-unique_id)
@@ -98,7 +91,6 @@ parse_eCH_0252 <- function(file, doi = c("CH", "CT")){
 #' @param index index of the voteInfo nodes of interest.
 #' @param canton_id Canton ID of interest.
 #' @param polling_day Polling day of interest.
-#' @param ns0252 Namespace tag for namespace ns0252.
 #'
 #' @return A dataframe.
 #' @export
@@ -107,22 +99,22 @@ parse_eCH_0252 <- function(file, doi = c("CH", "CT")){
 #' \dontrun{
 #' read_voteInfo(node_voteBaseDelivery, c(3, 4), 1, "2024-09-22")
 #' }
-read_voteInfo <- function(xml_node, index, canton_id, polling_day, ns0252 = ns0252){
+read_voteInfo <- function(xml_node, index, canton_id, polling_day){
 
-  # get voteInfo element
+  # Get voteInfo element
   voteInfo_xml <- xml2::xml_child(xml_node, index)
 
-  # get structure of the indexed node as a list
+  # Get structure of the indexed node as a list
   voteInfo <- voteInfo_xml |>
     xml2::as_list()
 
-  # number the names to create unique names
+  # Number the names to create unique names
   names(voteInfo) <- paste0(1:length(voteInfo),"_", names(voteInfo))
 
-  # unlist the list
+  # Unlist the list
   voteInfo_unlist <- unlist(voteInfo)
 
-  # list to df and add unique id
+  # List to df and add unique id
   voteInfo_df_long <- to_df(voteInfo_unlist, names(voteInfo_unlist)) |>
     dplyr::mutate(unique_id = gsub("^(\\d+)_.*", "\\1", var)) |>
     dplyr::mutate(var_short = gsub("\\d_", "", var_short))
@@ -135,8 +127,8 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day, ns0252 = ns02
 
   # HIER MÜSSTE SCHON EIN LANGUAGE PARSER REIN =======================================
 
-  # define language nodes (not necessary, since in 0252 language only occurs in voteTitleInformation)
-  language_nodes <- xml2::xml_find_all(voteInfo_xml, paste0(".//", ns0252, ":language")) |>
+  # Define language nodes (not necessary, since in 0252 language only occurs in voteTitleInformation)
+  language_nodes <- xml2::xml_find_all(voteInfo_xml, paste0(".//language")) |>
     xml2::xml_parent() |>
     xml2::xml_name()
 
@@ -153,20 +145,20 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day, ns0252 = ns02
 
 
 
-  # define vote information
+  # Define vote information
   vote_info <- voteInfo_df_long |>
     dplyr::filter(grepl("vote\\.", var)) |>
     to_wide() |>
     dplyr::select(-unique_id) |>
     tidyr::unnest_longer(tidyselect::everything())
 
-  # check for voteTitleInformation nodes
+  # Check for voteTitleInformation nodes
   if (length(grep("voteTitleInformation", names(vote_info))) > 0) {
 
     # Extract all voteTitleInformation nodes
-    vote_nodes <- xml2::xml_find_all(voteInfo_xml, paste0(".//", ns0252, ":vote"))
+    vote_nodes <- xml2::xml_find_all(voteInfo_xml, paste0(".//vote"))
 
-    # create mu
+    # Create mu
     lapply(vote_nodes, function(x) {
       read_language_text_node(x)
     }) |>
@@ -191,16 +183,16 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day, ns0252 = ns02
 
 
 
-  # handle nested otherIdentification element
+  # Handle nested otherIdentification element
   if ("otherIdentification_idName" %in% names(vote_info) && "otherIdentification_id" %in% names(vote_info)) {
 
-    # create the new column title
+    # Create the new column title
     new_name <- paste0("otherIdentification_", vote_info$otherIdentification_idName[1])
 
-    # replace old name
+    # Replace old name
     names(vote_info)[names(vote_info) == "otherIdentification_id"] <- new_name
 
-    # remove name column
+    # Remove name column
     vote_info <- vote_info |>
       dplyr::select(-otherIdentification_idName)
 
@@ -221,7 +213,7 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day, ns0252 = ns02
 
 
 
-  # define vote results
+  # Define vote results
   vote_result <- voteInfo_df_long |>
     dplyr::filter(!grepl("vote\\.", var)) |>
     to_wide() |>
@@ -230,10 +222,10 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day, ns0252 = ns02
   # Replace all NULL with NA
   vote_result[vote_result == "NULL"] <- NA
 
-  # deal with nested nodes (seem to exist to add additional non-defined information that cannot be put in an element of the standard)
+  # Deal with nested nodes (seem to exist to add additional non-defined information that cannot be put in an element of the standard)
   if ("namedElement_elementName" %in% names(vote_result) || "subtotalInfo_countOfVoters" %in% names(vote_result)){
 
-    # handle namedElement
+    # Handle namedElement
     if ("namedElement_elementName" %in% names(vote_result)) {
 
       element_name <- vote_result |>
@@ -253,21 +245,20 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day, ns0252 = ns02
 
     if ("subtotalInfo_countOfVoters" %in% names(vote_result)) {
 
-      # get the index of the rows containing results (+ 1 because the the first element of voteInfo contains no results but information on the vote itself)
+      # Get the index of the rows containing results (+ 1 because the the first element of voteInfo contains no results but information on the vote itself)
       voter_info_index <- which(!is.na(vote_result$subtotalInfo_countOfVoters)) + 1
 
-      # unpack all voter information
+      # Unpack all voter information
       out_list <- lapply(voter_info_index, function(x) {
 
         unpack_voters(
           voteInfo_xml,
-          x,
-          ns0252
+          x
         )
 
       })
 
-      # unpack list
+      # Unpack list
       out_df <- dplyr::bind_rows(out_list) |>
         dplyr::distinct()
 
@@ -276,7 +267,7 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day, ns0252 = ns02
         tidyr::unnest_longer(tidyselect::everything())
 
 
-      # join with result df and add voteTitle
+      # Join with result df and add voteTitle
       vote_result_full <- vote_result_full |>
         dplyr::left_join(out_df) |>
         dplyr::mutate(vote_voteIdentification = vote_info$vote_voteIdentification)
@@ -292,7 +283,7 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day, ns0252 = ns02
 
   }
 
-  # join result and information data
+  # Join result and information data
   vote_data_complete <- vote_result_full |>
     dplyr::left_join(vote_info, by = "vote_voteIdentification") |>
     dplyr::mutate(canotonId = canton_id,
@@ -320,7 +311,7 @@ to_wide <- function(data){
 
   if ("var" %in% names(data)){
     data <- data |>
-      # delete var to make the pivot work
+      # Delete var to make the pivot work
       dplyr::select(-var)
   }
 
@@ -372,28 +363,27 @@ to_df <- function(data, names){
 #'
 #' @param data An xml node.
 #' @param index A numeric vector with the positions of interest.
-#' @param ns0252 The prefix of the namespace for eCH-0252.
 #'
 #' @return A dataframe.
 #'
 #' @examples
 #' \dontrun{
-#' unpack_voters(voteInfo_xml, x, ns0252)
+#' unpack_voters(voteInfo_xml, x)
 #' }
-unpack_voters <- function(data, index, ns0252 = ns0252){
+unpack_voters <- function(data, index){
 
   node_of_interest <- xml2::xml_child(data, index)
 
-  count_of_voters_info <- xml2::xml_find_first(node_of_interest, paste0(".//", ns0252, ":countOfVotersInformation"))
+  count_of_voters_info <- xml2::xml_find_first(node_of_interest, paste0(".//countOfVotersInformation"))
 
   # Extract total count
-  total_count <- xml2::xml_text(xml2::xml_find_first(count_of_voters_info, paste0(".//", ns0252, ":countOfVotersTotal")))
+  total_count <- xml2::xml_text(xml2::xml_find_first(count_of_voters_info, paste0(".//countOfVotersTotal")))
 
   # Extract counting circle ID
-  municipality <- xml2::xml_text(xml2::xml_find_first(node_of_interest, paste0(".//", ns0252, ":countingCircleId")))
+  municipality <- xml2::xml_text(xml2::xml_find_first(node_of_interest, paste0(".//countingCircleId")))
 
   # Extract all "subtotalInfo" nodes
-  subtotal_nodes <- xml2::xml_find_all(count_of_voters_info, paste0(".//", ns0252, ":subtotalInfo"))
+  subtotal_nodes <- xml2::xml_find_all(count_of_voters_info, paste0(".//subtotalInfo"))
 
   # Define desired structure
   desired_columns <- c("countOfVoters", "voterType", "sex")
