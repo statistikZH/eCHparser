@@ -16,8 +16,7 @@
 parse_eCH_0157 <- function(file){
 
   # Load file and strip namespaces
-  xml_data <- xml2::read_xml(file) |>
-    xml2::xml_ns_strip()
+  xml_data <- xml2::read_xml(file)
 
   # Strip namespaces
   xml_data_stripped <- strip_namespaces(xml_data)

@@ -16,7 +16,7 @@
 strip_namespaces <- function(xml_data) {
 
   # If we find the node deliveryHeader without prefix, remove all namespaces with xml_ns_strip()
-  if(length(xml2::xml_find_first(xml_data, ".//deliveryHeader"))) {
+  if(grepl("<deliveryHeader>", as.character(xml_data))) {
 
     xml_data_stripped <- xml2::xml_ns_strip(xml_data)
 
