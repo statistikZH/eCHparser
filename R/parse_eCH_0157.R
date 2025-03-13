@@ -19,8 +19,11 @@ parse_eCH_0157 <- function(file){
   xml_data <- xml2::read_xml(file) |>
     xml2::xml_ns_strip()
 
+  # Strip namespaces
+  xml_data_stripped <- strip_namespaces(xml_data)
+
   # Load initial delivery part of the file
-  node_initialDelivery <- xml2::xml_find_first(xml_data, ".//initialDelivery")
+  node_initialDelivery <- xml2::xml_find_first(xml_data_stripped, ".//initialDelivery")
 
 
   # CONTEST INFORMATION ========================================================
