@@ -83,11 +83,10 @@ parse_node <- function(xml_node) {
     children_2_nested <- xml2::xml_children(nested_node)
 
     # Check for language nodes
-    if (length(xml2::xml_find_all(children_2_nested, ".//language"))) {
+    if (length(xml2::xml_find_all(xml2::xml_parent(children_2_nested), ".//language"))) {
 
-      # Get the names of the multilingual nodes
-      nested_language_node_names <- xml2::xml_find_all(children_2_nested, ".//language") |>
-        xml2::xml_parent() |>
+      # Get the names of the language nodes
+      nested_language_node_names <- xml2::xml_find_all(xml2::xml_parent(children_2_nested), ".//language") |>
         xml2::xml_parent() |>
         xml2::xml_name()
 
@@ -193,11 +192,11 @@ parse_node <- function(xml_node) {
 #' Parse through a node that contains nested language elements.
 #'
 #' @description
-#' This function parses through one node that contains multiple nodes that again contain the element language.
-#' These elements have to be parsed differently since they contain the  elements with the same content in different languages.
-#' Therefore, the content of the language element needs to be put into the column names of the the other elements when flattening the data.
+#' This function parses through one node that contains the element language.
+#' These elements have to be parsed differently since they contain elements with the same content in different languages.
+#' Therefore, the new column name needs to include the language (i. e. the content of the language element).
 #'
-#' @param language_node A nodeset of the XML file that contain children that in turn contain the element language.
+#' @param language_node A nodeset of the XML file that contains the element language.
 #'
 #' @return A dataframe.
 #' @export
@@ -208,18 +207,12 @@ parse_node <- function(xml_node) {
 #' }
 parse_language_node <- function(language_node) {
 
-  # Define children and grandchildren
+  # Define children
   children_1 <- xml2::xml_children(language_node)
-  children_2 <- xml2::xml_children(children_1)
 
   # Stop, if we are not inside of a language text node
-  if (!"language" %in% xml2::xml_name(children_2)) {
+  if (!"language" %in% xml2::xml_name(children_1)) {
     stop(paste0(xml2::xml_name(language_node), " is not a language text node."))
-  }
-
-  # Stop, if there are other nodes than language nodes
-  if (length(xml2::xml_find_all(language_node, ".//language")) != length(xml2::xml_children(language_node))) {
-    stop("The node contains not only language nodes and therefore cannot be parsed.")
   }
 
 
@@ -228,8 +221,8 @@ parse_language_node <- function(language_node) {
 
   # Convert XML nodes to a named vector
   data_raw <- stats::setNames(
-    object = xml2::xml_text(children_2),
-    nm = xml2::xml_name(children_2)
+    object = xml2::xml_text(children_1),
+    nm = xml2::xml_name(children_1)
   )
 
   # Identify all "language" values and their corresponding indices
