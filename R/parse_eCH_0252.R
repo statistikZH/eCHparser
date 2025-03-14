@@ -62,15 +62,15 @@ parse_eCH_0252 <- function(file, doi = c("CH", "CT", "BZ", "MU", "SC", "KI", "OG
 
   # Stop if there are no relevant votes
   if (length(relevant) == 0) {
-    stop("There are no votes matching your defined domains of influence (doi).")
+    stop(paste0("There are no votes matching your defined domains of influence (", paste0(doi, collapse = ", "), ")."))
   }
 
   # Transform relevant data to list
-  out_list <- lapply(relevant, function(x) {
+  out_list <- lapply(relevant, function(relevant_index) {
 
     read_voteInfo(
       xml_node = node_voteBaseDelivery,
-      index = x,
+      index = relevant_index,
       canton_id = canton_id,
       polling_day = polling_day
     )
@@ -168,8 +168,8 @@ read_voteInfo <- function(xml_node, index, canton_id, polling_day){
     vote_nodes <- xml2::xml_find_all(voteInfo_xml, paste0(".//vote"))
 
     # Create mu
-    lapply(vote_nodes, function(x) {
-      read_language_text_node(x)
+    lapply(vote_nodes, function(vote_nodes_index) {
+      read_language_text_node(vote_nodes_index)
     }) |>
       unlist()
 
