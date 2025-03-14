@@ -126,8 +126,8 @@ parse_node <- function(xml_node) {
     if (length(nested_language_nodes)) {
 
       # Apply the parse_language_node() function to all language nodes
-      language_nodes_list <- lapply(seq_along(nested_language_nodes), function(index) {
-        parse_language_node(nested_language_nodes[index])
+      language_nodes_list <- lapply(seq_along(nested_language_nodes), function(nested_language_nodes_index) {
+        parse_language_node(nested_language_nodes[nested_language_nodes_index])
       })
 
       # Turn list to df
