@@ -23,7 +23,6 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' filepath <- system.file(
 #'   "extdata",
 #'   "eCH-0252_abraxas_vote_ZH_counting_2024-11-24.xml",
@@ -31,7 +30,6 @@
 #' )
 #'
 #' votedata <- parse_eCH_0252(filepath, doi = c("CH", "CT", "MU"))
-#' }
 parse_eCH_0252 <- function(file, doi = "all"){
 
   # Load file
@@ -65,7 +63,7 @@ parse_eCH_0252 <- function(file, doi = "all"){
     xml2::xml_text()
 
   # Define index of votes with the relevant domain of influence types (must be +2 since the first two nodes are not of interest)
-  if (doi == "all") {
+  if ("all" %in% doi) {
     relevant <- seq_along(domainofOnfluenceType) + 2
   } else {
   relevant <- which(grepl(paste0(doi, collapse = "|"), domainofOnfluenceType)) + 2
