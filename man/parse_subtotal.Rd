@@ -2,7 +2,7 @@
 % Please edit documentation in R/parse_eCH_0252.R
 \name{parse_subtotal}
 \alias{parse_subtotal}
-\title{Parse "subtotalInfo" nodes into a data frame}
+\title{Convert "subtotalInfo" nodes into a data frame}
 \usage{
 parse_subtotal(node, columns)
 }
@@ -15,10 +15,5 @@ parse_subtotal(node, columns)
 A dataframe.
 }
 \description{
-Parse "subtotalInfo" nodes into a data frame
-}
-\examples{
-\dontrun{
-parse_subtotal(x, columns = desired_columns)
-}
+Convert "subtotalInfo" nodes into a data frame
 }
