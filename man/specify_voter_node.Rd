@@ -15,8 +15,3 @@ An xml node.
 \description{
 Trial of alternative to the unpack_voters() helper function.
 }
-\examples{
-\dontrun{
-specify_voter_node(x)
-}
-}

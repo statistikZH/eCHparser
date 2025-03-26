@@ -17,8 +17,3 @@ This function parses through xml nodes that contain on the last level contain on
 If some of the elements are nested, it recursively parses through all the levels.
 Whenever it finds language nodes, it parses them using the parse_language_node() function.
 }
-\examples{
-\dontrun{
-
-}
-}

@@ -19,8 +19,3 @@ Certain nodes have a different logic, insofar as they do not themselves specify 
 Examples of this are the namedElement or the otherIdentification nodes, or also nodes, that contain multilingual content.
 To create unique names that define their content, we specify their parents' names.
 }
-\examples{
-\dontrun{
-specify_node(x, spec_element)
-}
-}

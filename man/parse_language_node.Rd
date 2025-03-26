@@ -17,8 +17,3 @@ This function parses through one node that contains the element language.
 These elements have to be parsed differently since they contain elements with the same content in different languages.
 Therefore, the new column name needs to include the language (i. e. the content of the language element).
 }
-\examples{
-\dontrun{
-
-}
-}

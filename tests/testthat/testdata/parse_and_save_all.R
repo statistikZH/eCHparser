@@ -23,8 +23,6 @@ for (i in seq_along(testfiles)) {
     stop(paste0("No function found for filetype eCH-", eCH_type))
   }
 
-
-
   # Load the corresponding RDS file from the testdata folder (use testthat::test_path for the test to work also with devtools::test())
   rds_filepath <- testthat::test_path(paste0("testdata/files_parsed/eCH-", eCH_type), paste0(sub("\\.[^.]*$", "", testfiles[i]), ".RDS")) # the sub() removes the .xml extension
 

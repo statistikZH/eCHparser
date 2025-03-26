@@ -17,8 +17,3 @@ A dataframe.
 \description{
 Unlist list to dataframe
 }
-\examples{
-\dontrun{
-to_df(voteInfo_unlist, names(voteInfo_unlist))
-}
-}

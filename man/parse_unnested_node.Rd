@@ -15,8 +15,3 @@ A dataframe.
 \description{
 This function parses through one node of only unnested nodes.
 }
-\examples{
-\dontrun{
-
-}
-}

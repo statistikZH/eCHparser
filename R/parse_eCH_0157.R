@@ -60,7 +60,10 @@ parse_eCH_0157 <- function(file){
 
       # Stop if there are more than one election
       if (length(election_node) > 1) {
-        stop(paste0("There seem to be more than one election node in the electionInformation node for DOI ", doi))
+        stop(paste0(
+          "There seem to be more than one election node in the electionInformation node for DOI ",
+          xml2::xml_text(xml2::xml_find_first(electionInformation_nodes[electionInformation_index], ".//domainOfInfluenceIdentification"))
+        ))
       }
 
       ## Parse Election Element ------------------------------------------------

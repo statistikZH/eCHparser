@@ -15,8 +15,3 @@ A dataframe.
 \description{
 Convert long dataframe to wide
 }
-\examples{
-\dontrun{
-to_wide(voteInfo_df_long)
-}
-}

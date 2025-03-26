@@ -11,7 +11,17 @@
 #'
 #' @examples
 #' \dontrun{
+#' filepath <- system.file(
+#'   "extdata",
+#'   "eCH-0252_abraxas_vote_ZH_counting_2024-11-24.xml",
+#'   package = "eCHparser"
+#' )
 #'
+#' # Load file
+#' xml_data <- xml2::read_xml(filepath)
+#'
+#' # Strip namespaces
+#' xml_data_stripped <- strip_namespaces(xml_data)
 #' }
 strip_namespaces <- function(xml_data) {
 
@@ -44,12 +54,6 @@ strip_namespaces <- function(xml_data) {
 #' @param xml_node A node of the XML file with only unique elements.
 #'
 #' @return A dataframe.
-#' @export
-#'
-#' @examples
-#' \dontrun{
-#'
-#' }
 parse_node <- function(xml_node) {
 
   # Define children
@@ -199,12 +203,6 @@ parse_node <- function(xml_node) {
 #' @param language_node A nodeset of the XML file that contains the element language.
 #'
 #' @return A dataframe.
-#' @export
-#'
-#' @examples
-#' \dontrun{
-#'
-#' }
 parse_language_node <- function(language_node) {
 
   # Define children
@@ -264,12 +262,6 @@ parse_language_node <- function(language_node) {
 #' @param unnested_node A node of the XML file that is not nested (i. e. that does not contain grandchildren).
 #'
 #' @return A dataframe.
-#' @export
-#'
-#' @examples
-#' \dontrun{
-#'
-#' }
 parse_unnested_node <- function(unnested_node) {
 
   # Turn the unnested node into a string
