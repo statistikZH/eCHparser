@@ -279,24 +279,24 @@ to_df <- function(data, names){
 
 
 
-#' Convert "subtotalInfo" nodes into a data frame
+#' #' Convert "subtotalInfo" nodes into a data frame
+#' #'
+#' #' @param node An xml node.
+#' #' @param columns A vector with the columns of interest.
+#' #'
+#' #' @return A dataframe.
+#' parse_subtotal <- function(node, columns) {
 #'
-#' @param node An xml node.
-#' @param columns A vector with the columns of interest.
+#'   # Extract all children of the node
+#'   children <- xml2::xml_children(node)
 #'
-#' @return A dataframe.
-parse_subtotal <- function(node, columns) {
-
-  # Extract all children of the node
-  children <- xml2::xml_children(node)
-
-  # Create a named list with element names as keys and their text as values
-  data <- stats::setNames(xml2::xml_text(children), xml2::xml_name(children))
-
-  # Turn into data frame
-  data_tbl <- as.data.frame(t(data), stringsAsFactors = FALSE)
-
-}
+#'   # Create a named list with element names as keys and their text as values
+#'   data <- stats::setNames(xml2::xml_text(children), xml2::xml_name(children))
+#'
+#'   # Turn into data frame
+#'   data_tbl <- as.data.frame(t(data), stringsAsFactors = FALSE)
+#'
+#' }
 
 
 

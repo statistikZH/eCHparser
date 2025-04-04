@@ -162,39 +162,17 @@ parse_eCH_0157 <- function(file){
       electionInfo_df <- election_df |>
         dplyr::left_join(candidate_df, by = "join_id")
 
-
-       # STAND HIER =========================
     })
 
-
-
-
-
-
-
-
-
-
-
-    # Unlist electionInformation list
-    electionInformation_unlist <- unlist(electionInformation_list)
-
-
-
-
-
-
-
-
-
+    # Bind rows to df
+    electionInformation_df <-  dplyr::bind_rows(electionInformation_list)
 
   })
 
-  # Unlist children list
-  children_unlist <- unlist(children_list)
+  # Bind the tables in the electionGroup_list
+  electionGroup_data_complete <- dplyr::bind_rows(electionGroup_list)
 
-
-
+  return(electionGroup_data_complete)
 
 }
 
@@ -202,71 +180,71 @@ parse_eCH_0157 <- function(file){
 
 
 
-#' Convert an XXXXXXXX node into a dataframe
+#' #' Convert an XXXXXXXX node into a dataframe
+#' #'
+#' #' @param xml_node Node XXXXXXXXX of the XML file.
+#' #'
+#' #' @return A dataframe.
+#' #' @export
+#' #'
+#' #' @examples
+#' #' \dontrun{
+#' #'
+#' #' }
+#' read_node <- function(xml_node){
 #'
-#' @param xml_node Node XXXXXXXXX of the XML file.
 #'
-#' @return A dataframe.
-#' @export
 #'
-#' @examples
-#' \dontrun{
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'   # Get structure of the indexed node as a list
+#'   node_list <- xml_node |>
+#'     xml2::as_list()
+#'
+#'   # Number the names to create unique names
+#'   names(node_list) <- paste0(1:length(node_list),"_", names(node_list))
+#'
+#'   # Unlist the list
+#'   node_unlist <- unlist(node_list)
+#'
+#'   # List to df and add unique id
+#'   node_df_long <- to_df(node_unlist, names(node_unlist)) |>
+#'     dplyr::mutate(unique_id = gsub("^(\\d+)_.*", "\\1", var))
+#'
+#'
+#'
+#'
+#'
+#'   ## Vote Information ----------------------------------------------------------
+#'
+#'
+#'   # Define vote results
+#'   electionGroupBallot_df <- node_df_long |>
+#'     dplyr::filter(!grepl("contest\\.", var)) |>
+#'     to_wide() |>
+#'     as.data.frame()
+#'
+#'   # Replace all NULL with NA
+#'   vote_result[vote_result == "NULL"] <- NA
+#'
+#'   # Unnest
+#'   vote_result_full <- vote_result |>
+#'     tidyr::unnest_longer(
+#'       tidyselect::everything(),
+#'       keep_empty = TRUE
+#'     ) |>
+#'     dplyr::mutate(vote_voteIdentification = vote_info$vote_voteIdentification)
+#'
+#'   # Join result and information data
+#'   vote_data_complete <- vote_result_full |>
+#'     dplyr::left_join(vote_info, by = "vote_voteIdentification")
+#'
+#'   return(vote_data_complete)
 #'
 #' }
-read_node <- function(xml_node){
-
-
-
-
-
-
-
-
-
-
-
-  # Get structure of the indexed node as a list
-  node_list <- xml_node |>
-    xml2::as_list()
-
-  # Number the names to create unique names
-  names(node_list) <- paste0(1:length(node_list),"_", names(node_list))
-
-  # Unlist the list
-  node_unlist <- unlist(node_list)
-
-  # List to df and add unique id
-  node_df_long <- to_df(node_unlist, names(node_unlist)) |>
-    dplyr::mutate(unique_id = gsub("^(\\d+)_.*", "\\1", var))
-
-
-
-
-
-  ## Vote Information ----------------------------------------------------------
-
-
-  # Define vote results
-  electionGroupBallot_df <- node_df_long |>
-    dplyr::filter(!grepl("contest\\.", var)) |>
-    to_wide() |>
-    as.data.frame()
-
-  # Replace all NULL with NA
-  vote_result[vote_result == "NULL"] <- NA
-
-  # Unnest
-  vote_result_full <- vote_result |>
-    tidyr::unnest_longer(
-      tidyselect::everything(),
-      keep_empty = TRUE
-    ) |>
-    dplyr::mutate(vote_voteIdentification = vote_info$vote_voteIdentification)
-
-  # Join result and information data
-  vote_data_complete <- vote_result_full |>
-    dplyr::left_join(vote_info, by = "vote_voteIdentification")
-
-  return(vote_data_complete)
-
-}
