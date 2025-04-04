@@ -41,7 +41,7 @@ parse_eCH_0157 <- function(file){
   # TURN TO DF =================================================================
 
 
-  ## Contest Information ------------------------------------------------------- # This here could be a new function, used in 252 too
+  ## Contest Information -------------------------------------------------------
 
 
   # Get structure of the indexed node as a list
@@ -62,11 +62,12 @@ parse_eCH_0157 <- function(file){
   contest_df_long <- to_df(contest_unlist, names(contest_unlist)) |>
     dplyr::mutate(unique_id = gsub("^(\\d+)_.*", "\\1", var))
 
-  # Write contest information to a df
+  # Write contest information to a df (and add a join_id)
   contest_df <- contest_df_long |>
     to_wide() |>
     dplyr::select(-unique_id) |>
-    tidyr::unnest_longer(tidyselect::everything())
+    tidyr::unnest_longer(tidyselect::everything()) |>
+    dplyr::mutate(join_id = 1879)
 
 
   ## Election Information ------------------------------------------------------
@@ -170,9 +171,14 @@ parse_eCH_0157 <- function(file){
   })
 
   # Bind the tables in the electionGroup_list
-  electionGroup_data_complete <- dplyr::bind_rows(electionGroup_list)
+  electionGroup_df <- dplyr::bind_rows(electionGroup_list)
 
-  return(electionGroup_data_complete)
+  # Join contest information and electionGroup data and remove the join_id
+  contest_data_complete <- contest_df |>
+    dplyr::left_join(electionGroup_df) |>
+    dplyr::select(-join_id)
+
+  return(contest_data_complete)
 
 }
 

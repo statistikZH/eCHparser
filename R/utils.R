@@ -44,244 +44,155 @@ strip_namespaces <- function(xml_data) {
 
 
 
-#' #' Parse through nested nodes.
-#' #'
-#' #' @description
-#' #' This function parses through xml nodes that contain on the last level contain only uniquely named elements (with the exception of language nodes).
-#' #' If some of the elements are nested, it recursively parses through all the levels.
-#' #' Whenever it finds language nodes, it parses them using the parse_language_node() function.
-#' #'
-#' #' @param xml_node A node of the XML file with only unique elements.
-#' #'
-#' #' @return A dataframe.
-#' parse_node <- function(xml_node) {
-#'
-#'   # Define children
-#'   children_1 <- xml2::xml_children(xml_node)
-#'   children_2 <- xml2::xml_children(children_1)
-#'
-#'
-#'   # HANDLE NESTED NODES ========================================================
-#'
-#'
-#'   # Check if there are nested nodes
-#'   if (length(children_2)) {
-#'
-#'     # Define the names of the nested elements
-#'     nested_node_names <- children_2 |>
-#'       xml2::xml_parent() |>
-#'       xml2::xml_name()
-#'
-#'     # Define the indices of the nested elements
-#'     nested_node_indices <- which(grepl(paste0(nested_node_names, collapse = "|"), children_1))
-#'
-#'     # Split the node into unnested and nested nodes
-#'     unnested_node <- children_1[setdiff(seq_along(children_1), nested_node_indices)]
-#'     nested_node <- children_1[nested_node_indices]
-#'
-#'
-#'     ## Work Through Nested Nodes -----------------------------------------------
-#'
-#'
-#'     # Define children/elements of the nested node
-#'     children_2_nested <- xml2::xml_children(nested_node)
-#'
-#'     # Check for language nodes
-#'     if (length(xml2::xml_find_all(xml2::xml_parent(children_2_nested), ".//language"))) {
-#'
-#'       # Get the names of the language nodes
-#'       nested_language_node_names <- xml2::xml_find_all(xml2::xml_parent(children_2_nested), ".//language") |>
-#'         xml2::xml_parent() |>
-#'         xml2::xml_name()
-#'
-#'       # Then, get their indices (if returns integer(0) it means that there are no multilingual nodes ON THIS LEVEL)
-#'       nested_language_node_indices <- which(grepl(paste0(nested_language_node_names, collapse = "|"), xml2::xml_name(nested_node)))
-#'
-#'       # Define nested non-language and language nodes
-#'       nested_other_nodes <- nested_node[setdiff(seq_along(nested_node), nested_language_node_indices)]
-#'       nested_language_nodes <- nested_node[nested_language_node_indices]
-#'
-#'       # If there are no langauge nodes, define all nodes as other nested nodes (and NULL for the nested_language_nodes object)
-#'     } else {
-#'       nested_other_nodes <- nested_node
-#'       nested_language_nodes <- NULL
-#'     }
-#'
-#'
-#'     ### Go to Next Level -------------------------------------------------------
-#'
-#'
-#'     # Check if we have nested non-language nodes
-#'     if (length(nested_other_nodes)) {
-#'
-#'       # Recursively call this function again to work through the next level and create a df
-#'       other_nodes_df <- parse_node(nested_other_nodes)
-#'
-#'     # If there are no nested non-language nodes, define NULL object
-#'     } else {
-#'       other_nodes_df <- NULL
-#'     }
-#'
-#'
-#'     ### Parse the Language Nodes -----------------------------------------------
-#'
-#'
-#'     if (length(nested_language_nodes)) {
-#'
-#'       # Apply the parse_language_node() function to all language nodes
-#'       language_nodes_list <- lapply(seq_along(nested_language_nodes), function(nested_language_nodes_index) {
-#'         parse_language_node(nested_language_nodes[nested_language_nodes_index])
-#'       })
-#'
-#'       # Turn list to df
-#'       language_nodes_df <- dplyr::bind_cols(language_nodes_list) |>
-#'         dplyr::distinct()
-#'
-#'     } else {
-#'       language_nodes_df <- NULL
-#'     }
-#'
-#'
-#'     ### Join Nested Node Data --------------------------------------------------
-#'
-#'
-#'     nested_nodes_df <- other_nodes_df |>
-#'       dplyr::bind_cols(language_nodes_df) # This only works if both dataframes have only one (or the same number of) row(s), which should be the case inside a node that contains language nodes
-#'
-#'
-#'   # If there are no nested nodes...
-#'   } else {
-#'
-#'     # ...and also define all children_1 as unnested nodes
-#'     unnested_node <- children_1
-#'     nested_nodes_df <- NULL
-#'
-#'   }
-#'
-#'
-#'   # HANDLE UNNESTED NODES ======================================================
-#'
-#'
-#'   # If there are any...
-#'   if(length(unnested_node)) {
-#'
-#'     # Parse through the unnested node
-#'     unnested_node_df <- parse_unnested_node(unnested_node)
-#'
-#'   } else {
-#'
-#'     # Otherwise, create NULL object
-#'     unnested_node_df <- NULL
-#'
-#'   }
-#'
-#'
-#'   # BIND DATA, CLEANUP AND RETURN ==============================================
-#'
-#'
-#'   data <- unnested_node_df |>
-#'     dplyr::bind_cols(nested_nodes_df)
-#'
-#'   # Cleanup
-#'   unnested_node <- NULL
-#'
-#'   return(data)
-#'
-#' }
 
-
-
-
-
-#' #' Parse through a node that contains nested language elements.
-#' #'
-#' #' @description
-#' #' This function parses through one node that contains the element language.
-#' #' These elements have to be parsed differently since they contain elements with the same content in different languages.
-#' #' Therefore, the new column name needs to include the language (i. e. the content of the language element).
-#' #'
-#' #' @param language_node A nodeset of the XML file that contains the element language.
-#' #'
-#' #' @return A dataframe.
-#' parse_language_node <- function(language_node) {
-#'
-#'   # Define children
-#'   children_1 <- xml2::xml_children(language_node)
-#'
-#'   # Stop, if we are not inside of a language text node
-#'   if (!"language" %in% xml2::xml_name(children_1)) {
-#'     stop(paste0(xml2::xml_name(language_node), " is not a language text node."))
-#'   }
-#'
-#'
-#'   # LANGUAGE NODE TO DF ========================================================
-#'
-#'
-#'   # Convert XML nodes to a named vector
-#'   data_raw <- stats::setNames(
-#'     object = xml2::xml_text(children_1),
-#'     nm = xml2::xml_name(children_1)
-#'   )
-#'
-#'   # Identify all "language" values and their corresponding indices
-#'   language_values <- data_raw[names(data_raw) == "language"]
-#'   other_keys <- unique(names(data_raw)[names(data_raw) != "language"])
-#'
-#'   # Prepare a list to store structured data
-#'   structured_list <- list()
-#'
-#'   # Loop through languages and assign corresponding values dynamically
-#'   for (i in seq_along(language_values)) {
-#'     lang <- language_values[i]
-#'
-#'     for (key in other_keys) {
-#'       structured_list[[paste0(key, "_", lang)]] <- data_raw[names(data_raw) == key][i]
-#'     }
-#'   }
-#'
-#'   # Convert the structured list into a data frame
-#'   data_tbl <- as.data.frame(structured_list, stringsAsFactors = FALSE, row.names = NULL)
-#'
-#'
-#'   # RETURN DATAFRAME ===========================================================
-#'
-#'
-#'   return(data_tbl)
-#'
-#' }
-
-
-
-
-
-#' Parse through one node of unnested nodes.
+#' Amend node parents' names with node specification
 #'
 #' @description
-#' This function parses through one node of only unnested nodes.
+#' Certain nodes have a different logic, insofar as they do not themselves specify their content in the name but do this in one of the children.
+#' Examples of this are the namedElement or the otherIdentification nodes, or also nodes, that contain multilingual content.
+#' To create unique names that define their content, we specify their parents' names.
 #'
-#' @param unnested_node A node of the XML file that is not nested (i. e. that does not contain grandchildren).
+#' @param node An xml node.
+#' @param spec_element The name of the specification element that contains text.
 #'
-#' @return A dataframe.
-parse_unnested_node <- function(unnested_node) {
+#' @return An xml node.
+specify_node <- function(node, spec_element) {
 
-  # Turn the unnested node into a string
-  unnested_node_list <- unnested_node |>
-    xml2::as_list()
+  # Define search tag
+  search_tag <- paste0(".//", spec_element)
 
-  # Replace empty elements with NAs
-  unnested_node_unlist <- unnested_node_list |>
-    replace(lengths(unnested_node_list) == 0, NA) |>
-    unlist()
+  # Define all specification nodes
+  spec_nodes <- xml2::xml_find_all(node, search_tag)
 
-  # Define names
-  names(unnested_node_unlist) <- xml2::xml_name(unnested_node)
+  # Get all specifications
+  specs <- spec_nodes |>
+    xml2::xml_text()
 
-  # Transpose and turn to df
-  data_tbl <- as.data.frame(t(unnested_node_unlist))
+  # Define parent nodes
+  parent_nodes <- xml2::xml_parent(spec_nodes)
 
-  # Return
-  return(data_tbl)
+  # Get all parents' original names
+  parents_names <- xml2::xml_name(parent_nodes)
+
+  # Combine original names with specification to create unique names and rename nodes
+  xml2::xml_name(parent_nodes) <- paste(parents_names, specs, sep = "-")
+
+  # Remove specification nodes
+  xml2::xml_remove(spec_nodes)
 
 }
 
 
+
+
+
+#' Amend voter information subtotalInfo nodes with node specifications
+#'
+#' @description
+#' Trial of alternative to the unpack_voters() helper function.
+#'
+#' @param node An xml node.
+#'
+#' @return An xml node.
+specify_voter_node <- function(node) {
+
+
+  # AMEND WITH VOTER TYPE ======================================================
+
+
+  # Define all voterType nodes
+  voterType_nodes <- xml2::xml_find_all(node, ".//voterType")
+
+  # Get all voterTypes
+  voterTypes <- voterType_nodes |>
+    xml2::xml_text()
+
+  # Define parent nodes
+  parent_nodes <- xml2::xml_parent(voterType_nodes)
+
+  # Get all parents' original names
+  parents_names <- xml2::xml_name(parent_nodes)
+
+  # Combine original names with specification to create unique names and rename nodes
+  xml2::xml_name(parent_nodes) <- paste0(parents_names, "-voterType", voterTypes)
+
+  # Remove specification nodes
+  xml2::xml_remove(voterType_nodes)
+
+
+  # AMEND WITH SEX =============================================================
+
+
+  # Define all sex nodes
+  sex_nodes <- xml2::xml_find_all(node, ".//sex")
+
+  # Get all sexes
+  sexes <- sex_nodes |>
+    xml2::xml_text()
+
+  # Define parent nodes
+  parent_nodes <- xml2::xml_parent(sex_nodes)
+
+  # Get all parents' original names
+  parents_names <- xml2::xml_name(parent_nodes)
+
+  # Combine original names with specification to create unique names and rename nodes
+  xml2::xml_name(parent_nodes) <- paste0(parents_names, "-sex", sexes)
+
+  # Remove specification nodes
+  xml2::xml_remove(sex_nodes)
+
+}
+
+
+
+
+
+#' Convert long dataframe to wide
+#'
+#' @param data A long dataframe.
+#'
+#' @return A dataframe.
+to_wide <- function(data){
+
+  if ("var" %in% names(data)){
+    data <- data |>
+      # Delete var to make the pivot work
+      dplyr::select(-var)
+  }
+
+  data |>
+    tidyr::pivot_wider(
+      names_from = var_short,
+      values_from = data,
+      values_fn = list
+    )
+
+}
+
+
+
+
+
+#' Unlist list to dataframe
+#'
+#' @param data A dataframe.
+#' @param names A string of variable names.
+#'
+#' @return A dataframe.
+to_df <- function(data, names){
+
+  data.frame(
+    data = data,
+    var = names
+  ) |>
+    dplyr::mutate(
+      # Keep only string after second to last "."
+      var_short = gsub("^.*?\\.([^.]+\\.[^.]+)$", "\\1", var),
+      # Remove digits followed by an underscore at the start of the string
+      var_short = gsub("^\\d+_", "", var_short),
+      # Replace "." with "_"
+      var_short = gsub("\\.", "_", var_short)
+    )
+
+}
