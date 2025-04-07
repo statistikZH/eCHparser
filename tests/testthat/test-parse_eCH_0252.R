@@ -3,8 +3,11 @@ test_that("Parsed file output is a dataframe and matches corresponding RDS file"
   # Get the list of unparsed test files
   testfiles <- list.files(testthat::test_path("testdata/files_unparsed/eCH-0252"))
 
-  # Initialize a list to capture errors
-  errors <- list()
+  # Initialize a new environment (necessary to actually assign values inside of tryCatch)
+  errorenv <- new.env()
+
+  # Initialize a list in a new environment to capture errors (new env is necessary to actually assign values inside of tryCatch)
+  errorenv$errors <- list()
 
   for (i in seq_along(testfiles)) {
 
@@ -31,7 +34,7 @@ test_that("Parsed file output is a dataframe and matches corresponding RDS file"
       }, error = function(e) {
 
         # Collect errors in the list for reporting later
-        errors[[testfiles[i]]] <- e$message
+        errorenv$errors[[testfiles[i]]] <- e$message
 
       })
 
@@ -45,10 +48,18 @@ test_that("Parsed file output is a dataframe and matches corresponding RDS file"
   }
 
   # Report all errors if there are any
-  if (length(errors) > 0) {
+  if (length(errorenv$errors) > 0) {
 
-    stop(paste("Errors found in the following files:", paste(names(errors), collapse = ", "), "\n", paste(errors, collapse = "\n")))
+    stop(paste(
+      "Errors found in the following files:",
+      paste(names(errorenv$errors), collapse = ", "),
+      "\n",
+      paste(errorenv$errors, collapse = "\n")
+    ))
 
   }
+
+  # Remove error environment
+  rm(errorenv)
 
 })
