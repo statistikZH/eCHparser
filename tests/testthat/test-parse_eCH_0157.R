@@ -1,7 +1,7 @@
 test_that("Parsed file output is a dataframe and matches corresponding RDS file", {
 
   # Get the list of unparsed test files
-  testfiles <- list.files(testthat::test_path("testdata/files_unparsed/eCH-0252"))
+  testfiles <- list.files(testthat::test_path("testdata/files_unparsed/eCH-0157"))
 
   # Initialize a new environment (necessary to actually assign values inside of tryCatch)
   errorenv <- new.env()
@@ -12,16 +12,16 @@ test_that("Parsed file output is a dataframe and matches corresponding RDS file"
   for (i in seq_along(testfiles)) {
 
     # Get the full file path
-    filepath <- testthat::test_path("testdata/files_unparsed/eCH-0252", paste0(testfiles[i]))
+    filepath <- testthat::test_path("testdata/files_unparsed/eCH-0157", paste0(testfiles[i]))
 
     # Parse the file using the parse_eCH_0252 function
-    file_out <- parse_eCH_0252(filepath)
+    file_out <- parse_eCH_0157(filepath)
 
     # Ensure the output is a data frame
     testthat::expect_true(is.data.frame(file_out), info = paste("File:", testfiles[i]))
 
     # Load the corresponding RDS file from the testdata folder (use testthat::test_path for the test to work also with devtools::test())
-    rds_filepath <- testthat::test_path("testdata/files_parsed/eCH-0252", paste0(sub("\\.[^.]*$", "", testfiles[i]), ".RDS")) # the sub() removes the .xml extension
+    rds_filepath <- testthat::test_path("testdata/files_parsed/eCH-0157", paste0(sub("\\.[^.]*$", "", testfiles[i]), ".RDS")) # the sub() removes the .xml extension
 
     if (file.exists(rds_filepath)) {
       expected_out <- readRDS(rds_filepath)

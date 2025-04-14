@@ -2,27 +2,36 @@
 % Please edit documentation in R/parse_eCH_0252.R
 \name{read_voteInfo}
 \alias{read_voteInfo}
-\title{Read eCH-0252 voteInfo node}
+\title{Convert an eCH-0252 voteInfo node into a dataframe}
 \usage{
-read_voteInfo(xml_node, index, canton_id, polling_day)
+read_voteInfo(xml_node, index)
 }
 \arguments{
 \item{xml_node}{Node voteBaseDelivery of the XML file.}
 
-\item{index}{index of the voteInfo nodes of interest.}
-
-\item{canton_id}{Canton ID of interest.}
-
-\item{polling_day}{Polling day of interest.}
+\item{index}{Index of the voteInfo nodes of interest.}
 }
 \value{
-A dataframe
+A dataframe.
 }
 \description{
-Read eCH-0252 voteInfo node
+Convert an eCH-0252 voteInfo node into a dataframe
 }
 \examples{
-\dontrun{
-read_voteInfo(node_voteBaseDelivery, c(3, 4), 1, "2024-09-22")
-}
+filepath <- system.file(
+  "extdata",
+  "eCH-0252_abraxas_vote_ZH_counting_2024-11-24.xml",
+  package = "eCHparser"
+)
+
+# Load file
+xml_data <- xml2::read_xml(filepath)
+
+# Strip namespaces
+xml_data_stripped <- strip_namespaces(xml_data)
+
+# Load base delivery part of the file
+node_voteBaseDelivery <- xml2::xml_find_first(xml_data_stripped, ".//voteBaseDelivery")
+
+read_voteInfo(node_voteBaseDelivery, 3)
 }
