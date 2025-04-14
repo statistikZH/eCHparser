@@ -6,7 +6,7 @@
 #'
 #' @param file Path to your XML file.
 #' @param doi Domains of influence of the votes that you want included.
-#' If set to "all", all votes are included.
+#' If set to "all" (the default), all votes are included.
 #' [eCH-0155](https://www.ech.ch/de/ech/ech-0155/4.1) defines the following domains of influence:
 #' * CH = Bund
 #' * CT = Kanton
@@ -119,13 +119,12 @@ parse_eCH_0252 <- function(file, doi = "all"){
 #' Convert an eCH-0252 voteInfo node into a dataframe
 #'
 #' @param xml_node Node voteBaseDelivery of the XML file.
-#' @param index index of the voteInfo nodes of interest.
+#' @param index Index of the voteInfo node of interest.
 #'
 #' @return A dataframe.
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' filepath <- system.file(
 #'   "extdata",
 #'   "eCH-0252_abraxas_vote_ZH_counting_2024-11-24.xml",
@@ -141,8 +140,7 @@ parse_eCH_0252 <- function(file, doi = "all"){
 #' # Load base delivery part of the file
 #' node_voteBaseDelivery <- xml2::xml_find_first(xml_data_stripped, ".//voteBaseDelivery")
 #'
-#' read_voteInfo(node_voteBaseDelivery, c(3, 4), 1, "2024-09-22")
-#' }
+#' read_voteInfo(node_voteBaseDelivery, 3)
 read_voteInfo <- function(xml_node, index){
 
   # Get voteInfo element
