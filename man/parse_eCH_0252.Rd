@@ -10,7 +10,7 @@ parse_eCH_0252(file, doi = "all")
 \item{file}{Path to your XML file.}
 
 \item{doi}{Domains of influence of the votes that you want included.
-If set to "all", all votes are included.
+If set to "all" (the default), all votes are included.
 \href{https://www.ech.ch/de/ech/ech-0155/4.1}{eCH-0155} defines the following domains of influence:
 \itemize{
 \item CH = Bund
