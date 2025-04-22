@@ -189,7 +189,10 @@ read_voteInfo <- function(xml_node, index){
     dplyr::filter(grepl("vote\\.", var)) |>
     to_wide() |>
     dplyr::select(-unique_id) |>
-    tidyr::unnest_longer(tidyselect::everything())
+    tidyr::unnest_longer(
+      tidyselect::everything(),
+      keep_empty = TRUE
+    )
 
 
   ## Vote Results --------------------------------------------------------------
