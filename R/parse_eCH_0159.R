@@ -80,6 +80,113 @@ parse_eCH_0159 <- function(file){
   # Parse through all voteInformation nodes
   vote_list <- lapply(seq_along(voteInformation_nodes), function(voteInformation_index){
 
+    # Define node of interest
+    voteInfo <- voteInformation_nodes[[voteInformation_index]]
+
+
+    #### Vote ------------------------------------------------------------------
+
+
+    vote <- xml2::xml_find_first(voteInfo, ".//vote")
+
+    # Get structure of the indexed node as a list
+    vote_list <- vote |>
+      xml2::as_list()
+
+    # Add node's name (so that we are always have two levels in var_short downstream)
+    names(vote_list) <- paste0(xml2::xml_name(vote),"_", names(vote_list))
+
+    # Unlist the list
+    vote_unlist <- unlist(vote_list)
+
+    # List to df and add unique id
+    vote_df_long <- to_df(vote_unlist, names(vote_unlist))
+
+    # Define vote information
+    vote_df <- vote_df_long |>
+      to_wide() |>
+      tidyr::unnest_longer(
+        tidyselect::everything(),
+        keep_empty = TRUE
+      ) |>
+      dplyr::mutate(join_id = 1879)
+
+
+    #### Ballots ---------------------------------------------------------------
+
+
+    # Define all ballot nodes (as one nodeset)
+    ballot_nodes <- xml2::xml_find_all(voteInfo, ".//ballot")
+
+    # Parse through all ballot nodes
+    ballot_list <- lapply(seq_along(ballot_nodes), function(ballot_index){
+
+      # Define node of interest
+      ballot <- ballot_nodes[[ballot_index]]
+
+      # Get structure of the indexed node as a list
+      ballot_list <- ballot |>
+        xml2::as_list()
+
+
+      # STAND HIER ====
+
+
+      # Number the names to create unique names
+      names(ballot_list) <- paste0(1:length(ballot_list),"_", names(ballot_list))
+
+      # Unlist the list
+      voteInfo_unlist <- unlist(voteInfo_list)
+
+      # List to df and add unique id
+      voteInfo_df_long <- to_df(voteInfo_unlist, names(voteInfo_unlist)) |>
+        dplyr::mutate(unique_id = gsub("^(\\d+)_.*", "\\1", var))
+
+
+    #### Vote ------------------------------------------------------------------
+
+
+    # Define vote information
+    vote_df <- voteInfo_df_long |>
+      dplyr::filter(grepl("vote\\.", var)) |>
+      to_wide() |>
+      dplyr::select(-unique_id) |>
+      tidyr::unnest_longer(
+        tidyselect::everything(),
+        keep_empty = TRUE
+      ) |>
+      dplyr::mutate(join_id = 1879)
+
+
+    #### Ballots ---------------------------------------------------------------
+
+
+    # Define candidate information
+    ballot_df <- voteInfo_df_long |>
+      dplyr::filter(grepl("ballot\\.", var)) |>
+      to_wide() |>
+      dplyr::select(-unique_id) |>
+      tidyr::unnest_longer(
+        tidyselect::everything(),
+        keep_empty = TRUE
+      ) |>
+      dplyr::mutate(join_id = 1879)
+
+
+    #### Join ----------------------------------------------------------------
+
+
+    voteInfo_df <- vote_df |>
+      dplyr::left_join(ballot_df, by = "join_id")
+
+
+
+
+
+
+
+
+
 
     ### Parse Vote Information -------------------------------------------------
 
@@ -123,6 +230,8 @@ parse_eCH_0159 <- function(file){
       # Get structure of the indexed node as a list
       ballot_ls <- ballot |>
         xml2::as_list()
+
+      browser()
 
       # # Number the names to create unique names --> not needed here, the content of the ballot node is unique already
       # names(ballot_ls) <- paste0(1:length(ballot_ls),"_", names(ballot_ls))
