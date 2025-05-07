@@ -70,7 +70,10 @@ parse_eCH_0157 <- function(file){
   contest_df <- contest_df_long |>
     to_wide() |>
     dplyr::select(-unique_id) |>
-    tidyr::unnest_longer(tidyselect::everything()) |>
+    tidyr::unnest_longer(
+      tidyselect::everything(),
+      keep_empty = TRUE
+    ) |>
     dplyr::mutate(join_id = 1879)
 
 
@@ -106,7 +109,10 @@ parse_eCH_0157 <- function(file){
     electionGroupInfo_df <- electionGroupInfo_df_long |>
       to_wide() |>
       dplyr::select(-unique_id) |>
-      tidyr::unnest_longer(tidyselect::everything()) |>
+      tidyr::unnest_longer(
+        tidyselect::everything(),
+        keep_empty = TRUE
+      ) |>
       dplyr::mutate(join_id = 1879)
 
 
@@ -145,7 +151,10 @@ parse_eCH_0157 <- function(file){
         dplyr::filter(grepl("election\\.", var)) |>
         to_wide() |>
         dplyr::select(-unique_id) |>
-        tidyr::unnest_longer(tidyselect::everything()) |>
+        tidyr::unnest_longer(
+          tidyselect::everything(),
+          keep_empty = TRUE
+        ) |>
         dplyr::mutate(join_id = 1879)
 
 
@@ -157,7 +166,10 @@ parse_eCH_0157 <- function(file){
         dplyr::filter(grepl("candidate\\.", var)) |>
         to_wide() |>
         dplyr::select(-unique_id) |>
-        tidyr::unnest_longer(tidyselect::everything()) |>
+        tidyr::unnest_longer(
+          tidyselect::everything(),
+          keep_empty = TRUE
+        ) |>
         dplyr::mutate(join_id = 1879)
 
 
