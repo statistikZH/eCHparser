@@ -32,14 +32,13 @@ parse_eCH_0157 <- function(file){
   # SPECIFY SPECIAL NODES' NAMES ===============================================
 
 
-  # Nodes containing language nodes
-  specify_node(node_initialDelivery, "language")
+  # Define all nodes whose parents' names need to be specified
+  nodes_to_specify <- c("language", "idName", "elementName", "electionRelation")
 
-  # otherIdentification nodes
-  specify_node(node_initialDelivery, "idName")
-
-  # namedElement nodes
-  specify_node(node_initialDelivery, "elementName")
+  # Apply the node specification fucntion to these nodes
+  lapply(nodes_to_specify, function(nodename){
+    specify_node(node_initialDelivery, nodename)
+  })
 
 
   # TURN TO DF =================================================================
