@@ -16,7 +16,7 @@
 		</eCH-0058:sendingApplication>
 		<eCH-0058:messageDate>2025-01-01T00:00:00Z</eCH-0058:messageDate>
 		<eCH-0058:action>1</eCH-0058:action>
-    <	eCH-0058:testDeliveryFlag>true</eCH-0058:testDeliveryFlag>
+    <eCH-0058:testDeliveryFlag>true</eCH-0058:testDeliveryFlag>
 	</eCH-0058:deliveryHeader>
 	<initialDelivery>
 		<!-- electionGroupBallot nodes will be appended here -->
