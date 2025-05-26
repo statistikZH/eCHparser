@@ -92,6 +92,12 @@ parse_eCH_0157 <- function(file){
 
 
     electionGroupBallot <- electionGroupBallot_list[electionGroupBallot_index]
+#
+#     # Define the doi of the supperior authority of the election group (domainOfInfluenceIdentification)
+#     domainOfInfluenceIdentification_df <- data.frame(electionGroupBallot_domainOfInfluenceIdentification = xml2::xml_text(xml2::xml_find_first(
+#       electionGroupBallot_nodes[electionGroupBallot_index],
+#       "domainOfInfluenceIdentification"
+#     )))
 
     # Define nodes of interest as named list
     electionGroupInfo_list <- list(electionGroupBallot[[1]][names(electionGroupBallot[[1]]) != "electionInformation"])
@@ -130,6 +136,33 @@ parse_eCH_0157 <- function(file){
       # Get structure of the indexed node as a list
       electionInfo_list <- electionInfo |>
         xml2::as_list()
+
+      # Handle duplicated elements in the election information (i. e. type 2 referenced elections like multiple by-elections)
+      if (any(duplicated(electionInfo_list[[1]] |> names()))) {
+
+        # Identify recurring element names and their occurrences
+        element_names <- names(electionInfo_list[[1]])
+        unique_names <- unique(element_names)
+        recurring_names <- element_names[duplicated(element_names)]
+
+        # Combine recurring elements
+        for (name in recurring_names) {
+
+          # Get all occurrences of the recurring element
+          elements <- electionInfo_list[[1]][element_names == name]
+
+          # Combine contents into a comma-separated string
+          combined_content <- paste(unlist(elements), collapse = ", ") # unlist to handle potential list within lists
+
+          # Replace all occurrences with the combined content
+          electionInfo_list[[1]][[name]][[1]][[1]] <- combined_content
+
+        }
+
+        # Keep only unique elements
+        electionInfo_list[[1]] <- electionInfo_list[[1]][!duplicated(element_names)]
+
+      }
 
       # Number the names to create unique names
       names(electionInfo_list) <- paste0(1:length(electionInfo_list),"_", names(electionInfo_list))
@@ -180,8 +213,32 @@ parse_eCH_0157 <- function(file){
 
     })
 
-    # Bind rows to df
-    electionInformation_df <-  dplyr::bind_rows(electionInformation_list)
+    # Bind rows to df and join them to the election group information df
+    electionInformation_df <- electionGroupInfo_df |>
+      dplyr::left_join(dplyr::bind_rows(electionInformation_list))
+
+    # Relocate the referenced election columns if they exist
+    if (any(grep("referencedElection", names(electionInformation_df)))) {
+
+      # Identify columns containing "referencedElection"
+      ref_election_cols <- grep("referencedElection", names(electionInformation_df))
+
+      # Find the index of the column after which we want the referencedElection columns
+      identification_index <- which(names(electionInformation_df) == "election_numberOfMandates")
+
+      # If "electionIdentification" doesn't exist, handle the error
+      if (length(identification_index) == 0) {
+        stop("Column 'election_numberOfMandates' cannot be found in the data frame.")
+      }
+
+      # Create the new column order
+      new_order <- c(1:identification_index, ref_election_cols, (setdiff(1:ncol(electionInformation_df), c(1:identification_index, ref_election_cols))))
+
+      # Reorder the columns
+      electionInformation_df <- electionInformation_df[, new_order]
+
+
+    }
 
   })
 
