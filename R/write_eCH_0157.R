@@ -69,11 +69,17 @@ write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "e
 
 
 
+  # NEXT FUNCTION
 
 
-  initialDelivery <- list()
 
-  initialDelivery <- append(initialDelivery, list("contest"))
+
+
+
+
+  # initialDelivery <- list()
+  #
+  # initialDelivery <- append(initialDelivery, list("contest"))
 
 
 }
@@ -105,6 +111,14 @@ create_candidate_list <- function(data){
 
   # PREPARE NESTED LISTS =======================================================
 
+
+  # Drop empty columns
+  data <- data |>
+    dplyr::select(
+      dplyr::where(
+        ~ !all(is.na(.x))
+      )
+    )
 
   # Define and transform nested data
   data_nested <- data |>
@@ -175,14 +189,11 @@ create_candidate_list <- function(data){
   )
 
 
-
-
-  # STAND HIER
-
-
-
-
   # PREPARE ORIGIN =============================================================
+
+
+  to_list("swiss_origin", data)
+
 
 
   # PUT TOGETHER ===============================================================
@@ -190,13 +201,43 @@ create_candidate_list <- function(data){
 
 
 
+  to_list("candidate_title", data)
+
+  if ("swiss_origin" %in% names(data)) {
+    swiss <- list("origin" = origin)
+  }
+
 }
 
 
 
 
 
+#' Turn table columns into lists
+#'
+#' @description
+#' This helper function turns an element of a table into a list if the element is found.
+#'
+#' @param column A column name that may or may not occur in data.
+#' @param data A tibble.
+#'
+#' @return A list.
+#' @export
+#'
+#' @examples
+#'
+to_list <- function(column, data = data){
 
+  # Check if the column exists
+  if (column %in% names(data)) {
+    # Create list
+    list <- list(data[[column]])
+
+    # Assign the name of the former column and write to parent environment
+    assign(sub(".*_", "", column), list, envir = parent.frame())
+  }
+
+}
 
 
 
