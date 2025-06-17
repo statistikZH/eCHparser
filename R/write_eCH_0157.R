@@ -103,87 +103,94 @@ create_election_list <- function(data){
   # PREPARE NESTED LISTS =======================================================
 
 
+
+
+# STAND HIER ==================================================
+
+
+
+
   # Define and transform nested data
-  data_nested <- transform_multilingual(data) # STAND HIER
+  data_nested <- transform_nested(data, "reference_type")
 
-  # Create lists
-  list <- lapply(data_nested$name_parent_element |> unique(), function(list_name) {
-
-    # Filter data
-    data_nested_parent <- data_nested |>
-      dplyr::filter(name_parent_element == list_name)
-
-    list <- lapply(1:nrow(data_nested_parent), function(element_number) {
-
-      # Select relevant row
-      data_nested_child <- data_nested_parent[element_number, ]
-
-      # Build list
-      list <- list(
-        language = list(data_nested_child$language),
-        dynamic_name = list(data_nested_child$value)
-      )
-
-      # Rename the second list element dynamically
-      names(list)[2] <- data_nested_child$name_list_element
-
-      return(list)
-
-    })
-
-    # Rename list elements
-    names(list) <- rep(unique(data_nested_parent$name_parent_element), length(list))
-
-    return(list)
-
-  })
-
-
-  # Split Up -------------------------------------------------------------------
-
-
-  # Define names
-  nested_list_names <- sub(pattern = "Info", replacement = "", unique(data_nested$name_parent_element))
-
-  # Assign the names to the lists. This gives us separate lists for candidateTextInfo, occupationalTitleInfo, partyAffiliationInfo
-  for (i in 1:length(nested_list_names)) {
-    assign(nested_list_names[i], list[[i]])
-  }
-
-
-  # CREATE LIST ================================================================
-
-
-  # Hardcode everything since structure is fixed
-  candidate_list <- list(
-    candidateIdentification = list(data$candidate_candidateIdentification),
-    familyName = list(data$candidate_familyName),
-    firstName = list(data$candidate_firstName),
-    callName = list(data$candidate_callName),
-    candidateText = candidateText,
-    dateOfBirth = list(data$candidate_dateOfBirth),
-    sex = list(data$candidate_sex),
-    occupationalTitle = occupationalTitle,
-    dwellingAddress = list(
-      street = list(data$dwellingAddress_street),
-      houseNumber = list(data$dwellingAddress_houseNumber),
-      town = list(data$dwellingAddress_town),
-      swissZipCode = list(data$dwellingAddress_swissZipCode),
-      country = list(
-        countryId = list(data$country_countryId),
-        countryIdISO2 = list(data$country_countryIdISO2),
-        countryNameShort = list(data$country_countryNameShort)
-      )
-    ),
-    swiss = list(
-      origin = list(data$swiss_origin)
-    ),
-    mrMrs = list(data$candidate_mrMrs),
-    title = list(data$candidate_title),
-    languageOfCorrespondence = list(data$candidate_languageOfCorrespondence),
-    candidateReference = list(data$candidate_candidateReference),
-    partyAffiliation = partyAffiliation
-  )
+  # # Create lists
+  # list <- lapply(data_nested$name_parent_element |> unique(), function(list_name) {
+  #
+  #   # Filter data
+  #   data_nested_parent <- data_nested |>
+  #     dplyr::filter(name_parent_element == list_name)
+  #
+  #   list <- lapply(1:nrow(data_nested_parent), function(element_number) {
+  #
+  #     # Select relevant row
+  #     data_nested_child <- data_nested_parent[element_number, ]
+  #
+  #     # Build list
+  #     list <- list(
+  #       language = list(data_nested_child$language),
+  #       dynamic_name = list(data_nested_child$value)
+  #     )
+  #
+  #     # Rename the second list element dynamically
+  #     names(list)[2] <- data_nested_child$name_list_element
+  #
+  #     return(list)
+  #
+  #   })
+  #
+  #   # Rename list elements
+  #   names(list) <- rep(unique(data_nested_parent$name_parent_element), length(list))
+  #
+  #   return(list)
+  #
+  # })
+  #
+  #
+  # # Split Up -------------------------------------------------------------------
+  #
+  #
+  # # Define names
+  # nested_list_names <- sub(pattern = "Info", replacement = "", unique(data_nested$name_parent_element))
+  #
+  # # Assign the names to the lists. This gives us separate lists for candidateTextInfo, occupationalTitleInfo, partyAffiliationInfo
+  # for (i in 1:length(nested_list_names)) {
+  #   assign(nested_list_names[i], list[[i]])
+  # }
+  #
+  #
+  # # CREATE LIST ================================================================
+  #
+  #
+  # # Hardcode everything since structure is fixed
+  # candidate_list <- list(
+  #   candidateIdentification = list(data$candidate_candidateIdentification),
+  #   familyName = list(data$candidate_familyName),
+  #   firstName = list(data$candidate_firstName),
+  #   callName = list(data$candidate_callName),
+  #   candidateText = candidateText,
+  #   dateOfBirth = list(data$candidate_dateOfBirth),
+  #   sex = list(data$candidate_sex),
+  #   occupationalTitle = occupationalTitle,
+  #   dwellingAddress = list(
+  #     street = list(data$dwellingAddress_street),
+  #     houseNumber = list(data$dwellingAddress_houseNumber),
+  #     town = list(data$dwellingAddress_town),
+  #     swissZipCode = list(data$dwellingAddress_swissZipCode),
+  #     country = list(
+  #       countryId = list(data$country_countryId),
+  #       countryIdISO2 = list(data$country_countryIdISO2),
+  #       countryNameShort = list(data$country_countryNameShort)
+  #     )
+  #   ),
+  #   swiss = list(
+  #     origin = list(data$swiss_origin)
+  #   ),
+  #   mrMrs = list(data$candidate_mrMrs),
+  #   title = list(data$candidate_title),
+  #   languageOfCorrespondence = list(data$candidate_languageOfCorrespondence),
+  #   candidateReference = list(data$candidate_candidateReference),
+  #   partyAffiliation = partyAffiliation
+  # )
 
 }
 
@@ -216,7 +223,7 @@ create_candidate_list <- function(data){
 
 
   # Define and transform nested multilingual data
-  data_nested2 <- transform_multilingual(data)
+  data_nested <- transform_nested(data, "multilingual")
 
   # Create lists
   list <- lapply(data_nested$name_parent_element |> unique(), function(list_name) {
@@ -303,32 +310,51 @@ create_candidate_list <- function(data){
 
 
 
-#' Prepare multilingual data for further processing
+#' Prepare specified data for further processing
 #'
 #' @description
-#' This helper function transforms multilingual columns into dataframes for further processing.
+#' This helper function transforms specified columns into dataframes for further processing.
 #'
-#' @param data A tibble containing columns, for which the language of the content is defined by a language tag in the column title.
+#' @param data A tibble containing columns, for which a characteristic of the content is defined by a tag in the column title.
+#' @param type A character vector defining the type of the specification. Either "multilingual" or "reference_type".
 #'
 #' @return A tibble.
 #' @export
 #'
 #' @examples
 #'
-transform_multilingual <- function(data) {
+transform_nested <- function(data, type) {
 
-  transformed_data <- data |>
-    dplyr::select(dplyr::contains("-")) |>
+  # Select data based on the defined specification type
+  if(type == "multilingual") {
+    selected_data <- data |>
+      dplyr::select(grep("-([a-z])", names(data)))
+  } else if(type == "reference_type") {
+    selected_data <- data |>
+      dplyr::select(grep("-([0-9])", names(data)))
+  }
+
+  # Transform data to long and add names for the different levels in the list later on
+  transformed_data <- selected_data |>
+    # dplyr::select(dplyr::contains("-")) |>
     tidyr::pivot_longer(
       cols = everything(),
       names_to = "name",
       values_to = "value"
     ) |>
     dplyr::mutate(
-      language = sub(".*-([a-zA-Z]{2}).*", "\\1", name),
       name_list_element = sub(".*_", "", name),
       name_parent_element = sub("-.*", "", name)
     )
+
+  # Add the specification
+  if(type == "multilingual") {
+    transformed_data <- transformed_data |>
+      dplyr::mutate(language = sub(".*-([a-zA-Z]{2}).*", "\\1", name))
+  } else {
+    transformed_data <- transformed_data |>
+      dplyr::mutate(reference = sub(".*-([0-9]{1}).*", "\\1", name))
+  }
 
   return(transformed_data)
 
