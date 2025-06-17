@@ -61,18 +61,9 @@ write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "e
   # WRITE LIST =================================================================
 
 
-  # Candidates -----------------------------------------------------------------
-
-
-
-
-
-
-
-  # NEXT FUNCTION
-
-
-
+  # lapply over all unique rows of the election group ballot tbl
+  # lapply over all unique rows of the election tbl
+  # inside each of those, lapply over the rows of the election tbl
 
 
 
@@ -88,6 +79,118 @@ write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "e
 
 
 
+#' Create election lists
+#'
+#' @description
+#' This helper function transforms election information to an election list.
+#'
+#' @param data A tibble containing the necessary election information for the eCH-0157.
+#'
+#' @return A list.
+#' @export
+#'
+#' @examples
+#'
+create_election_list <- function(data){
+
+
+  # !!!!!!! DEV-HELPER - DELETE AFTER DEV  =====================================
+
+
+  # data <- election_tbl[1, ]
+
+
+  # PREPARE NESTED LISTS =======================================================
+
+
+  # Define and transform nested data
+  data_nested <- transform_multilingual(data) # STAND HIER
+
+  # Create lists
+  list <- lapply(data_nested$name_parent_element |> unique(), function(list_name) {
+
+    # Filter data
+    data_nested_parent <- data_nested |>
+      dplyr::filter(name_parent_element == list_name)
+
+    list <- lapply(1:nrow(data_nested_parent), function(element_number) {
+
+      # Select relevant row
+      data_nested_child <- data_nested_parent[element_number, ]
+
+      # Build list
+      list <- list(
+        language = list(data_nested_child$language),
+        dynamic_name = list(data_nested_child$value)
+      )
+
+      # Rename the second list element dynamically
+      names(list)[2] <- data_nested_child$name_list_element
+
+      return(list)
+
+    })
+
+    # Rename list elements
+    names(list) <- rep(unique(data_nested_parent$name_parent_element), length(list))
+
+    return(list)
+
+  })
+
+
+  # Split Up -------------------------------------------------------------------
+
+
+  # Define names
+  nested_list_names <- sub(pattern = "Info", replacement = "", unique(data_nested$name_parent_element))
+
+  # Assign the names to the lists. This gives us separate lists for candidateTextInfo, occupationalTitleInfo, partyAffiliationInfo
+  for (i in 1:length(nested_list_names)) {
+    assign(nested_list_names[i], list[[i]])
+  }
+
+
+  # CREATE LIST ================================================================
+
+
+  # Hardcode everything since structure is fixed
+  candidate_list <- list(
+    candidateIdentification = list(data$candidate_candidateIdentification),
+    familyName = list(data$candidate_familyName),
+    firstName = list(data$candidate_firstName),
+    callName = list(data$candidate_callName),
+    candidateText = candidateText,
+    dateOfBirth = list(data$candidate_dateOfBirth),
+    sex = list(data$candidate_sex),
+    occupationalTitle = occupationalTitle,
+    dwellingAddress = list(
+      street = list(data$dwellingAddress_street),
+      houseNumber = list(data$dwellingAddress_houseNumber),
+      town = list(data$dwellingAddress_town),
+      swissZipCode = list(data$dwellingAddress_swissZipCode),
+      country = list(
+        countryId = list(data$country_countryId),
+        countryIdISO2 = list(data$country_countryIdISO2),
+        countryNameShort = list(data$country_countryNameShort)
+      )
+    ),
+    swiss = list(
+      origin = list(data$swiss_origin)
+    ),
+    mrMrs = list(data$candidate_mrMrs),
+    title = list(data$candidate_title),
+    languageOfCorrespondence = list(data$candidate_languageOfCorrespondence),
+    candidateReference = list(data$candidate_candidateReference),
+    partyAffiliation = partyAffiliation
+  )
+
+}
+
+
+
+
+
 #' Create candidate lists
 #'
 #' @description
@@ -95,7 +198,7 @@ write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "e
 #'
 #' @param data A tibble containing the necessary candidate information for the eCH-0157.
 #'
-#' @return An list.
+#' @return A list.
 #' @export
 #'
 #' @examples
@@ -112,29 +215,8 @@ create_candidate_list <- function(data){
   # PREPARE NESTED LISTS =======================================================
 
 
-  # Drop empty columns
-  data <- data |>
-    dplyr::select(
-      dplyr::where(
-        ~ !all(is.na(.x))
-      )
-    )
-
-  # Define and transform nested data
-  data_nested <- data |>
-    dplyr::select(
-      dplyr::contains("-")
-    ) |>
-    tidyr::pivot_longer(
-      cols = everything(),
-      names_to = "name",
-      values_to = "value"
-    ) |>
-    dplyr::mutate(
-      language = sub(".*-([a-zA-Z]{2}).*", "\\1", name),
-      name_list_element = sub(".*_", "", name),
-      name_parent_element = sub("-.*", "", name)
-    )
+  # Define and transform nested multilingual data
+  data_nested2 <- transform_multilingual(data)
 
   # Create lists
   list <- lapply(data_nested$name_parent_element |> unique(), function(list_name) {
@@ -149,16 +231,20 @@ create_candidate_list <- function(data){
       data_nested_child <- data_nested_parent[element_number, ]
 
       # Build list
-      list <- list()
-      list[["language"]] <- data_nested_child$language
-      list[[data_nested_child$name_list_element]] <- data_nested_child$value
+      list <- list(
+        language = list(data_nested_child$language),
+        dynamic_name = list(data_nested_child$value)
+      )
+
+      # Rename the second list element dynamically
+      names(list)[2] <- data_nested_child$name_list_element
 
       return(list)
 
     })
 
     # Rename list elements
-    names(list) <- rep(unique(data_nested_parent$name_list_element), length(list))
+    names(list) <- rep(unique(data_nested_parent$name_parent_element), length(list))
 
     return(list)
 
@@ -169,43 +255,47 @@ create_candidate_list <- function(data){
 
 
   # Define names
-  nested_list_names <- unique(data_nested$name_parent_element)
+  nested_list_names <- sub(pattern = "Info", replacement = "", unique(data_nested$name_parent_element))
 
+  # Assign the names to the lists. This gives us separate lists for candidateTextInfo, occupationalTitleInfo, partyAffiliationInfo
   for (i in 1:length(nested_list_names)) {
     assign(nested_list_names[i], list[[i]])
   }
 
 
-  # PREPARE ADDRESS ============================================================
+  # CREATE LIST ================================================================
 
 
-  # Country List ---------------------------------------------------------------
-
-
-  country <- list(
-    "countryId" = list(data$country_countryId),
-    "countryIdISO2" = list(data$country_countryIdISO2),
-    "countryNameShort" = list(data$country_countryNameShort)
+  # Hardcode everything since structure is fixed
+  candidate_list <- list(
+    candidateIdentification = list(data$candidate_candidateIdentification),
+    familyName = list(data$candidate_familyName),
+    firstName = list(data$candidate_firstName),
+    callName = list(data$candidate_callName),
+    candidateText = candidateText,
+    dateOfBirth = list(data$candidate_dateOfBirth),
+    sex = list(data$candidate_sex),
+    occupationalTitle = occupationalTitle,
+    dwellingAddress = list(
+      street = list(data$dwellingAddress_street),
+      houseNumber = list(data$dwellingAddress_houseNumber),
+      town = list(data$dwellingAddress_town),
+      swissZipCode = list(data$dwellingAddress_swissZipCode),
+      country = list(
+        countryId = list(data$country_countryId),
+        countryIdISO2 = list(data$country_countryIdISO2),
+        countryNameShort = list(data$country_countryNameShort)
+      )
+    ),
+    swiss = list(
+      origin = list(data$swiss_origin)
+    ),
+    mrMrs = list(data$candidate_mrMrs),
+    title = list(data$candidate_title),
+    languageOfCorrespondence = list(data$candidate_languageOfCorrespondence),
+    candidateReference = list(data$candidate_candidateReference),
+    partyAffiliation = partyAffiliation
   )
-
-
-  # PREPARE ORIGIN =============================================================
-
-
-  to_list("swiss_origin", data)
-
-
-
-  # PUT TOGETHER ===============================================================
-
-
-
-
-  to_list("candidate_title", data)
-
-  if ("swiss_origin" %in% names(data)) {
-    swiss <- list("origin" = origin)
-  }
 
 }
 
@@ -213,217 +303,35 @@ create_candidate_list <- function(data){
 
 
 
-#' Turn table columns into lists
+#' Prepare multilingual data for further processing
 #'
 #' @description
-#' This helper function turns an element of a table into a list if the element is found.
+#' This helper function transforms multilingual columns into dataframes for further processing.
 #'
-#' @param column A column name that may or may not occur in data.
-#' @param data A tibble.
+#' @param data A tibble containing columns, for which the language of the content is defined by a language tag in the column title.
 #'
-#' @return A list.
+#' @return A tibble.
 #' @export
 #'
 #' @examples
 #'
-to_list <- function(column, data = data){
+transform_multilingual <- function(data) {
 
-  # Check if the column exists
-  if (column %in% names(data)) {
-    # Create list
-    list <- list(data[[column]])
+  transformed_data <- data |>
+    dplyr::select(dplyr::contains("-")) |>
+    tidyr::pivot_longer(
+      cols = everything(),
+      names_to = "name",
+      values_to = "value"
+    ) |>
+    dplyr::mutate(
+      language = sub(".*-([a-zA-Z]{2}).*", "\\1", name),
+      name_list_element = sub(".*_", "", name),
+      name_parent_element = sub("-.*", "", name)
+    )
 
-    # Assign the name of the former column and write to parent environment
-    assign(sub(".*_", "", column), list, envir = parent.frame())
-  }
+  return(transformed_data)
 
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#' #' Convert an xlsx file into an XML file with the format eCH-0157
-#' #'
-#' #' @description
-#' #' This function transforms an xlsx file in a defined structure into a xml file in the format eCH-0157.
-#' #' Use the function "open_eCH_0157_xlsx" to open a blank template file.
-#' #'
-#' #' @param file Path to your xlsx file.
-#' #' @param template_xml_path The path to the template xml file that provides the structure for the output xml file.
-#' #'
-#' #' @return An XML file.
-#' #' @export
-#' #'
-#' #' @examples
-#' #'
-#' write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "eCH_0157_template.xml", package = "eCHparser")){
-#'
-#'   # Read xlsx file
-#'   data <- readxl::read_xlsx(file)
-#'
-#'   # Read template XML and preserve namespace structure
-#'   template_doc <- xml2::read_xml(template_xml_path)
-#'   ns <- xml2::xml_ns(template_doc)
-#'
-#'   # Copy root and deliveryHeader from template
-#'   new_doc <- xml2::xml_new_root("delivery", ns = ns)
-#'   delivery_header <- xml2::xml_find_first(template_doc, ".//eCH-0058:deliveryHeader", ns)
-#'   xml2::xml_add_child(new_doc, delivery_header)
-#'
-#'   # Create initialDelivery node
-#'   initial_delivery <- xml2::xml_add_child(new_doc, "initialDelivery")
-#'
-#'   # Apply to all rows using lapply
-#'   ballots <- lapply(1:nrow(data), function(i, initial_delivery, ns) {
-#'     build_ballot_node(data[i, ])
-#'   })
-#'
-#'   lapply(ballots, function(node) {
-#'     xml_add_child(initial_delivery, node)
-#'   })
-#'
-#'   # Save
-#'   write_xml(new_doc, output_xml_path, options = "format")
-#'   message("XML successfully written to: ", output_xml_path)
-#'
-#'
-#'
-#'
-#' }
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#' add_multilingual_nodes <- function(parent_node, data_row, xml_block_name, field_prefix, ns) {
-#'   # Find all columns matching this multilingual block
-#'   pattern <- paste0("^", field_prefix, "-([a-z]{2})_(\\w+)$")
-#'   lang_cols <- grep(pattern, names(data_row), value = TRUE)
-#'
-#'   if (length(lang_cols) == 0) return(invisible(NULL))
-#'
-#'   # Get unique languages and subfields
-#'   lang_field_matrix <- stringr::str_match(lang_cols, pattern)
-#'   langs <- unique(lang_field_matrix[, 2])
-#'
-#'   for (lang in langs) {
-#'     info_node <- xml_add_child(parent_node, xml_block_name, ns = ns)
-#'     xml_add_child(info_node, "language", lang)
-#'
-#'     # For each field in that language
-#'     fields <- lang_field_matrix[lang_field_matrix[, 2] == lang, , drop = FALSE]
-#'     for (i in seq_len(nrow(fields))) {
-#'       col_name <- paste0(field_prefix, "-", lang, "_", fields[i, 3])
-#'       xml_add_child(info_node, fields[i, 3], data_row[[col_name]])
-#'     }
-#'   }
-#' }
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#' contest_node <- xml_add_child(parent, xml_new_node("eCH-0155:contestDescription", ns = ns))
-#' add_multilingual_nodes(
-#'   parent_node = contest_node,
-#'   data_row = row,
-#'   xml_block_name = "eCH-0155:contestDescriptionInfo",
-#'   field_prefix = "contestDescriptionInfo",
-#'   ns = ns
-#' )
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#' #' Helper to construct electionGroupBallot
-#' #'
-#' #' @description
-#' #'
-#' #' @param row ?
-#' #'
-#' #' @return ?.
-#' #' @export
-#' #'
-#' #' @examples
-#' #'
-#' build_ballot_node <- function(row, initial_delivery, ns) {
-#'
-#'   row <- as.list(row)
-#'
-#'   # Add electionGroupBallot under initialDelivery
-#'   ballot <- xml2::xml_add_child(initial_delivery, "electionGroupBallot", ns = ns)
-#'   xml2::xml_add_child(ballot, "domainOfInfluenceIdentification", row$domainOfInfluenceIdentification)
-#'
-#'   # Add electionInformation under ballot
-#'   info <- xml2::xml_add_child(ballot, "electionInformation")
-#'
-#'   # Add election node under info
-#'   election <- xml2::xml_add_child(info, "eCH-0155:election", ns = ns)
-#'
-#'   # Add child elements to election
-#'   xml2::xml_add_child(election, "eCH-0155:electionIdentification", row$electionIdentification, ns = ns)
-#'   xml2::xml_add_child(election, "eCH-0155:typeOfElection", as.character(row$typeOfElection), ns = ns)
-#'   xml2::xml_add_child(election, "eCH-0155:electionPosition", as.character(row$electionPosition), ns = ns)
-#'   xml2::xml_add_child(election, "eCH-0155:numberOfMandates", as.character(row$numberOfMandates), ns = ns)
-#'
-#'   # Add candidate if present
-#'   if (!is.na(row$candidateFirstName)) {
-#'     candidate <- xml2::xml_add_child(info, "eCH-0155:candidate", ns = ns)
-#'     xml2::xml_add_child(candidate, "eCH-0155:firstName", row$candidateFirstName, ns = ns)
-#'     xml2::xml_add_child(candidate, "eCH-0155:familyName", row$candidateFamilyName, ns = ns)
-#'     xml2::xml_add_child(candidate, "eCH-0155:dateOfBirth", as.character(row$candidateDOB), ns = ns)
-#'     # Additional fields can be added here
-#'   }
-#'
-#'   return(ballot)
-#' }
