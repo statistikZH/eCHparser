@@ -61,6 +61,30 @@ write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "e
   # WRITE LIST =================================================================
 
 
+  ## Contest Level -------------------------------------------------------------
+
+
+  initialDelivery <- lapply(contest_tbl$contest_contestIdentification, function(contestID){
+
+    contest <- create_contest_list(contest_tbl[contest_tbl$contest_contestIdentification == contestID])
+
+    lapply(nrow(election_group_ballot_tbl), function(EGB){
+
+      domainOfInfluenceIdentification = list(election_group_ballot_tbl[election_group_ballot_tbl$electionGroupBallot_domainOfInfluenceIdentification == EGB]$electionGroupBallot_domainOfInfluenceIdentification)
+
+    })
+
+
+  })
+
+  names(initialDelivery) <- c(
+    rep("contest", nrow(contest_tbl))
+  )
+
+
+
+
+
   # lapply over all unique rows of the election group ballot tbl
   # lapply over all unique rows of the election tbl
   # inside each of those, lapply over the rows of the election tbl
@@ -72,6 +96,71 @@ write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "e
   #
   # initialDelivery <- append(initialDelivery, list("contest"))
 
+
+}
+
+
+
+
+
+#' Create contest lists
+#'
+#' @description
+#' This helper function transforms contest information to a contest list.
+#'
+#' @param data A tibble containing the necessary contest information for the eCH-0157.
+#'
+#' @return A list.
+#' @export
+#'
+#' @examples
+#'
+create_contest_list <- function(data){
+
+
+  # !!!!!!! DEV-HELPER - DELETE AFTER DEV  =====================================
+
+
+  # data <- contest_tbl[1, ]
+
+
+  # PREPARE NESTED LISTS =======================================================
+
+
+  ## Multilingual Contest Description ------------------------------------------
+
+
+  # Define and transform nested data for multilingual information
+  data_nested <- transform_nested(data, "language")
+
+  # Create lists
+  contestDescription <- lapply(data_nested$language |> unique(), function(language) {
+
+    # # Filter data
+    # data_nested_language <- data_nested |>
+    #   dplyr::filter(language == language)
+
+    # Assemble list
+    contestDescriptionInfo <- list(
+      language = list(language),
+      contestDescription = list(data_nested[data_nested$language == language, ]$value)
+    )
+
+  })
+
+  # Name the sublists
+  names(contestDescription) <- rep("contestDescriptionInfo", length(electionDescription))
+
+
+  # ASSEMBLE ELECTION LIST =====================================================
+
+
+  # Hardcode everything since structure is fixed
+  contest_list <- list(
+    contesIdentification = list(data$contest_contestIdentification),
+    contestDate = list(data$contest_contestDate),
+    contestDescription = contestDescription
+  )
 
 }
 
@@ -103,94 +192,67 @@ create_election_list <- function(data){
   # PREPARE NESTED LISTS =======================================================
 
 
+  ## Referenced Election -------------------------------------------------------
 
 
-# STAND HIER ==================================================
+  # Define and transform nested data for referenced elections and drop all rows with no value
+  data_nested <- transform_nested(data, "relation") |>
+    dplyr::filter(!is.na(value))
+
+  referencedElection <- list(
+    referencedElection = list(data_nested$value),
+    electionRelation = list(data_nested$relation)
+  )
 
 
+  ## Multilingual Information --------------------------------------------------
 
 
-  # Define and transform nested data
-  data_nested <- transform_nested(data, "reference_type")
+  # Define and transform nested data for multilingual information
+  data_nested <- transform_nested(data, "language")
 
-  # # Create lists
-  # list <- lapply(data_nested$name_parent_element |> unique(), function(list_name) {
-  #
-  #   # Filter data
-  #   data_nested_parent <- data_nested |>
-  #     dplyr::filter(name_parent_element == list_name)
-  #
-  #   list <- lapply(1:nrow(data_nested_parent), function(element_number) {
-  #
-  #     # Select relevant row
-  #     data_nested_child <- data_nested_parent[element_number, ]
-  #
-  #     # Build list
-  #     list <- list(
-  #       language = list(data_nested_child$language),
-  #       dynamic_name = list(data_nested_child$value)
-  #     )
-  #
-  #     # Rename the second list element dynamically
-  #     names(list)[2] <- data_nested_child$name_list_element
-  #
-  #     return(list)
-  #
-  #   })
-  #
-  #   # Rename list elements
-  #   names(list) <- rep(unique(data_nested_parent$name_parent_element), length(list))
-  #
-  #   return(list)
-  #
-  # })
-  #
-  #
-  # # Split Up -------------------------------------------------------------------
-  #
-  #
-  # # Define names
-  # nested_list_names <- sub(pattern = "Info", replacement = "", unique(data_nested$name_parent_element))
-  #
-  # # Assign the names to the lists. This gives us separate lists for candidateTextInfo, occupationalTitleInfo, partyAffiliationInfo
-  # for (i in 1:length(nested_list_names)) {
-  #   assign(nested_list_names[i], list[[i]])
-  # }
-  #
-  #
-  # # CREATE LIST ================================================================
-  #
-  #
-  # # Hardcode everything since structure is fixed
-  # candidate_list <- list(
-  #   candidateIdentification = list(data$candidate_candidateIdentification),
-  #   familyName = list(data$candidate_familyName),
-  #   firstName = list(data$candidate_firstName),
-  #   callName = list(data$candidate_callName),
-  #   candidateText = candidateText,
-  #   dateOfBirth = list(data$candidate_dateOfBirth),
-  #   sex = list(data$candidate_sex),
-  #   occupationalTitle = occupationalTitle,
-  #   dwellingAddress = list(
-  #     street = list(data$dwellingAddress_street),
-  #     houseNumber = list(data$dwellingAddress_houseNumber),
-  #     town = list(data$dwellingAddress_town),
-  #     swissZipCode = list(data$dwellingAddress_swissZipCode),
-  #     country = list(
-  #       countryId = list(data$country_countryId),
-  #       countryIdISO2 = list(data$country_countryIdISO2),
-  #       countryNameShort = list(data$country_countryNameShort)
-  #     )
-  #   ),
-  #   swiss = list(
-  #     origin = list(data$swiss_origin)
-  #   ),
-  #   mrMrs = list(data$candidate_mrMrs),
-  #   title = list(data$candidate_title),
-  #   languageOfCorrespondence = list(data$candidate_languageOfCorrespondence),
-  #   candidateReference = list(data$candidate_candidateReference),
-  #   partyAffiliation = partyAffiliation
-  # )
+  # Create lists
+  electionDescription <- lapply(data_nested$language |> unique(), function(language) {
+
+    # Define electionDescriptionShort
+    electionDescriptionShort <- data_nested |>
+      dplyr::filter(
+        language == language,
+        name_list_element == "electionDescriptionShort"
+      )
+
+    # Define electionDescription
+    electionDescription <- data_nested |>
+      dplyr::filter(
+        language == language,
+        name_list_element == "electionDescription"
+      )
+
+    # Assemble list
+    electionDescriptionInfo <- list(
+      language = list(language),
+      electionDescriptionShort = list(electionDescriptionShort$value),
+      electionDescription = list(electionDescription$value)
+    )
+
+  })
+
+  # Name the sublists
+  names(electionDescription) <- rep("electionDescriptionInfo", length(electionDescription))
+
+
+  # ASSEMBLE ELECTION LIST =====================================================
+
+
+  # Hardcode everything since structure is fixed
+  election_list <- list(
+    electionIdentification = list(data$election_electionIdentification),
+    typeOfElection = list(data$election_typeOfElection),
+    electionPosition = list(data$election_electionPosition),
+    electionDescription = electionDescription,
+    numberOfMandates = list(data$election_numberOfMandates),
+    referencedElection = referencedElection
+  )
 
 }
 
@@ -223,7 +285,7 @@ create_candidate_list <- function(data){
 
 
   # Define and transform nested multilingual data
-  data_nested <- transform_nested(data, "multilingual")
+  data_nested <- transform_nested(data, "language")
 
   # Create lists
   list <- lapply(data_nested$name_parent_element |> unique(), function(list_name) {
@@ -270,7 +332,7 @@ create_candidate_list <- function(data){
   }
 
 
-  # CREATE LIST ================================================================
+  # ASSEMBLE CANDIDATE LIST ====================================================
 
 
   # Hardcode everything since structure is fixed
@@ -316,7 +378,7 @@ create_candidate_list <- function(data){
 #' This helper function transforms specified columns into dataframes for further processing.
 #'
 #' @param data A tibble containing columns, for which a characteristic of the content is defined by a tag in the column title.
-#' @param type A character vector defining the type of the specification. Either "multilingual" or "reference_type".
+#' @param type A character vector defining the type of the specification. Either "language" or "relation".
 #'
 #' @return A tibble.
 #' @export
@@ -326,10 +388,10 @@ create_candidate_list <- function(data){
 transform_nested <- function(data, type) {
 
   # Select data based on the defined specification type
-  if(type == "multilingual") {
+  if (type == "language") {
     selected_data <- data |>
       dplyr::select(grep("-([a-z])", names(data)))
-  } else if(type == "reference_type") {
+  } else if (type == "relation") {
     selected_data <- data |>
       dplyr::select(grep("-([0-9])", names(data)))
   }
@@ -348,16 +410,14 @@ transform_nested <- function(data, type) {
     )
 
   # Add the specification
-  if(type == "multilingual") {
+  if (type == "language") {
     transformed_data <- transformed_data |>
       dplyr::mutate(language = sub(".*-([a-zA-Z]{2}).*", "\\1", name))
-  } else {
+  } else if (type == "relation") {
     transformed_data <- transformed_data |>
-      dplyr::mutate(reference = sub(".*-([0-9]{1}).*", "\\1", name))
+      dplyr::mutate(relation = sub(".*-([0-9]{1}).*", "\\1", name))
   }
 
   return(transformed_data)
 
 }
-
-
