@@ -237,8 +237,9 @@ parse_eCH_0157 <- function(file){
       # Reorder the columns
       electionInformation_df <- electionInformation_df[, new_order]
 
-
     }
+
+    return(electionInformation_df)
 
   })
 
