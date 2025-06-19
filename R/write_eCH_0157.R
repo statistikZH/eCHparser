@@ -69,9 +69,7 @@ write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "e
     contest <- create_contest_list(contest_tbl[contest_tbl$contest_contestIdentification == contestID])
 
     lapply(nrow(election_group_ballot_tbl), function(EGB){
-
       domainOfInfluenceIdentification = list(election_group_ballot_tbl[election_group_ballot_tbl$electionGroupBallot_domainOfInfluenceIdentification == EGB]$electionGroupBallot_domainOfInfluenceIdentification)
-
     })
 
 
