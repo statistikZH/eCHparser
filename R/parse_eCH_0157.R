@@ -118,7 +118,10 @@ parse_eCH_0157 <- function(file){
         tidyselect::everything(),
         keep_empty = TRUE
       ) |>
-      dplyr::mutate(join_id = 1879)
+      dplyr::mutate(
+        electionGroupBallot_index = as.character(electionGroupBallot_index), # Add an election group ballot id
+        join_id = 1879 # Add join id
+      )
 
 
     ### Parse Election Information ---------------------------------------------
