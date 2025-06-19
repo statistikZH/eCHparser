@@ -9,7 +9,7 @@ read_voteInfo(xml_node, index)
 \arguments{
 \item{xml_node}{Node voteBaseDelivery of the XML file.}
 
-\item{index}{Index of the voteInfo nodes of interest.}
+\item{index}{Index of the voteInfo node of interest.}
 }
 \value{
 A dataframe.
