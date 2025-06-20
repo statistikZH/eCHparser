@@ -18,11 +18,11 @@ write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "e
   # !!!!!!! DEV-HELPER - DELETE AFTER DEV  =====================================
 
 
-  # test <- parse_eCH_0157("tests/testthat/testdata/files_unparsed/eCH-0157/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xml")
-  # writexl::write_xlsx(test, "/home/file-server/01_Post/Graf/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xlsx")
-  # file <- "/home/file-server/01_Post/Graf/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xlsx"
-  # target_xml <- xml2::read_xml("tests/testthat/testdata/files_unparsed/eCH-0157/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xml")
-  # target_list <- xml2::as_list(target_xml)
+  test <- parse_eCH_0157("tests/testthat/testdata/files_unparsed/eCH-0157/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xml")
+  writexl::write_xlsx(test, "/home/file-server/01_Post/Graf/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xlsx")
+  file <- "/home/file-server/01_Post/Graf/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xlsx"
+  target_xml <- xml2::read_xml("tests/testthat/testdata/files_unparsed/eCH-0157/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xml")
+  target_list <- xml2::as_list(target_xml)
 
 
   # PREPARE DATA ===============================================================
@@ -38,12 +38,15 @@ write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "e
 
   # ... election group ballots, ...
   election_group_ballot_tbl <- data |>
-    dplyr::select(electionGroupBallot_domainOfInfluenceIdentification) |>
+    dplyr::select(
+      electionGroupBallot_domainOfInfluenceIdentification
+    ) |>
     unique()
 
   # ...elections, and...
   election_tbl <- data |>
     dplyr::select(
+      electionGroupBallot_index,
       election_electionIdentification:candidate_candidateIdentification,
       -candidate_candidateIdentification,
       electionGroupBallot_domainOfInfluenceIdentification # as link to the election group ballot
@@ -64,16 +67,35 @@ write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "e
   ## Contest Level -------------------------------------------------------------
 
 
-  initialDelivery <- lapply(contest_tbl$contest_contestIdentification, function(contestID){
+  initialDelivery <- list(
+    contest = create_contest_list(contest_tbl[1, ]), # Define contest list
+    lapply(data$electionGroupBallot_index |> unique(), function(electionGroupIndex){ # apply through all election group ballots
 
-    contest <- create_contest_list(contest_tbl[contest_tbl$contest_contestIdentification == contestID])
+      electionGroupBallot_tbl <- data |>
+        dplyr::filter(electionGroupBallot_index == electionGroupBallot_index)
 
-    lapply(nrow(election_group_ballot_tbl), function(EGB){
-      domainOfInfluenceIdentification = list(election_group_ballot_tbl[election_group_ballot_tbl$electionGroupBallot_domainOfInfluenceIdentification == EGB]$electionGroupBallot_domainOfInfluenceIdentification)
+      lapply(election_group_ballot_tbl$election_electionIdentification |> unique(), function(electionIdentification){
+
+        create_election_list(electionGroupBallot_tbl |> dplyr::filter(election_electionIdentification == electionIdentification))
+
+      })
+
+
     })
+  )
 
 
-  })
+
+  # initialDelivery <- lapply(contest_tbl$contest_contestIdentification, function(contestID){
+  #
+  #   contest <- create_contest_list(contest_tbl[contest_tbl$contest_contestIdentification == contestID])
+  #
+  #   lapply(nrow(election_group_ballot_tbl), function(EGB){
+  #     domainOfInfluenceIdentification = list(election_group_ballot_tbl[election_group_ballot_tbl$electionGroupBallot_domainOfInfluenceIdentification == EGB]$electionGroupBallot_domainOfInfluenceIdentification)
+  #   })
+  #
+  #
+  # })
 
   names(initialDelivery) <- c(
     rep("contest", nrow(contest_tbl))
@@ -147,7 +169,7 @@ create_contest_list <- function(data){
   })
 
   # Name the sublists
-  names(contestDescription) <- rep("contestDescriptionInfo", length(electionDescription))
+  names(contestDescription) <- rep("contestDescriptionInfo", length(contestDescription))
 
 
   # ASSEMBLE ELECTION LIST =====================================================
