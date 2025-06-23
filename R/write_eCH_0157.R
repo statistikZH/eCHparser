@@ -39,7 +39,8 @@ write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "e
   # ... election group ballots, ...
   election_group_ballot_tbl <- data |>
     dplyr::select(
-      electionGroupBallot_domainOfInfluenceIdentification
+      electionGroupBallot_domainOfInfluenceIdentification,
+      electionGroupBallot_index
     ) |>
     unique()
 
@@ -64,43 +65,25 @@ write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "e
   # WRITE LIST =================================================================
 
 
-  ## Contest Level -------------------------------------------------------------
-
-
   initialDelivery <- list(
     contest = create_contest_list(contest_tbl[1, ]), # Define contest list
-    lapply(data$electionGroupBallot_index |> unique(), function(electionGroupIndex){ # apply through all election group ballots
+    electionGroupBallot = lapply(data$electionGroupBallot_index |> unique(), function(egb_index){ # apply on all election group ballots
 
       electionGroupBallot_tbl <- data |>
-        dplyr::filter(electionGroupBallot_index == electionGroupBallot_index)
+        dplyr::filter(electionGroupBallot_index == egb_index)
 
-      lapply(election_group_ballot_tbl$election_electionIdentification |> unique(), function(electionIdentification){
+      result = list(
+        result = list(
+        domainOfInfluenceIdentification = list(electionGroupBallot_tbl$electionGroupBallot_domainOfInfluenceIdentification[1])
+      )
+      )
 
-        create_election_list(electionGroupBallot_tbl |> dplyr::filter(election_electionIdentification == electionIdentification))
+      names(result) <- paste("electionGroupBallot", egb_index)
 
-      })
-
+      return(result)
 
     })
   )
-
-
-
-  # initialDelivery <- lapply(contest_tbl$contest_contestIdentification, function(contestID){
-  #
-  #   contest <- create_contest_list(contest_tbl[contest_tbl$contest_contestIdentification == contestID])
-  #
-  #   lapply(nrow(election_group_ballot_tbl), function(EGB){
-  #     domainOfInfluenceIdentification = list(election_group_ballot_tbl[election_group_ballot_tbl$electionGroupBallot_domainOfInfluenceIdentification == EGB]$electionGroupBallot_domainOfInfluenceIdentification)
-  #   })
-  #
-  #
-  # })
-
-  names(initialDelivery) <- c(
-    rep("contest", nrow(contest_tbl))
-  )
-
 
 
 
