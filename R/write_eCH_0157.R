@@ -15,14 +15,10 @@
 write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "eCH_0157_template.xml", package = "eCHparser")){
 
 
-  # !!!!!!! DEV-HELPER - DELETE AFTER DEV  =====================================
-
-
-  test <- parse_eCH_0157("tests/testthat/testdata/files_unparsed/eCH-0157/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xml")
-  writexl::write_xlsx(test, "/home/file-server/01_Post/Graf/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xlsx")
-  file <- "/home/file-server/01_Post/Graf/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xlsx"
-  target_xml <- xml2::read_xml("tests/testthat/testdata/files_unparsed/eCH-0157/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xml")
-  target_list <- xml2::as_list(target_xml)
+  # writexl::write_xlsx(test, "/home/file-server/01_Post/Graf/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xlsx")
+  # file <- "/home/file-server/01_Post/Graf/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xlsx"
+  # target_xml <- xml2::read_xml("tests/testthat/testdata/files_unparsed/eCH-0157/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xml")
+  # target_list <- xml2::as_list(target_xml)
 
 
   # PREPARE DATA ===============================================================
@@ -31,73 +27,91 @@ write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "e
   # Read xlsx file
   data <- readxl::read_xlsx(file) # This could/should be changed later so that the input is a tibble
 
-  # Split data into contest...
-  contest_tbl <- data |>
-    dplyr::select(contest_contestIdentification:`contestDescriptionInfo-rm_contestDescription`) |>
-    unique()
 
-  # ... election group ballots, ...
-  election_group_ballot_tbl <- data |>
-    dplyr::select(
-      electionGroupBallot_domainOfInfluenceIdentification,
-      electionGroupBallot_index
-    ) |>
-    unique()
-
-  # ...elections, and...
-  election_tbl <- data |>
-    dplyr::select(
-      electionGroupBallot_index,
-      election_electionIdentification:candidate_candidateIdentification,
-      -candidate_candidateIdentification,
-      electionGroupBallot_domainOfInfluenceIdentification # as link to the election group ballot
-    ) |>
-    unique()
-
-  # ...candidates.
-  candidates_tbl <- data |>
-    dplyr::select(
-      candidate_candidateIdentification:ncol(data),
-      election_electionIdentification # as link to the election
-    )
+  # GET DELIVERY HEADER ========================================================
 
 
-  # WRITE LIST =================================================================
+
+
+
+  # BUILD INITIAL DELIVERY LIST ================================================
 
 
   initialDelivery <- list(
-    contest = create_contest_list(contest_tbl[1, ]), # Define contest list
-    electionGroupBallot = lapply(data$electionGroupBallot_index |> unique(), function(egb_index){ # apply on all election group ballots
-
-      electionGroupBallot_tbl <- data |>
-        dplyr::filter(electionGroupBallot_index == egb_index)
-
-      result = list(
-        result = list(
-        domainOfInfluenceIdentification = list(electionGroupBallot_tbl$electionGroupBallot_domainOfInfluenceIdentification[1])
-      )
-      )
-
-      names(result) <- paste("electionGroupBallot", egb_index)
-
-      return(result)
-
-    })
+    contest = create_contest_list(data[1, ]) # Define contest list
   )
 
 
+  ## Build Election Group Ballot List ------------------------------------------
 
 
-  # lapply over all unique rows of the election group ballot tbl
-  # lapply over all unique rows of the election tbl
-  # inside each of those, lapply over the rows of the election tbl
+  electionGroupBallot <- lapply(unique(data$electionGroupBallot_index), function(egb_index){
+
+    # Get the right data
+    egb_data <- data |>
+      dplyr::filter(electionGroupBallot_index == egb_index)
+
+    # Define the single DOI-ID of the election group ballot (always a single one)
+    domainOfInfluenceIdentification <- egb_data$electionGroupBallot_domainOfInfluenceIdentification[1]
+
+    # Create the list
+    electionGroupBallot <- list(
+      domainOfInfluenceIdentification = list(domainOfInfluenceIdentification)
+    )
 
 
+    ## Build Election Information List -----------------------------------------
 
 
-  # initialDelivery <- list()
-  #
-  # initialDelivery <- append(initialDelivery, list("contest"))
+    # Apply over unique election identification in this specific election group ballot
+    electionInformation <- lapply(unique(egb_data$election_electionIdentification), function(elec_id){
+
+      # Get the right data
+      elec_data <- egb_data |>
+        dplyr::filter(election_electionIdentification == elec_id)
+
+      # Define the election list (take the first element since the election information must be identical in every row)
+      electionInformation <- list(election = create_election_list(elec_data[1, ]))
+
+
+      ## Build Candidate Lists -------------------------------------------------
+
+
+      # Apply over unique candidate identification in this specific election
+      candidate <- lapply(unique(elec_data$candidate_candidateIdentification), function(cand_id){
+
+        # Get the right data
+        cand_data <- elec_data |>
+          dplyr::filter(candidate_candidateIdentification == cand_id)
+
+        # Define the candidate list (take the first element since nrow() must be 1 here)
+        candidate <- create_candidate_list(cand_data[1, ])
+
+      })
+
+
+      # RENAME AND ASSEMBLE ====================================================
+
+
+      # Set the names of the candidate lists
+      names(candidate) <- rep("candidate", length(candidate))
+
+      electionInformation <- c(electionInformation, candidate)
+
+    })
+
+    # Set the names of the election lists
+    names(electionInformation) <- rep("electionInformation", length(electionInformation))
+
+    electionGroupBallot <- c(electionGroupBallot, electionInformation)
+
+  })
+
+  # Set the names of the election group ballot list
+  names(electionGroupBallot) <- rep("electionGroupBallot", length(electionGroupBallot))
+
+  # Put together entire list
+  initialDelivery <- c(initialDelivery, electionGroupBallot)
 
 
 }
@@ -111,20 +125,14 @@ write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "e
 #' @description
 #' This helper function transforms contest information to a contest list.
 #'
-#' @param data A tibble containing the necessary contest information for the eCH-0157.
+#' @param cont_data A tibble containing the necessary contest information for the eCH-0157.
 #'
 #' @return A list.
 #' @export
 #'
 #' @examples
 #'
-create_contest_list <- function(data){
-
-
-  # !!!!!!! DEV-HELPER - DELETE AFTER DEV  =====================================
-
-
-  # data <- contest_tbl[1, ]
+create_contest_list <- function(cont_data){
 
 
   # PREPARE NESTED LISTS =======================================================
@@ -134,7 +142,7 @@ create_contest_list <- function(data){
 
 
   # Define and transform nested data for multilingual information
-  data_nested <- transform_nested(data, "language")
+  data_nested <- transform_nested(cont_data, "language")
 
   # Create lists
   contestDescription <- lapply(data_nested$language |> unique(), function(language) {
@@ -160,8 +168,8 @@ create_contest_list <- function(data){
 
   # Hardcode everything since structure is fixed
   contest_list <- list(
-    contesIdentification = list(data$contest_contestIdentification),
-    contestDate = list(data$contest_contestDate),
+    contesIdentification = list(cont_data$contest_contestIdentification),
+    contestDate = list(cont_data$contest_contestDate),
     contestDescription = contestDescription
   )
 
@@ -176,20 +184,14 @@ create_contest_list <- function(data){
 #' @description
 #' This helper function transforms election information to an election list.
 #'
-#' @param data A tibble containing the necessary election information for the eCH-0157.
+#' @param elec_data A tibble containing the necessary election information for the eCH-0157.
 #'
 #' @return A list.
 #' @export
 #'
 #' @examples
 #'
-create_election_list <- function(data){
-
-
-  # !!!!!!! DEV-HELPER - DELETE AFTER DEV  =====================================
-
-
-  # data <- election_tbl[1, ]
+create_election_list <- function(elec_data){
 
 
   # PREPARE NESTED LISTS =======================================================
@@ -199,7 +201,7 @@ create_election_list <- function(data){
 
 
   # Define and transform nested data for referenced elections and drop all rows with no value
-  data_nested <- transform_nested(data, "relation") |>
+  data_nested <- transform_nested(elec_data, "relation") |>
     dplyr::filter(!is.na(value))
 
   referencedElection <- list(
@@ -212,7 +214,7 @@ create_election_list <- function(data){
 
 
   # Define and transform nested data for multilingual information
-  data_nested <- transform_nested(data, "language")
+  data_nested <- transform_nested(elec_data, "language")
 
   # Create lists
   electionDescription <- lapply(data_nested$language |> unique(), function(language) {
@@ -249,11 +251,11 @@ create_election_list <- function(data){
 
   # Hardcode everything since structure is fixed
   election_list <- list(
-    electionIdentification = list(data$election_electionIdentification),
-    typeOfElection = list(data$election_typeOfElection),
-    electionPosition = list(data$election_electionPosition),
+    electionIdentification = list(elec_data$election_electionIdentification),
+    typeOfElection = list(elec_data$election_typeOfElection),
+    electionPosition = list(elec_data$election_electionPosition),
     electionDescription = electionDescription,
-    numberOfMandates = list(data$election_numberOfMandates),
+    numberOfMandates = list(elec_data$election_numberOfMandates),
     referencedElection = referencedElection
   )
 
@@ -268,27 +270,21 @@ create_election_list <- function(data){
 #' @description
 #' This helper function transforms candidate information to a candidate list.
 #'
-#' @param data A tibble containing the necessary candidate information for the eCH-0157.
+#' @param cand_data A tibble containing the necessary candidate information for the eCH-0157.
 #'
 #' @return A list.
 #' @export
 #'
 #' @examples
 #'
-create_candidate_list <- function(data){
-
-
-  # !!!!!!! DEV-HELPER - DELETE AFTER DEV  =====================================
-
-
-  # data <- candidates_tbl[1, ]
+create_candidate_list <- function(cand_data){
 
 
   # PREPARE NESTED LISTS =======================================================
 
 
   # Define and transform nested multilingual data
-  data_nested <- transform_nested(data, "language")
+  data_nested <- transform_nested(cand_data, "language")
 
   # Create lists
   list <- lapply(data_nested$name_parent_element |> unique(), function(list_name) {
