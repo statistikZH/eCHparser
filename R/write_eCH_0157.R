@@ -16,9 +16,9 @@ write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "e
 
 
   # writexl::write_xlsx(test, "/home/file-server/01_Post/Graf/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xlsx")
-  # file <- "/home/file-server/01_Post/Graf/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xlsx"
-  # target_xml <- xml2::read_xml("tests/testthat/testdata/files_unparsed/eCH-0157/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xml")
-  # target_list <- xml2::as_list(target_xml)
+  file <- "/home/file-server/01_Post/Graf/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xlsx"
+  target_xml <- xml2::read_xml("tests/testthat/testdata/files_unparsed/eCH-0157/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xml")
+  target_list <- xml2::as_list(target_xml)
 
 
   # PREPARE DATA ===============================================================
@@ -26,12 +26,6 @@ write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "e
 
   # Read xlsx file
   data <- readxl::read_xlsx(file) # This could/should be changed later so that the input is a tibble
-
-
-  # GET DELIVERY HEADER ========================================================
-
-
-
 
 
   # BUILD INITIAL DELIVERY LIST ================================================
@@ -114,6 +108,21 @@ write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "e
   initialDelivery <- c(initialDelivery, electionGroupBallot)
 
 
+
+
+  # TO DOs: ====================================================================
+
+
+  # Currently, we have NAs in our data, they need to go. I tried to solve this with
+  # mylist <- initialDelivery[!sapply(initialDelivery, function(x) all(is.na(x)))]
+  # inside every helper function, however, this does not seem to have worked.
+  #
+  # Furthermore, I need to transform the list into an xml tree, including the correct namespaces.
+  #
+  # Last but not least, I need to add the delivery header on top of the initialDelivery (probably only after I transformed it to xml).
+
+
+
 }
 
 
@@ -172,6 +181,9 @@ create_contest_list <- function(cont_data){
     contestDate = list(cont_data$contest_contestDate),
     contestDescription = contestDescription
   )
+
+  # Remove all NAs from the list
+  contest_list <- contest_list[!sapply(contest_list, function(x) all(is.na(x)))]
 
 }
 
@@ -259,6 +271,9 @@ create_election_list <- function(elec_data){
     referencedElection = referencedElection
   )
 
+  # Remove all NAs from the list
+  election_list <- election_list[!sapply(election_list, function(x) all(is.na(x)))]
+
 }
 
 
@@ -336,34 +351,37 @@ create_candidate_list <- function(cand_data){
 
   # Hardcode everything since structure is fixed
   candidate_list <- list(
-    candidateIdentification = list(data$candidate_candidateIdentification),
-    familyName = list(data$candidate_familyName),
-    firstName = list(data$candidate_firstName),
-    callName = list(data$candidate_callName),
+    candidateIdentification = list(cand_data$candidate_candidateIdentification),
+    familyName = list(cand_data$candidate_familyName),
+    firstName = list(cand_data$candidate_firstName),
+    callName = list(cand_data$candidate_callName),
     candidateText = candidateText,
-    dateOfBirth = list(data$candidate_dateOfBirth),
-    sex = list(data$candidate_sex),
+    dateOfBirth = list(cand_data$candidate_dateOfBirth),
+    sex = list(cand_data$candidate_sex),
     occupationalTitle = occupationalTitle,
     dwellingAddress = list(
-      street = list(data$dwellingAddress_street),
-      houseNumber = list(data$dwellingAddress_houseNumber),
-      town = list(data$dwellingAddress_town),
-      swissZipCode = list(data$dwellingAddress_swissZipCode),
+      street = list(cand_data$dwellingAddress_street),
+      houseNumber = list(cand_data$dwellingAddress_houseNumber),
+      town = list(cand_data$dwellingAddress_town),
+      swissZipCode = list(cand_data$dwellingAddress_swissZipCode),
       country = list(
-        countryId = list(data$country_countryId),
-        countryIdISO2 = list(data$country_countryIdISO2),
-        countryNameShort = list(data$country_countryNameShort)
+        countryId = list(cand_data$country_countryId),
+        countryIdISO2 = list(cand_data$country_countryIdISO2),
+        countryNameShort = list(cand_data$country_countryNameShort)
       )
     ),
     swiss = list(
-      origin = list(data$swiss_origin)
+      origin = list(cand_data$swiss_origin)
     ),
-    mrMrs = list(data$candidate_mrMrs),
-    title = list(data$candidate_title),
-    languageOfCorrespondence = list(data$candidate_languageOfCorrespondence),
-    candidateReference = list(data$candidate_candidateReference),
+    mrMrs = list(cand_data$candidate_mrMrs),
+    title = list(cand_data$candidate_title),
+    languageOfCorrespondence = list(cand_data$candidate_languageOfCorrespondence),
+    candidateReference = list(cand_data$candidate_candidateReference),
     partyAffiliation = partyAffiliation
   )
+
+  # Remove all NAs from the list
+  candidate_list <- candidate_list[!sapply(candidate_list, function(x) all(is.na(x)))]
 
 }
 
@@ -384,15 +402,15 @@ create_candidate_list <- function(cand_data){
 #'
 #' @examples
 #'
-transform_nested <- function(data, type) {
+transform_nested <- function(nested_data, type) {
 
   # Select data based on the defined specification type
   if (type == "language") {
-    selected_data <- data |>
-      dplyr::select(grep("-([a-z])", names(data)))
+    selected_data <- nested_data |>
+      dplyr::select(grep("-([a-z])", names(nested_data)))
   } else if (type == "relation") {
-    selected_data <- data |>
-      dplyr::select(grep("-([0-9])", names(data)))
+    selected_data <- nested_data |>
+      dplyr::select(grep("-([0-9])", names(nested_data)))
   }
 
   # Transform data to long and add names for the different levels in the list later on
