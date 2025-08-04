@@ -24,6 +24,15 @@ write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "e
   # PREPARE DATA ===============================================================
 
 
+  # Read file template including delivery header
+  template_path <- system.file("templates", "eCH-0157_abraxas_elections_ZH_majority_delivery_header.RDS", package = "eCHparser")
+  delivery <- readRDS(template_path)
+
+  # Adjust deliveryHeader
+  delivery[[1]][["messageId"]] <- list(substr(paste0("STAT_", Sys.time()), 1, 36))
+  delivery[[1]][["sendingApplication"]][["productVersion"]] <- list(substr(packageVersion("eCHparser"), 1, 10))
+  delivery[[1]][["messageDate"]] <- list(as.character(Sys.time()))
+
   # Read xlsx file
   data <- readxl::read_xlsx(file) # This could/should be changed later so that the input is a tibble
 
@@ -107,7 +116,12 @@ write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "e
   # Put together entire list
   initialDelivery <- c(initialDelivery, electionGroupBallot)
 
+  # Add initialDelivery to the delivery
+  delivery[[length(delivery) + 1]] <- initialDelivery
+  names(delivery)[length(delivery)] <- "initialDelivery"
 
+  # Add all namespaces
+  # Change the utils function to match by full path rather than by name
 
 
   # TO DOs: ====================================================================

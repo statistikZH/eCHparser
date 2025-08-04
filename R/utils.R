@@ -196,3 +196,91 @@ to_df <- function(data, names){
     )
 
 }
+
+
+
+
+
+#' Extract all attributes from a list
+#'
+#' @param my_list A list.
+#' @param path A character vector of length 1.
+#' @param results A list.
+#'
+#' @return A list.
+extract_attributes <- function(my_list, path = character(), results = list()){
+
+  if (is.list(my_list)) {
+
+    for (i in seq_along(my_list)) {
+
+      element <- my_list[[i]]
+      name <- names(my_list)[i]
+
+      # Get namespace if available
+      ns <- attr(element, "xmlns")
+
+      # Construct full path for clarity (optional)
+      full_path <- c(path, name)
+
+      # Save result
+      results[[length(results) + 1]] <- list(
+        path = paste(full_path, collapse = "/"),
+        name = name,
+        namespace = ns
+      )
+
+      # Recurse if the element is also a list
+      if (is.list(element)) {
+        results <- extract_attributes(element, path = full_path, results = results)
+      }
+    }
+
+  }
+
+  # Drop duplicates
+  results <- unique(results)
+
+  return(results)
+
+}
+
+
+
+
+
+#' Assign attributes by their name/path
+#'
+#' @param my_list A list.
+#' @param ns_info A list of name-namespace pairs.
+#'
+#' @return A list.
+assign_namespaces_by_name <- function(x, ns_info) {
+
+  for (i in seq_along(x)) {
+
+    name <- names(x)[i]
+    elem <- x[[i]]
+
+    # Safely extract matching namespace
+    match_idx <- which(vapply(ns_info, function(info) {
+      is.list(info) && !is.null(info$name) && info$name == name
+    }, logical(1)))
+
+    if (length(match_idx) > 0) {
+      ns <- ns_info[[match_idx[1]]]$namespace
+      attr(elem, "xmlns") <- ns
+    }
+
+    # Recurse if the element is a list
+    if (is.list(elem)) {
+      elem <- assign_namespaces_by_name(elem, ns_info)
+    }
+
+    x[[i]] <- elem
+
+  }
+
+  return(x)
+
+}

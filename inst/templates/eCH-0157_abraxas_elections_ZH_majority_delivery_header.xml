@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<delivery xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+          xmlns="http://www.ech.ch/xmlns/eCH-0157/4">
+	<deliveryHeader>
+		<senderId xmlns="http://www.ech.ch/xmlns/eCH-0058/5">Statistisches Amt Kanton Zürich</senderId>
+		<messageId xmlns="http://www.ech.ch/xmlns/eCH-0058/5">PLACEHOLDER-MESSAGE-ID</messageId>
+		<messageType xmlns="http://www.ech.ch/xmlns/eCH-0058/5">1710967</messageType>
+		<sendingApplication xmlns="http://www.ech.ch/xmlns/eCH-0058/5">
+			<manufacturer>Statistisches Amt Kanton Zürich</manufacturer>
+			<product>eCHparser</product>
+			<productVersion>0.0.1.9000</productVersion>
+		</sendingApplication>
+		<messageDate xmlns="http://www.ech.ch/xmlns/eCH-0058/5">1970-01-01T00:00:00.000Z</messageDate>
+		<action xmlns="http://www.ech.ch/xmlns/eCH-0058/5">1</action>
+		<testDeliveryFlag xmlns="http://www.ech.ch/xmlns/eCH-0058/5">true</testDeliveryFlag>
+	</deliveryHeader>
+</delivery>
