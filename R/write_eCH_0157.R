@@ -5,36 +5,39 @@
 #' Use the function "open_eCH_0157_xlsx" to open a blank template file.
 #'
 #' @param file Path to your xlsx file.
-#' @param template_xml_path The path to the template xml file that provides the structure for the output xml file.
 #'
 #' @return An XML file.
 #' @export
 #'
 #' @examples
 #'
-write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "eCH_0157_template.xml", package = "eCHparser")){
+write_eCH_0157 <- function(file){
 
 
   # writexl::write_xlsx(test, "/home/file-server/01_Post/Graf/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xlsx")
-  file <- "/home/file-server/01_Post/Graf/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xlsx"
-  target_xml <- xml2::read_xml("tests/testthat/testdata/files_unparsed/eCH-0157/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xml")
-  target_list <- xml2::as_list(target_xml)
+  # file <- "/home/file-server/01_Post/Graf/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xlsx"
+  # target_xml <- xml2::read_xml("tests/testthat/testdata/files_unparsed/eCH-0157/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xml")
+  # target_list <- xml2::as_list(target_xml)
 
 
   # PREPARE DATA ===============================================================
 
 
   # Read file template including delivery header
-  template_path <- system.file("templates", "eCH-0157_abraxas_elections_ZH_majority_delivery_header.RDS", package = "eCHparser")
+  template_path <- system.file("templates", "eCH_0157_majority_template.RDS", package = "eCHparser")
   delivery <- readRDS(template_path)
 
-  # Adjust deliveryHeader
-  delivery[[1]][["messageId"]] <- list(substr(paste0("STAT_", Sys.time()), 1, 36))
+  # Update deliveryHeader
+  delivery[[1]][["messageId"]] <- list(substr(paste0("STAT_", sub(" ", "T", as.character(Sys.time()))), 1, 36))
   delivery[[1]][["sendingApplication"]][["productVersion"]] <- list(substr(packageVersion("eCHparser"), 1, 10))
-  delivery[[1]][["messageDate"]] <- list(as.character(Sys.time()))
+  delivery[[1]][["messageDate"]] <- list(sub(" ", "T", as.character(Sys.time())))
 
   # Read xlsx file
   data <- readxl::read_xlsx(file) # This could/should be changed later so that the input is a tibble
+
+  # Load namespaces file
+  ns_path <- system.file("templates", "eCH_0157_majority_namespaces.RDS", package = "eCHparser")
+  ns_list <- readRDS(ns_path)
 
 
   # BUILD INITIAL DELIVERY LIST ================================================
@@ -120,21 +123,31 @@ write_eCH_0157 <- function(file, template_xml_path = system.file("templates", "e
   delivery[[length(delivery) + 1]] <- initialDelivery
   names(delivery)[length(delivery)] <- "initialDelivery"
 
+  # Clean the list (drop all empty and NULL elements as well as empty lists)
+  delivery <- clean_list(delivery)
+
   # Add all namespaces
-  # Change the utils function to match by full path rather than by name
+  delivery <- assign_namespaces_by_path(delivery, ns_list)
+  attr(delivery, "xmlns:xsi") <- "http://www.w3.org/2001/XMLSchema-instance"
+  attr(delivery, "xmlns:xsd") <- "http://www.w3.org/2001/XMLSchema"
+  attr(delivery, "xmlns") <- "http://www.ech.ch/xmlns/eCH-0157/4"
+
+  # Build root node of length() == 1
+  delivery_list <- list(delivery)
+  names(delivery_list) <- "delivery"
+
+  # Turn to xml
+  delivery_xml <- xml2::as_xml_document(delivery_list)
+
+  return(delivery_xml)
 
 
-  # TO DOs: ====================================================================
 
-
-  # Currently, we have NAs in our data, they need to go. I tried to solve this with
-  # mylist <- initialDelivery[!sapply(initialDelivery, function(x) all(is.na(x)))]
-  # inside every helper function, however, this does not seem to have worked.
-  #
-  # Furthermore, I need to transform the list into an xml tree, including the correct namespaces.
-  #
-  # Last but not least, I need to add the delivery header on top of the initialDelivery (probably only after I transformed it to xml).
-
+  # TO DO:
+  # Problem is, that we do not remove empty lists inside the dwellingAddress element.
+  # An empty swissZipCode is currently delivered but this must not be the case.
+  # Either remove element or replace empty element with an empty foreignZipCode
+  # for schema conformity.
 
 
 }
@@ -191,7 +204,7 @@ create_contest_list <- function(cont_data){
 
   # Hardcode everything since structure is fixed
   contest_list <- list(
-    contesIdentification = list(cont_data$contest_contestIdentification),
+    contestIdentification = list(cont_data$contest_contestIdentification),
     contestDate = list(cont_data$contest_contestDate),
     contestDescription = contestDescription
   )

@@ -234,6 +234,9 @@ extract_attributes <- function(my_list, path = character(), results = list()){
       if (is.list(element)) {
         results <- extract_attributes(element, path = full_path, results = results)
       }
+
+      # Remove all elements with no namespaces
+      results[sapply(results, function(sublist) !is.null(sublist$namespace))]
     }
 
   }
@@ -249,38 +252,82 @@ extract_attributes <- function(my_list, path = character(), results = list()){
 
 
 
-#' Assign attributes by their name/path
+#' Assign attributes by their path
 #'
 #' @param my_list A list.
-#' @param ns_info A list of name-namespace pairs.
+#' @param ns_info A list of path-namespace pairs.
+#' @param path An empty character vector.
 #'
 #' @return A list.
-assign_namespaces_by_name <- function(x, ns_info) {
+assign_namespaces_by_path <- function(my_list, ns_info, path = character()) {
 
-  for (i in seq_along(x)) {
+  for (i in seq_along(my_list)) {
 
-    name <- names(x)[i]
-    elem <- x[[i]]
+    name <- names(my_list)[i]
+    elem <- my_list[[i]]
 
-    # Safely extract matching namespace
+    full_path <- c(path, name)
+    path_str <- paste(full_path, collapse = "/")
+
+    # Find matching entry in ns_info by full path
     match_idx <- which(vapply(ns_info, function(info) {
-      is.list(info) && !is.null(info$name) && info$name == name
+      is.list(info) && !is.null(info$path) && info$path == path_str
     }, logical(1)))
 
-    if (length(match_idx) > 0) {
+    if (length(match_idx) > 0 && is.list(elem)) {
       ns <- ns_info[[match_idx[1]]]$namespace
       attr(elem, "xmlns") <- ns
     }
 
     # Recurse if the element is a list
     if (is.list(elem)) {
-      elem <- assign_namespaces_by_name(elem, ns_info)
+      elem <- assign_namespaces_by_path(elem, ns_info, path = full_path)
     }
 
-    x[[i]] <- elem
+    my_list[[i]] <- elem
 
   }
 
-  return(x)
+  return(my_list)
+
+}
+
+
+
+
+
+#' Remove all empty elements from nested list.
+#'
+#' @param my_list A list.
+#'
+#' @return A list.
+clean_list <- function(my_list) {
+
+  if (is.list(my_list)) {
+
+    # Recursively clean each element
+    my_list <- lapply(my_list, clean_list)
+
+    # Remove NULLs and elements of length 0
+    my_list <- my_list[!sapply(my_list, function(e) is.null(e) || (length(e) == 0))]
+
+    # Remove elements containing the string "NA"
+    my_list <- my_list[!sapply(my_list, function(e) {
+      is.atomic(e) && any(e == "NA")
+    })]
+
+    # After cleaning, remove empty lists
+    my_list <- my_list[!sapply(my_list, function(e) is.list(e) && length(e) == 0)]
+
+  } else {
+
+    # If not a list, check if length is 0 (e.g., character(0))
+    if (length(my_list) == 0) {
+      return(NULL)
+    }
+
+  }
+
+  return(my_list)
 
 }
