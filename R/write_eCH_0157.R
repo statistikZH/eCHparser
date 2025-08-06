@@ -144,10 +144,9 @@ write_eCH_0157 <- function(file){
 
 
   # TO DO:
-  # Problem is, that we do not remove empty lists inside the dwellingAddress element.
-  # An empty swissZipCode is currently delivered but this must not be the case.
-  # Either remove element or replace empty element with an empty foreignZipCode
-  # for schema conformity.
+  # Problem: Language converter creates elements even if there is no content.
+  # This needs to be switched off.
+  # Also, it seems to recycle the first language it finds?
 
 
 }

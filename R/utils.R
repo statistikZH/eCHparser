@@ -302,32 +302,28 @@ assign_namespaces_by_path <- function(my_list, ns_info, path = character()) {
 #'
 #' @return A list.
 clean_list <- function(my_list) {
-
   if (is.list(my_list)) {
-
-    # Recursively clean each element
+    # Recursively clean children
     my_list <- lapply(my_list, clean_list)
 
-    # Remove NULLs and elements of length 0
-    my_list <- my_list[!sapply(my_list, function(e) is.null(e) || (length(e) == 0))]
+    # Drop children that became NULL
+    my_list <- my_list[!vapply(my_list, is.null, logical(1))]
 
-    # Remove elements containing the string "NA"
-    my_list <- my_list[!sapply(my_list, function(e) {
-      is.atomic(e) && any(e == "NA")
-    })]
-
-    # After cleaning, remove empty lists
-    my_list <- my_list[!sapply(my_list, function(e) is.list(e) && length(e) == 0)]
-
-  } else {
-
-    # If not a list, check if length is 0 (e.g., character(0))
-    if (length(my_list) == 0) {
-      return(NULL)
-    }
-
+    # If list is empty after cleaning, remove it
+    if (length(my_list) == 0) return(NULL)
+    return(my_list)
   }
 
-  return(my_list)
+  # Atomic case
+  if (length(my_list) == 0) return(NULL)  # remove empty vectors
 
+  # Turn "NA" strings into actual NA
+  if (is.character(my_list)) {
+    my_list[my_list == "NA"] <- NA_character_
+  }
+
+  # Remove element if *all* entries are NA
+  if (all(is.na(my_list))) return(NULL)
+
+  return(my_list)
 }
