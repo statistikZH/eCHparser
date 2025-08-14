@@ -149,10 +149,8 @@ write_eCH_0157 <- function(file){
   return(delivery_xml)
 
   # TO DO:
-  # Problem: Additional level for language nodes:
-  # Currentlx, there is one level with e. g. electionDescription and directly bellow, there is the language element.
-  # But there needs to be an additional level, namely the electionDescriptionInfo element.
-  # This holds true for all nested language nodes, however not for the relation nodes.
+  # Problem: two same relation types are currently in the same element
+  # They need to be stored in separate elements.
 
 
 }
@@ -386,17 +384,17 @@ create_candidate_list <- function(cand_data){
 
   # ASSEMBLE CANDIDATE LIST ====================================================
 
-
+# browser()
   # Hardcode everything since structure is fixed (fill in NAs if there was no nested language info)
   candidate_list <- list(
     candidateIdentification = list(cand_data$candidate_candidateIdentification),
     familyName = list(cand_data$candidate_familyName),
     firstName = list(cand_data$candidate_firstName),
     callName = list(cand_data$candidate_callName),
-    candidateText = ifelse(exists("candidateText"), candidateText, NA),
+    candidateText = if(exists("candidateText")) candidateText else NA,
     dateOfBirth = list(cand_data$candidate_dateOfBirth),
     sex = list(cand_data$candidate_sex),
-    occupationalTitle = ifelse(exists("occupationalTitle"), occupationalTitle, NA),
+    occupationalTitle = if(exists("occupationalTitle")) occupationalTitle else NA,
     dwellingAddress = list(
       street = list(cand_data$dwellingAddress_street),
       houseNumber = list(cand_data$dwellingAddress_houseNumber),
@@ -415,7 +413,7 @@ create_candidate_list <- function(cand_data){
     title = list(cand_data$candidate_title),
     languageOfCorrespondence = list(cand_data$candidate_languageOfCorrespondence),
     candidateReference = list(cand_data$candidate_candidateReference),
-    partyAffiliation = ifelse(exists("partyAffiliation"), partyAffiliation, NA)
+    partyAffiliation = if (exists("partyAffiliation")) partyAffiliation else NA
   )
 
   # Remove all NAs from the list
