@@ -242,14 +242,20 @@ create_election_list <- function(elec_data){
   ## Referenced Election -------------------------------------------------------
 
 
-  # Define and transform nested data for referenced elections and drop all rows with no value
+  # Define and transform nested data for referenced elections and drop all rows with no value and duplicate rows if there are multiple referenced elections
   data_nested <- transform_nested(elec_data, "relation") |>
-    dplyr::filter(!is.na(value))
+    dplyr::filter(!is.na(value)) |>
+    tidyr::separate_rows(value, sep = ", ")
 
-  referencedElection <- list(
-    referencedElection = list(data_nested$value),
-    electionRelation = list(data_nested$relation)
-  )
+  # Work through multiple referenced elections
+  referencedElection <- lapply(1:nrow(data_nested), function(rownumber){
+    referencedElection <- list(
+      referencedElection = list(data_nested$value[rownumber]),
+      electionRelation = list(data_nested$relation[rownumber])
+      )
+    })
+
+  names(referencedElection) <- rep("referencedElection", length(referencedElection))
 
 
   ## Multilingual Information --------------------------------------------------
@@ -297,9 +303,12 @@ create_election_list <- function(elec_data){
     typeOfElection = list(elec_data$election_typeOfElection),
     electionPosition = list(elec_data$election_electionPosition),
     electionDescription = electionDescription,
-    numberOfMandates = list(elec_data$election_numberOfMandates),
-    referencedElection = referencedElection
+    numberOfMandates = list(elec_data$election_numberOfMandates)
   )
+
+  # Add the referenced election(s) at the end
+  election_list <- c(election_list, referencedElection)
+
 
   # Remove all NAs from the list
   election_list <- election_list[!sapply(election_list, function(x) all(is.na(x)))]
