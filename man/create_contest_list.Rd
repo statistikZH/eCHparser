@@ -4,10 +4,10 @@
 \alias{create_contest_list}
 \title{Create contest lists}
 \usage{
-create_contest_list(data)
+create_contest_list(cont_data)
 }
 \arguments{
-\item{data}{A tibble containing the necessary contest information for the eCH-0157.}
+\item{cont_data}{A tibble containing the necessary contest information for the eCH-0157.}
 }
 \value{
 A list.

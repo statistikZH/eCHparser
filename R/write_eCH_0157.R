@@ -14,12 +14,6 @@
 write_eCH_0157 <- function(file){
 
 
-  # writexl::write_xlsx(test, "/home/file-server/01_Post/Graf/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xlsx")
-  # file <- "/home/file-server/01_Post/Graf/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xlsx"
-  # target_xml <- xml2::read_xml("tests/testthat/testdata/files_unparsed/eCH-0157/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xml")
-  # target_list <- xml2::as_list(target_xml)
-
-
   # PREPARE DATA ===============================================================
 
 
@@ -147,11 +141,6 @@ write_eCH_0157 <- function(file){
 
 
   return(delivery_xml)
-
-  # TO DO:
-  # Problem: two same relation types are currently in the same element
-  # They need to be stored in separate elements.
-
 
 }
 
@@ -428,6 +417,26 @@ create_candidate_list <- function(cand_data){
   # Remove all NAs from the list
   candidate_list <- candidate_list[!sapply(candidate_list, function(x) all(is.na(x)))]
 
+}
+
+
+
+
+
+#' Create list lists
+#'
+#' @description
+#' This helper function transforms list information to a list list.
+#'
+#' @param cand_data A tibble containing the necessary list information for the eCH-0157.
+#'
+#' @return A list.
+#' @export
+#'
+#' @examples
+#'
+create_list_list <- function(list_data){
+  list_data
 }
 
 

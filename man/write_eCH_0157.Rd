@@ -4,16 +4,10 @@
 \alias{write_eCH_0157}
 \title{Convert an xlsx file into an XML file with the format eCH-0157}
 \usage{
-write_eCH_0157(
-  file,
-  template_xml_path = system.file("templates", "eCH_0157_template.xml", package =
-    "eCHparser")
-)
+write_eCH_0157(file)
 }
 \arguments{
 \item{file}{Path to your xlsx file.}
-
-\item{template_xml_path}{The path to the template xml file that provides the structure for the output xml file.}
 }
 \value{
 An XML file.

@@ -3,6 +3,7 @@
 export(create_candidate_list)
 export(create_contest_list)
 export(create_election_list)
+export(create_list_list)
 export(parse_eCH_0157)
 export(parse_eCH_0252)
 export(read_voteInfo)

@@ -4,12 +4,12 @@
 \alias{transform_nested}
 \title{Prepare specified data for further processing}
 \usage{
-transform_nested(data, type)
+transform_nested(nested_data, type)
 }
 \arguments{
-\item{data}{A tibble containing columns, for which a characteristic of the content is defined by a tag in the column title.}
-
 \item{type}{A character vector defining the type of the specification. Either "language" or "relation".}
+
+\item{data}{A tibble containing columns, for which a characteristic of the content is defined by a tag in the column title.}
 }
 \value{
 A tibble.

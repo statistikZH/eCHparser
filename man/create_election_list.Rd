@@ -4,10 +4,10 @@
 \alias{create_election_list}
 \title{Create election lists}
 \usage{
-create_election_list(data)
+create_election_list(elec_data)
 }
 \arguments{
-\item{data}{A tibble containing the necessary election information for the eCH-0157.}
+\item{elec_data}{A tibble containing the necessary election information for the eCH-0157.}
 }
 \value{
 A list.

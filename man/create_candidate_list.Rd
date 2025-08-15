@@ -4,10 +4,10 @@
 \alias{create_candidate_list}
 \title{Create candidate lists}
 \usage{
-create_candidate_list(data)
+create_candidate_list(cand_data)
 }
 \arguments{
-\item{data}{A tibble containing the necessary candidate information for the eCH-0157.}
+\item{cand_data}{A tibble containing the necessary candidate information for the eCH-0157.}
 }
 \value{
 A list.
