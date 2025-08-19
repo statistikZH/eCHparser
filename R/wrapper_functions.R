@@ -15,13 +15,9 @@
 transform_ech <- function(file, type){
 
 
-  # writexl::write_xlsx(test, "/home/file-server/01_Post/Graf/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xlsx")
-  # file <- "/home/file-server/01_Post/Graf/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xlsx"
-  # target_xml <- xml2::read_xml("tests/testthat/testdata/files_unparsed/eCH-0157/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xml")
-  # target_list <- xml2::as_list(target_xml)
+  # CHECK INPUTS ===============================================================
 
 
-  # Check inputs
   type <- as.numeric(type)
 
   if (type %in% c(157, 252)) {
@@ -32,39 +28,58 @@ transform_ech <- function(file, type){
     stop("The filepath referenced under \"file\" does not exist. Please make sure that the path given is correct.")
   }
 
-  # Transform file
-  if (type == 157) {
 
-    if(endsWith(file, ".xlsx")) {
+  # TRANSFORM XLSX FILE ========================================================
 
-      # Read xlsx
+
+  if (endsWith(file, ".xlsx")) {
+
+    # Define new name
+    new_name <- gsub(".xlsx", ".xml", file)
+
+    # Read xlsx
+    data <- readxl::read_xlsx(file)
+
+    if (type == 157) {
+
       # Trasform to xml
-      # Write xml
-
-    } else if (endsWith(file, ".xml")) {
-
-      # Read xml
-      # Trasform to table
-      # Write xlsx
+      data <- write_eCH_0157(data)
 
     } else {
 
-      stop("Your file does not seem to be an XLSX or XML file.")
+      stop("Unfortunately we can only transform XML to XLSX in eCH-0252.")
 
     }
-  } else if (type == 252) {
 
-    if (endsWith(file, ".xml")) {
+    # Write xml
+    xml2::write_xml(data, new_name)
 
-      # Read xml
-      # Trasform to table
-      # Write xlsx
 
-    } else {
+  # TRANSFORM XML FILE =========================================================
 
-      stop("Your file does not seem to be an XML file. At the moment we can only transform XML to XLSX in the eCH-0252.")
+
+  } else if (endsWith(file, ".xml")) {
+
+    # Define new name
+    new_name <- gsub(".xml", ".xslx", file)
+
+    # Read xlsx
+    data <- xml2::read_xml(file)
+
+    if (type == 157) {
+
+      # Trasform to xml
+      data <- parse_eCH_0157(data)
+
+    } else if (type == 252) {
+
+      # Trasform to xml
+      data <- parse_eCH_0252(data)
 
     }
+
+    # Write xml
+    xml2::write_xml(data, new_name)
 
   }
 
@@ -74,7 +89,7 @@ transform_ech <- function(file, type){
 
 
 
-#' Create and save a template XLSX file that can be converte into an XML file in the format eCH-0157
+#' Create and save a template XLSX file that can be converted into an XML file in the format eCH-0157
 #'
 #' @description
 #' This function creates an empty xlsx file that can be transformed into an XML file in the format eCH-0157.
@@ -87,5 +102,7 @@ transform_ech <- function(file, type){
 #' @examples
 #'
 open_eCH_0157_xlsx <- function(path){
+
+  # file <- read
 
 }

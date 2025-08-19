@@ -139,7 +139,6 @@ write_eCH_0157 <- function(file){
 
   xml2::write_xml(delivery_xml, "/home/file-server/01_Post/Graf/eCH_writer_output_0157.xml") # for dev purposes
 
-
   return(delivery_xml)
 
 }
