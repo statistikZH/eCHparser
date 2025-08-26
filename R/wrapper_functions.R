@@ -5,14 +5,15 @@
 #' Use the function "open_eCH_0157_xlsx" to open a blank template file.
 #'
 #' @param file Path to your file.
-#' @param type Type of eCH-File you want to transform. Either "" or ""
+#' @param type Type of eCH-File you want to transform. Either "" or "".
+#' @param overwrite Logical. Whether to overwrite an existing file.
 #'
-#' @return An XML or XLSX file.
+#' @return The function saves the corresponding XML or XLSX file of your defined input file under the same name with only the different file extension.
 #' @export
 #'
 #' @examples
 #'
-transform_ech <- function(file, type){
+transform_ech <- function(file, type, overwrite = TRUE){
 
 
   # CHECK INPUTS ===============================================================
@@ -20,7 +21,7 @@ transform_ech <- function(file, type){
 
   type <- as.numeric(type)
 
-  if (type %in% c(157, 252)) {
+  if (!type %in% c(157, 252)) {
     stop("\"type\" must be either \"0157\" or \"0252\".")
   }
 
@@ -52,7 +53,9 @@ transform_ech <- function(file, type){
     }
 
     # Write xml
-    xml2::write_xml(data, new_name)
+    if (overwrite == TRUE || !file.exists(new_name)) {
+      xml2::write_xml(data, new_name)
+    }
 
 
   # TRANSFORM XML FILE =========================================================
@@ -63,25 +66,28 @@ transform_ech <- function(file, type){
     # Define new name
     new_name <- gsub(".xml", ".xslx", file)
 
-    # Read xlsx
-    data <- xml2::read_xml(file)
-
     if (type == 157) {
 
       # Trasform to xml
-      data <- parse_eCH_0157(data)
+      data <- parse_eCH_0157(file)
 
     } else if (type == 252) {
 
       # Trasform to xml
-      data <- parse_eCH_0252(data)
+      data <- parse_eCH_0252(file)
 
     }
 
-    # Write xml
-    xml2::write_xml(data, new_name)
+    # Write xlsx
+    if (overwrite == TRUE || !file.exists(new_name)) {
+      writexl::write_xlsx(data, new_name)
+    }
 
   }
+
+
+  # ISSUE: The exports are currently not recognized as xlsx files.
+
 
 }
 
@@ -96,7 +102,7 @@ transform_ech <- function(file, type){
 #'
 #' @param path Path to your xlsx file.
 #'
-#' @return An XLSX file.
+#' @return An XLSX file, saved to the given path.
 #' @export
 #'
 #' @examples

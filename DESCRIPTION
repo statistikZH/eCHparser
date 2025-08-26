@@ -18,4 +18,5 @@ Imports:
     readxl,
     tidyr,
     tidyselect,
+    writexl,
     xml2
