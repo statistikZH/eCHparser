@@ -92,7 +92,7 @@ parse_eCH_0157 <- function(file){
 
 
     electionGroupBallot <- electionGroupBallot_list[electionGroupBallot_index]
-#
+
 #     # Define the doi of the supperior authority of the election group (domainOfInfluenceIdentification)
 #     domainOfInfluenceIdentification_df <- data.frame(electionGroupBallot_domainOfInfluenceIdentification = xml2::xml_text(xml2::xml_find_first(
 #       electionGroupBallot_nodes[electionGroupBallot_index],
@@ -208,11 +208,39 @@ parse_eCH_0157 <- function(file){
         dplyr::mutate(join_id = 1879)
 
 
+      #### Lists ---------------------------------------------------------------
+
+
+      # Check, if there is list information in the data (only the case for proportional elections)
+      if (any(grepl("list\\.", electionInfo_df_long$var))) {
+
+        # Define list information
+        list_df <- electionInfo_df_long |>
+          dplyr::filter(grepl("list\\.", var)) |>
+          to_wide() |>
+          dplyr::select(-unique_id) |>
+          tidyr::unnest_longer(
+            tidyselect::everything(),
+            keep_empty = TRUE
+          ) |>
+          dplyr::filter(!is.na(candidatePosition_candidateIdentification)) |>
+          dplyr::mutate(candidate_candidateIdentification = candidatePosition_candidateIdentification)
+
+      }
+
+
       #### Join ----------------------------------------------------------------
 
 
       electionInfo_df <- election_df |>
         dplyr::left_join(candidate_df, by = "join_id")
+
+      if (exists("list_df")) {
+
+        electionInfo_df1 <- electionInfo_df |>
+          dplyr::left_join(list_df, by = "candidate_candidateIdentification")
+
+      }
 
     })
 
