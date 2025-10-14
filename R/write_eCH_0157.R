@@ -183,7 +183,6 @@ create_contest_list <- function(cont_data){
       language = list(language),
       contestDescription = list(data_nested[data_nested$language == language, ]$value)
     )
-
   })
 
   # Name the sublists
@@ -275,7 +274,6 @@ create_election_list <- function(elec_data){
       electionDescriptionShort = list(electionDescriptionShort$value),
       electionDescription = list(electionDescription$value)
     )
-
   })
 
   # Name the sublists

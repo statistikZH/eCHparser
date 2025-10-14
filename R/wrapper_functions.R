@@ -64,7 +64,7 @@ transform_ech <- function(file, type, overwrite = TRUE){
   } else if (endsWith(file, ".xml")) {
 
     # Define new name
-    new_name <- gsub(".xml", ".xslx", file)
+    new_name <- gsub(".xml", ".xlsx", file)
 
     if (type == 157) {
 
@@ -85,10 +85,6 @@ transform_ech <- function(file, type, overwrite = TRUE){
 
   }
 
-
-  # ISSUE: The exports are currently not recognized as xlsx files.
-
-
 }
 
 
@@ -107,8 +103,61 @@ transform_ech <- function(file, type, overwrite = TRUE){
 #'
 #' @examples
 #'
-open_eCH_0157_xlsx <- function(path){
+create_election_template <- function(path){
 
-  # file <- read
+  # Define path to template
+  template_path <- system.file("templates", "eCH_0157_export_template.RDS", package = "eCHparser")
+
+  # Create object to export
+  file <- readRDS(template_path)
+
+}
+
+
+
+
+#' Create and save a template XLSX file that can be converted into an XML file in the format eCH-0157
+#'
+#' @description
+#' This function creates an empty xlsx file that can be transformed into an XML file in the format eCH-0157.
+#'
+#' @param path Path to your xlsx file.
+#'
+#' @return An XLSX file, saved to the given path.
+#' @export
+#'
+#' @examples
+#'
+read_election_template <- function(path){
+
+  # Read the file
+  data <- readxl::read_xlsx(path)
+
+  # Annotate and rename file
+  data <- data |>
+    dplyr::rename(dplyr::all_of(
+      contest_contestDate = "Datum",
+      `electionDescriptionInfo-de_electionDescriptionShort` = "Wahlkurzbezeichnung",
+      `electionDescriptionInfo-de_electionDescription` = "Wahllangbezeichnung",
+      election_numberOfMandates = "Mandate",
+      candidate_familyName = "Nachname",
+      candidate_firstName = "Vorname",
+      candidate_callName = "Rufname",
+      candidate_dateOfBirth = "Geburtsdatum",
+      candidate_sex = "Geschlecht",
+      dwellingAddress_town = "Wohnort",
+      `partyAffiliationInfo-de_partyAffiliationShort` = "Parteikurzbezeichnung",
+      list_listIndentureNumber = "Listennummer",
+      `listDescriptionInfo-de_listDescriptionShort` = "Listenkurzbezeichnung",
+      `listDescriptionInfo-de_listDescription` = "Listenlangbezeichnung",
+      list_listIndentureNumber = "Listennummer",
+      candidatePosition_positionOnList = "Kandidierendenposition",
+      candidatePosition_candidateReferenceOnPosition = "Kandidierendennummer",
+      list_emptyListPositions = "Leere Zeilen",
+      `occupationalTitleInfo-de_occupationalTitle` = "Berufsbezeichnung (und Titel)",
+      dwellingAddress_swissZipCode = "PLZ"
+    ))
+
+
 
 }

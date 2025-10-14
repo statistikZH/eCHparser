@@ -93,12 +93,6 @@ parse_eCH_0157 <- function(file){
 
     electionGroupBallot <- electionGroupBallot_list[electionGroupBallot_index]
 
-#     # Define the doi of the supperior authority of the election group (domainOfInfluenceIdentification)
-#     domainOfInfluenceIdentification_df <- data.frame(electionGroupBallot_domainOfInfluenceIdentification = xml2::xml_text(xml2::xml_find_first(
-#       electionGroupBallot_nodes[electionGroupBallot_index],
-#       "domainOfInfluenceIdentification"
-#     )))
-
     # Define nodes of interest as named list
     electionGroupInfo_list <- list(electionGroupBallot[[1]][names(electionGroupBallot[[1]]) != "electionInformation"])
     names(electionGroupInfo_list) <- names(electionGroupBallot)
@@ -237,10 +231,12 @@ parse_eCH_0157 <- function(file){
 
       if (exists("list_df")) {
 
-        electionInfo_df1 <- electionInfo_df |>
+        electionInfo_df <- electionInfo_df |>
           dplyr::left_join(list_df, by = "candidate_candidateIdentification")
 
       }
+
+      return(electionInfo_df)
 
     })
 

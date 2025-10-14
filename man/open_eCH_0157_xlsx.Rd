@@ -10,7 +10,7 @@ open_eCH_0157_xlsx(path)
 \item{path}{Path to your xlsx file.}
 }
 \value{
-An XLSX file.
+An XLSX file, saved to the given path.
 }
 \description{
 This function creates an empty xlsx file that can be transformed into an XML file in the format eCH-0157.

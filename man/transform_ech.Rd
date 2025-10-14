@@ -4,15 +4,17 @@
 \alias{transform_ech}
 \title{Convert an xlsx file into an XML file with the format eCH-0157}
 \usage{
-transform_ech(file, type)
+transform_ech(file, type, overwrite = TRUE)
 }
 \arguments{
 \item{file}{Path to your file.}
 
-\item{type}{Type of eCH-File you want to transform. Either "" or ""}
+\item{type}{Type of eCH-File you want to transform. Either "" or "".}
+
+\item{overwrite}{Logical. Whether to overwrite an existing file.}
 }
 \value{
-An XML or XLSX file.
+The function saves the corresponding XML or XLSX file of your defined input file under the same name with only the different file extension.
 }
 \description{
 This function transforms an xlsx file in a defined structure into a xml file or vice versa and saves it under the same path.
