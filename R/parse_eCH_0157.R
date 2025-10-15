@@ -209,16 +209,23 @@ parse_eCH_0157 <- function(file){
       if (any(grepl("list\\.", electionInfo_df_long$var))) {
 
         # Define list information
-        list_df <- electionInfo_df_long |>
+        list_df_raw <- electionInfo_df_long |>
           dplyr::filter(grepl("list\\.", var)) |>
           to_wide() |>
           dplyr::select(-unique_id) |>
           tidyr::unnest_longer(
             tidyselect::everything(),
             keep_empty = TRUE
-          ) |>
-          dplyr::filter(!is.na(candidatePosition_candidateIdentification)) |>
-          dplyr::mutate(candidate_candidateIdentification = candidatePosition_candidateIdentification)
+          )
+
+        # Drop cases with no lists (although this should not exist)
+        if ("candidatePosition_candidateIdentification" %in% names(list_df_raw)) {
+
+          list_df <- list_df_raw |>
+            dplyr::filter(!is.na(candidatePosition_candidateIdentification)) |>
+            dplyr::mutate(candidate_candidateIdentification = candidatePosition_candidateIdentification)
+
+        }
 
       }
 
@@ -227,12 +234,14 @@ parse_eCH_0157 <- function(file){
 
 
       electionInfo_df <- election_df |>
-        dplyr::left_join(candidate_df, by = "join_id")
+        # dplyr::left_join(candidate_df, by = "join_id")
+        dplyr::left_join(candidate_df)
 
       if (exists("list_df")) {
 
         electionInfo_df <- electionInfo_df |>
-          dplyr::left_join(list_df, by = "candidate_candidateIdentification")
+          # dplyr::left_join(list_df, by = "candidate_candidateIdentification")
+          dplyr::left_join(list_df)
 
       }
 
