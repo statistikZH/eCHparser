@@ -5,22 +5,37 @@
 # It
 
 
-# PARSE ALL TEST FILES AND SAVE THEM ===========================================
+# CREATE TEMPLATES FROM TEST FILES =============================================
 
 
 if(svDialogs::dlg_input("Are the files in tests/testthat/testdata/files_unparsed/eCH-0157/ are up to date?")$res == "Yes") {
 
+
+  ## Define Paths --------------------------------------------------------------
+
+
   # Define path to testfiles
-  path_raw <- "tests/testthat/testdata/files_unparsed/eCH-0157/"
+  path_origin_raw <- "tests/testthat/testdata/files_unparsed/eCH-0157/"
+
+  # Define path to destination
+  path_destination_raw <- "inst/templates/"
 
   # Define the two original files
-  original_file_maj <- paste0(path_raw, "eCH-0157_v4-0_abraxas_elections_ZH_majority_2026-06-16.xml")
-  original_file_prop <- paste0(path_raw, "eCH-0157_v4-0_abraxas_elections_ZH_proportion_2026-06-16.xml")
+  original_file_maj <- paste0(path_origin_raw, "eCH-0157_v4-0_abraxas_elections_ZH_majority_2026-06-16.xml")
+  original_file_prop <- paste0(path_origin_raw, "eCH-0157_v4-0_abraxas_elections_ZH_proportion_2030-06-16.xml")
 
-  # Prepare Majority Template
-  template_raw <- parse_eCH_0157(original_file_maj)
+  # Define destinations
+  template_path_maj <- paste0(path_destination_raw, "eCH-0157_majority_table_template.RDS")
+  template_path_prop <- paste0(path_destination_raw, "eCH-0157_proportion_table_template.RDS")
 
-  template <- template_raw[0,] |>
+
+  ## Build Majority Template ---------------------------------------------------
+
+
+  # Prepare template
+  template_majority_raw <- parse_eCH_0157(original_file_maj)
+
+  template_majority <- template_majority_raw[0,] |>
     dplyr::select(
       # contest_contestIdentification,
       # contest_contestDate,
@@ -59,11 +74,71 @@ if(svDialogs::dlg_input("Are the files in tests/testthat/testdata/files_unparsed
       parteilangbezeichnung = `partyAffiliationInfo-de_partyAffiliationLong`
     )
 
+  # Save template
+  saveRDS(template_majority, template_path_maj)
 
 
-    # saveRDS(template, rds_filepath)
+  ## Build Proportion Template ---------------------------------------------------
 
-  }
+
+  # Prepare template
+  template_proportion_raw <- parse_eCH_0157(original_file_prop)
+
+  template_proportion <- template_proportion_raw[0,] |>
+    dplyr::select(
+      # contest_contestIdentification,
+      datum = contest_contestDate,
+      # `contestDescriptionInfo-de_contestDescription`,
+      # electionGroupBallot_domainOfInfluenceIdentification,
+      # electionGroupBallot_index,
+      # election_electionIdentification,
+      # election_typeOfElection,
+      # election_electionPosition,
+      wahlkurzbezeichnung = `electionDescriptionInfo-de_electionDescriptionShort`,
+      wahllangbezeichnung = `electionDescriptionInfo-de_electionDescription`,
+      mandate = election_numberOfMandates,
+      # candidate_candidateIdentification,
+      nachname = candidate_familyName,
+      amtl_vorname = candidate_firstName,
+      pol_vorname = candidate_callName,
+      geburtsdatum = candidate_dateOfBirth,
+      geschlecht = candidate_sex,
+      beruf = `occupationalTitleInfo-de_occupationalTitle`,
+      titel = candidate_title,
+      strasse = dwellingAddress_street,
+      hausnummer = dwellingAddress_houseNumber,
+      plz = dwellingAddress_swissZipCode,
+      ort = dwellingAddress_town,
+      # country_countryId,
+      # country_countryIdISO2,
+      # country_countryNameShort,
+      # swiss_origin,
+      # candidate_mrMrs,
+      # candidate_languageOfCorrespondence,
+      # candidate_candidateReference,
+      parteikurzbezeichnung = `partyAffiliationInfo-de_partyAffiliationShort`,
+      # parteilangbezeichnung = `partyAffiliationInfo-de_partyAffiliationLong`,
+      # list_listIdentification,
+      list_listIndentureNumber,
+      listenkurzbezeichnung = `listDescriptionInfo-de_listDescriptionShort`,
+      listenlangbezeichnung = `listDescriptionInfo-de_listDescription`,
+      # list_isEmptyList,
+      list_listOrderOfPrecedence,
+      list_totalPositionsOnList,
+      candidatePosition_positionOnList,
+      candidatePosition_candidateReferenceOnPosition,
+      candidatePosition_candidateIdentification,
+      list_emptyListPositions
+    )
+
+  # Save template
+  saveRDS(template_proportion, template_path_prop)
+
+
+  ## Feedback ------------------------------------------------------------------
+
+
+  svDialogs::dlg_message(paste0("The templates at ", path_destination_raw, " were updated."))
 
 } else {
 

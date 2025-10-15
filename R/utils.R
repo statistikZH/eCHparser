@@ -327,3 +327,31 @@ clean_list <- function(my_list) {
 
   return(my_list)
 }
+
+
+
+
+
+#' Load election table template
+#'
+#' @param election_type election_type A character string specifying the election type.
+#' Must be one of: "Majority" or "Proportion"
+#'
+#' @return A dataframe.
+get_election_table_template <- function(election_type) {
+
+  # Check input
+  if (!tolower(election_type) %in% c("proportion", "majority")) {
+    stop("The parameter \"election_type\" must be either \"Majority\" or \"Proportion\". ")
+  }
+
+  type <- tolower(election_type)
+
+  # Define path to template
+  template_path <- system.file("templates", paste0("eCH-0157_", type, "_table_template.RDS"), package = "eCHparser")
+
+  # Get and return template
+  template <- readRDS(template_path)
+  return(template)
+
+}
