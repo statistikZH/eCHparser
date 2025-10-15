@@ -18,7 +18,7 @@ write_eCH_0157 <- function(file){
 
 
   # Read file template including delivery header
-  template_path <- system.file("templates", "eCH_0157_majority_template.RDS", package = "eCHparser")
+  template_path <- system.file("templates", "eCH_0157_majority_header_template.RDS", package = "eCHparser")
   delivery <- readRDS(template_path)
 
   # Update deliveryHeader
