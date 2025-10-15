@@ -18,7 +18,7 @@ write_eCH_0157 <- function(file){
 
 
   # Read file template including delivery header
-  template_path <- system.file("templates", "eCH_0157_majority_header_template.RDS", package = "eCHparser")
+  template_path <- system.file("templates", "eCH-0157_majority_header_template.RDS", package = "eCHparser")
   delivery <- readRDS(template_path)
 
   # Update deliveryHeader
@@ -30,7 +30,7 @@ write_eCH_0157 <- function(file){
   data <- readxl::read_xlsx(file) # This could/should be changed later so that the input is a tibble
 
   # Load namespaces file
-  ns_path <- system.file("templates", "eCH_0157_majority_namespaces.RDS", package = "eCHparser")
+  ns_path <- system.file("templates", "eCH-0157_majority_namespaces.RDS", package = "eCHparser")
   ns_list <- readRDS(ns_path)
 
 
