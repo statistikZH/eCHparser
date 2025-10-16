@@ -2,7 +2,8 @@
 % Please edit documentation in R/wrapper_functions.R
 \name{read_election_template}
 \alias{read_election_template}
-\title{Create and save a template XLSX file that can be converted into an XML file in the format eCH-0157}
+\title{Create and save a template XLSX file that can be converted into an XML file
+in the format eCH-0157}
 \usage{
 read_election_template(path)
 }
@@ -13,5 +14,6 @@ read_election_template(path)
 An XLSX file, saved to the given path.
 }
 \description{
-This function creates an empty xlsx file that can be transformed into an XML file in the format eCH-0157.
+This function creates an empty xlsx file that can be transformed into an XML
+file in the format eCH-0157.
 }

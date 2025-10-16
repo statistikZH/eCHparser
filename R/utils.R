@@ -48,9 +48,11 @@ strip_namespaces <- function(xml_data) {
 #' Amend node parents' names with node specification
 #'
 #' @description
-#' Certain nodes have a different logic, insofar as they do not themselves specify their content in the name but do this in one of the children.
-#' Examples of this are the namedElement or the otherIdentification nodes, or also nodes, that contain multilingual content.
-#' To create unique names that define their content, we specify their parents' names.
+#' Certain nodes have a different logic, insofar as they do not
+#' themselves specify their content in the name but do this in one of the
+#' children. Examples of this are the namedElement or the otherIdentification
+#' nodes, or also nodes, that contain multilingual content. To create unique
+#' names that define their content, we specify their parents' names.
 #'
 #' @param node An xml node.
 #' @param spec_element The name of the specification element that contains text.
@@ -259,6 +261,7 @@ extract_attributes <- function(my_list, path = character(), results = list()){
 #' @param path An empty character vector.
 #'
 #' @return A list.
+#' @export
 assign_namespaces_by_path <- function(my_list, ns_info, path = character()) {
 
   for (i in seq_along(my_list)) {
@@ -334,10 +337,11 @@ clean_list <- function(my_list) {
 
 #' Load election table template
 #'
-#' @param election_type election_type A character string specifying the election type.
+#' @param election_type A character string specifying the election type.
 #' Must be one of: "Majority" or "Proportion"
 #'
 #' @return A dataframe.
+#' @export
 get_election_table_template <- function(election_type) {
 
   # Check input

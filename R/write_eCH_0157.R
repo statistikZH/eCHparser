@@ -1,8 +1,9 @@
 #' Convert an xlsx file into an XML file with the format eCH-0157
 #'
 #' @description
-#' This function transforms an xlsx file in a defined structure into a xml file in the format eCH-0157.
-#' Use the function "open_eCH_0157_xlsx" to open a blank template file.
+#' This function transforms an xlsx file in a defined structure into a xml file
+#' in the format eCH-0157. Use the function "open_eCH_0157_xlsx" to open a
+#' blank template file.
 #'
 #' @param file Path to your xlsx file.
 #'
@@ -152,7 +153,8 @@ write_eCH_0157 <- function(file){
 #' @description
 #' This helper function transforms contest information to a contest list.
 #'
-#' @param cont_data A tibble containing the necessary contest information for the eCH-0157.
+#' @param cont_data A tibble containing the necessary contest information for
+#' the eCH-0157.
 #'
 #' @return A list.
 #' @export
@@ -213,7 +215,8 @@ create_contest_list <- function(cont_data){
 #' @description
 #' This helper function transforms election information to an election list.
 #'
-#' @param elec_data A tibble containing the necessary election information for the eCH-0157.
+#' @param elec_data A tibble containing the necessary election information for
+#' the eCH-0157.
 #'
 #' @return A list.
 #' @export
@@ -310,7 +313,8 @@ create_election_list <- function(elec_data){
 #' @description
 #' This helper function transforms candidate information to a candidate list.
 #'
-#' @param cand_data A tibble containing the necessary candidate information for the eCH-0157.
+#' @param cand_data A tibble containing the necessary candidate information for
+#' the eCH-0157.
 #'
 #' @return A list.
 #' @export
@@ -425,7 +429,8 @@ create_candidate_list <- function(cand_data){
 #' @description
 #' This helper function transforms list information to a list list.
 #'
-#' @param cand_data A tibble containing the necessary list information for the eCH-0157.
+#' @param cand_data A tibble containing the necessary list information for the
+#' eCH-0157.
 #'
 #' @return A list.
 #' @export

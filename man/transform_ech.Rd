@@ -14,9 +14,11 @@ transform_ech(file, type, overwrite = TRUE)
 \item{overwrite}{Logical. Whether to overwrite an existing file.}
 }
 \value{
-The function saves the corresponding XML or XLSX file of your defined input file under the same name with only the different file extension.
+The function saves the corresponding XML or XLSX file of your
+defined input file under the same name with only the different file extension.
 }
 \description{
-This function transforms an xlsx file in a defined structure into a xml file or vice versa and saves it under the same path.
+This function transforms an xlsx file in a defined structure into a xml file
+or vice versa and saves it under the same path.
 Use the function "open_eCH_0157_xlsx" to open a blank template file.
 }

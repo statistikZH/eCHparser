@@ -7,7 +7,7 @@
 get_election_table_template(election_type)
 }
 \arguments{
-\item{election_type}{election_type A character string specifying the election type.
+\item{election_type}{A character string specifying the election type.
 Must be one of: "Majority" or "Proportion"}
 }
 \value{

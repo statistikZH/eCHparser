@@ -1,14 +1,16 @@
 #' Convert an xlsx file into an XML file with the format eCH-0157
 #'
 #' @description
-#' This function transforms an xlsx file in a defined structure into a xml file or vice versa and saves it under the same path.
+#' This function transforms an xlsx file in a defined structure into a xml file
+#' or vice versa and saves it under the same path.
 #' Use the function "open_eCH_0157_xlsx" to open a blank template file.
 #'
 #' @param file Path to your file.
 #' @param type Type of eCH-File you want to transform. Either "" or "".
 #' @param overwrite Logical. Whether to overwrite an existing file.
 #'
-#' @return The function saves the corresponding XML or XLSX file of your defined input file under the same name with only the different file extension.
+#' @return The function saves the corresponding XML or XLSX file of your
+#' defined input file under the same name with only the different file extension.
 #' @export
 #'
 #' @examples
@@ -91,12 +93,16 @@ transform_ech <- function(file, type, overwrite = TRUE){
 
 
 
-#' Create and save a template XLSX file that can be converted into an XML file in the format eCH-0157
+#' Create and save a template XLSX file that can be converted into an XML file
+#' in the format eCH-0157
 #'
 #' @description
-#' This function creates an empty xlsx file that can be transformed into an XML file in the format eCH-0157.
+#' This function creates an empty xlsx file that can be transformed into an XML
+#' file in the format eCH-0157.
 #'
-#' @param path Path to your xlsx file.
+#' @inheritParams get_election_table_template
+#' @param path A character string specifying the path the file should be written
+#' to.
 #'
 #' @return An XLSX file, saved to the given path.
 #' @export
@@ -116,10 +122,12 @@ create_election_template <- function(path){
 
 
 
-#' Create and save a template XLSX file that can be converted into an XML file in the format eCH-0157
+#' Create and save a template XLSX file that can be converted into an XML file
+#' in the format eCH-0157
 #'
 #' @description
-#' This function creates an empty xlsx file that can be transformed into an XML file in the format eCH-0157.
+#' This function creates an empty xlsx file that can be transformed into an XML
+#' file in the format eCH-0157.
 #'
 #' @param path Path to your xlsx file.
 #'
