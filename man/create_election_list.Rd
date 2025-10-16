@@ -7,7 +7,8 @@
 create_election_list(elec_data)
 }
 \arguments{
-\item{elec_data}{A tibble containing the necessary election information for the eCH-0157.}
+\item{elec_data}{A tibble containing the necessary election information for
+the eCH-0157.}
 }
 \value{
 A list.

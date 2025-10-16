@@ -13,6 +13,7 @@ write_eCH_0157(file)
 An XML file.
 }
 \description{
-This function transforms an xlsx file in a defined structure into a xml file in the format eCH-0157.
-Use the function "open_eCH_0157_xlsx" to open a blank template file.
+This function transforms an xlsx file in a defined structure into a xml file
+in the format eCH-0157. Use the function "open_eCH_0157_xlsx" to open a
+blank template file.
 }

@@ -7,7 +7,8 @@
 create_candidate_list(cand_data)
 }
 \arguments{
-\item{cand_data}{A tibble containing the necessary candidate information for the eCH-0157.}
+\item{cand_data}{A tibble containing the necessary candidate information for
+the eCH-0157.}
 }
 \value{
 A list.
