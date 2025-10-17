@@ -171,6 +171,10 @@ read_election_template <- function(path, election_type, date, election_title_sho
     stop("Your input \"mandates\" must be numeric.")
   }
 
+  # DEV =================================================================================================================
+  data <- readRDS("inst/templates/eCH-0157_majority_table_template.RDS")
+  data <- readRDS("inst/templates/eCH-0157_proportion_table_template.RDS")
+
   # Read the file
   data <- readxl::read_xlsx(path)
 
@@ -185,66 +189,65 @@ read_election_template <- function(path, election_type, date, election_title_sho
 
   # Annotate and rename file
   data <- data |>
-    dplyr::rename(dplyr::all_of(
+    dplyr::rename(dplyr::all_of(c(
       candidate_familyName = "nachname",
       candidate_firstName = "amtl_vorname",
       candidate_callName = "pol_vorname",
       candidate_dateOfBirth = "geburtsdatum",
       candidate_sex = "geschlecht",
-      strasse = dwellingAddress_street,
-      hausnummer = dwellingAddress_houseNumber,
-      plz = dwellingAddress_swissZipCode,
+      dwellingAddress_street = "strasse",
+      dwellingAddress_houseNumber = "hausnummer",
+      dwellingAddress_swissZipCode = "plz",
       dwellingAddress_town = "ort",
-      `partyAffiliationInfo-de_partyAffiliationShort` = "Parteikurzbezeichnung",
-      list_listIndentureNumber = "Listennummer",
-      `listDescriptionInfo-de_listDescriptionShort` = "Listenkurzbezeichnung",
-      `listDescriptionInfo-de_listDescription` = "Listenlangbezeichnung",
-      list_listIndentureNumber = "Listennummer",
-      candidatePosition_candidateReferenceOnPosition = "Kandidierendennummer",
-      list_emptyListPositions = "Leere Zeilen",
+      `partyAffiliationInfo-de_partyAffiliationShort` = "parteikurzbezeichnung",
       `occupationalTitleInfo-de_occupationalTitle` = "beruf",
-      titel = candidate_title,
-      dwellingAddress_swissZipCode = "PLZ",
-      parteikurzbezeichnung = `partyAffiliationInfo-de_partyAffiliationShort`,
-    ))
-
+      candidate_title = "titel"
+    )))
 
   # Allgemein zusätzlich
-  country_countryId,
-  country_countryIdISO2,
-  country_countryNameShort,
-  swiss_origin,
-  candidate_mrMrs,
-  candidate_languageOfCorrespondence,
-  candidate_candidateReference,
+  data <- data |>
+    dplyr::mutate(
+      country_countryId = ,
+      country_countryIdISO2 = ,
+      country_countryNameShort = ,
+      swiss_origin = ,
+      candidate_mrMrs = ,
+      candidate_languageOfCorrespondence = ,
+      candidate_candidateReference =
+    )
 
   # Majorz zusätzlich
-  kand_nummer = candidate_candidateReference
-  parteilangbezeichnung = `partyAffiliationInfo-de_partyAffiliationLong`,
+  if (tolower(election_type) == "majority") {
 
+    data <- data |>
+      dplyr::rename(dplyr::all_of(c(
+        candidate_candidateReference = "kand_nummer",
+        `partyAffiliationInfo-de_partyAffiliationLong` = "parteilangbezeichnung"
+      )))
 
-
-
+  }
 
   # Proporz zusätzlich
+  if (tolower(election_type) == "proportion") {
 
+    data <- data |>
+      dplyr::mutate(
+        leere_zeilen = mandate -
+      ) |>
+      dplyr::rename(dplyr::all_of(c(
+        list_listIndentureNumber = "listennummer",
+        `listDescriptionInfo-de_listDescriptionShort` = "listenkurzbezeichnung",
+        `listDescriptionInfo-de_listDescription` = "listenlangbezeichnung",
+        # list_isEmptyList,
+        list_listOrderOfPrecedence,
+        list_totalPositionsOnList,
+        candidatePosition_positionOnList = "listenposition",
+        candidatePosition_candidateReferenceOnPosition = "kand_nummer",
+        # candidatePosition_candidateIdentification,
+        # list_listIdentification,
+        list_emptyListPositions = "leere_zeilen"
+      )))
 
-
-  # list_listIdentification,
-  listennummer = list_listIndentureNumber,
-  listenkurzbezeichnung = `listDescriptionInfo-de_listDescriptionShort`,
-  listenlangbezeichnung = `listDescriptionInfo-de_listDescription`,
-  list_isEmptyList,
-  list_listOrderOfPrecedence,
-  list_totalPositionsOnList,
-  listenposition = candidatePosition_positionOnList,
-  kand_nummer = candidatePosition_candidateReferenceOnPosition,
-  # candidatePosition_candidateIdentification,
-  leere_zeilen = list_emptyListPositions
-
-
-
-
-
+  }
 
 }
