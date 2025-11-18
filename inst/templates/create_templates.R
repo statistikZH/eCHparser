@@ -8,7 +8,7 @@
 # CREATE TEMPLATES FROM TEST FILES =============================================
 
 
-if(svDialogs::dlg_input("Are the files in tests/testthat/testdata/files_unparsed/eCH-0157/ are up to date?")$res == "Yes") {
+if(tolower(svDialogs::dlg_input("Are the files in tests/testthat/testdata/files_unparsed/eCH-0157/ are up to date?")$res) == "yes") {
 
 
   ## Define Paths --------------------------------------------------------------
@@ -21,8 +21,8 @@ if(svDialogs::dlg_input("Are the files in tests/testthat/testdata/files_unparsed
   path_destination_raw <- "inst/templates/"
 
   # Define the two original files
-  original_file_maj <- paste0(path_origin_raw, "eCH-0157_v4-0_abraxas_elections_ZH_majority_2026-06-16.xml")
-  original_file_prop <- paste0(path_origin_raw, "eCH-0157_v4-0_abraxas_elections_ZH_proportion_2030-06-16.xml")
+  original_file_maj <- paste0(path_origin_raw, "eCH-0157_v4_0_abraxas_election_ZH_majority_2030-01-01.xml")
+  original_file_prop <- paste0(path_origin_raw, "eCH-0157_v4_0_abraxas_election_ZH_proportion_2030-01-01.xml")
 
   # Define destinations
   template_path_maj <- paste0(path_destination_raw, "eCH-0157_majority_table_template.RDS")
@@ -64,6 +64,7 @@ if(svDialogs::dlg_input("Are the files in tests/testthat/testdata/files_unparsed
       plz = dwellingAddress_swissZipCode,
       ort = dwellingAddress_town,
       kand_nummer = candidate_candidateReference,
+      bisher = candidate_incumbentYesNo,
       # country_countryId,
       # country_countryIdISO2,
       # country_countryNameShort,
@@ -119,6 +120,7 @@ if(svDialogs::dlg_input("Are the files in tests/testthat/testdata/files_unparsed
       # candidate_candidateReference,
       listenposition = candidatePosition_positionOnList,
       kand_nummer = candidatePosition_candidateReferenceOnPosition,
+      bisher = candidate_incumbentYesNo,
       parteikurzbezeichnung = `partyAffiliationInfo-de_partyAffiliationShort`,
       # parteilangbezeichnung = `partyAffiliationInfo-de_partyAffiliationLong`,
       # list_listIdentification,
