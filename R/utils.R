@@ -7,6 +7,7 @@
 #' @param xml_data A list of class xml_document.
 #'
 #' @return A list of class xml_document.
+#'
 #' @export
 #'
 #' @examples
@@ -23,6 +24,7 @@
 #' # Strip namespaces
 #' xml_data_stripped <- strip_namespaces(xml_data)
 #' }
+#'
 strip_namespaces <- function(xml_data) {
 
   # If we find the node deliveryHeader without prefix, remove all namespaces with xml_ns_strip()
@@ -48,16 +50,17 @@ strip_namespaces <- function(xml_data) {
 #' Amend node parents' names with node specification
 #'
 #' @description
-#' Certain nodes have a different logic, insofar as they do not
-#' themselves specify their content in the name but do this in one of the
-#' children. Examples of this are the namedElement or the otherIdentification
-#' nodes, or also nodes, that contain multilingual content. To create unique
-#' names that define their content, we specify their parents' names.
+#' Certain nodes have a different logic, insofar as they do not themselves
+#' specify their content in the name but do this in one of the children.
+#' Examples of this are the namedElement or the otherIdentification nodes, or
+#' also nodes, that contain multilingual content. To create unique names that
+#' define their content, we specify their parents' names.
 #'
 #' @param node An xml node.
 #' @param spec_element The name of the specification element that contains text.
 #'
 #' @return An xml node.
+#'
 specify_node <- function(node, spec_element) {
 
   # Define search tag
@@ -96,6 +99,7 @@ specify_node <- function(node, spec_element) {
 #' @param node An xml node.
 #'
 #' @return An xml node.
+#'
 specify_voter_node <- function(node) {
 
 
@@ -155,6 +159,7 @@ specify_voter_node <- function(node) {
 #' @param data A long dataframe.
 #'
 #' @return A dataframe.
+#'
 to_wide <- function(data){
 
   if ("var" %in% names(data)){
@@ -182,6 +187,7 @@ to_wide <- function(data){
 #' @param names A string of variable names.
 #'
 #' @return A dataframe.
+#'
 to_df <- function(data, names){
 
   data.frame(
@@ -210,6 +216,7 @@ to_df <- function(data, names){
 #' @param results A list.
 #'
 #' @return A list.
+#'
 extract_attributes <- function(my_list, path = character(), results = list()){
 
   if (is.list(my_list)) {
@@ -261,7 +268,7 @@ extract_attributes <- function(my_list, path = character(), results = list()){
 #' @param path An empty character vector.
 #'
 #' @return A list.
-#' @export
+#'
 assign_namespaces_by_path <- function(my_list, ns_info, path = character()) {
 
   for (i in seq_along(my_list)) {
@@ -304,6 +311,7 @@ assign_namespaces_by_path <- function(my_list, ns_info, path = character()) {
 #' @param my_list A list.
 #'
 #' @return A list.
+#'
 clean_list <- function(my_list) {
   if (is.list(my_list)) {
     # Recursively clean children
@@ -341,8 +349,13 @@ clean_list <- function(my_list) {
 #' Must be one of: "Majority" or "Proportion"
 #'
 #' @return A dataframe.
+#'
 #' @export
-get_election_table_template <- function(election_type) {
+#'
+#' @examples
+#' my_template <- get_election_template("Proportion")
+#'
+get_election_template <- function(election_type) {
 
   # Transform input param
   election_type <- tolower(election_type)

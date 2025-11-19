@@ -4,10 +4,10 @@
 \alias{parse_eCH_0157}
 \title{Convert eCH-0157 XML file into a dataframe}
 \usage{
-parse_eCH_0157(file)
+parse_eCH_0157(input_path)
 }
 \arguments{
-\item{file}{Path to your XML file.}
+\item{input_path}{Path to your XML file.}
 }
 \value{
 A dataframe.
@@ -25,4 +25,5 @@ filepath <- system.file(
 )
 
 votedata <- parse_eCH_0157(filepath)
+
 }

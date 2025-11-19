@@ -4,10 +4,10 @@
 \alias{parse_eCH_0252}
 \title{Convert an eCH-0252 XML file into a dataframe}
 \usage{
-parse_eCH_0252(file, doi = "all")
+parse_eCH_0252(input_path, doi = "all")
 }
 \arguments{
-\item{file}{Path to your XML file.}
+\item{input_path}{Path to your XML file.}
 
 \item{doi}{Domains of influence of the votes that you want included.
 If set to "all" (the default), all votes are included.
@@ -41,4 +41,5 @@ filepath <- system.file(
 )
 
 votedata <- parse_eCH_0252(filepath, doi = c("CH", "CT", "MU"))
+
 }

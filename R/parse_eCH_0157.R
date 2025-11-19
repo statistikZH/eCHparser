@@ -5,9 +5,10 @@
 #' dataframe. Currently, the function supports input files for votes generated
 #' by the application VOTING.
 #'
-#' @param file Path to your XML file.
+#' @param input_path Path to your XML file.
 #'
 #' @return A dataframe.
+#'
 #' @export
 #'
 #' @examples
@@ -18,10 +19,11 @@
 #' )
 #'
 #' votedata <- parse_eCH_0157(filepath)
-parse_eCH_0157 <- function(file){
+#'
+parse_eCH_0157 <- function(input_path){
 
   # Load file and strip namespaces
-  xml_data <- xml2::read_xml(file)
+  xml_data <- xml2::read_xml(input_path)
 
   # Strip namespaces
   xml_data_stripped <- strip_namespaces(xml_data)

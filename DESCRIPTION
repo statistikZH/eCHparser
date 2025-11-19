@@ -16,6 +16,7 @@ Config/testthat/edition: 3
 Imports: 
     dplyr,
     readxl,
+    stringr,
     tidyr,
     tidyselect,
     writexl,

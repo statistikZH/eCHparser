@@ -1,18 +1,21 @@
-#' Convert an xlsx file into an XML file with the format eCH-0157
+#' Convert an dataframe into an XML file with the format eCH-0157
 #'
 #' @description
 #' This function transforms an xlsx file in a defined structure into a xml file
 #' in the format eCH-0157. Use the function "open_eCH_0157_xlsx" to open a
 #' blank template file.
 #'
-#' @param file Path to your xlsx file.
+#' @param data A dataframe in the required format.
 #'
 #' @return An XML file.
 #' @export
 #'
 #' @examples
+#' \dontrun{
+#' my_xml_file <- build_eCH_0157(my_df)
+#' }
 #'
-write_eCH_0157 <- function(file){
+build_eCH_0157 <- function(data){
 
 
   # PREPARE DATA ===============================================================
@@ -26,9 +29,6 @@ write_eCH_0157 <- function(file){
   delivery[[1]][["messageId"]] <- list(substr(paste0("STAT_", sub(" ", "T", as.character(Sys.time()))), 1, 36))
   delivery[[1]][["sendingApplication"]][["productVersion"]] <- list(substr(packageVersion("eCHparser"), 1, 10))
   delivery[[1]][["messageDate"]] <- list(sub(" ", "T", as.character(Sys.time())))
-
-  # Read xlsx file
-  data <- readxl::read_xlsx(file) # This could/should be changed later so that the input is a tibble
 
   # Load namespaces file
   ns_path <- system.file("templates", "eCH-0157_majority_namespaces.RDS", package = "eCHparser")
@@ -134,12 +134,6 @@ write_eCH_0157 <- function(file){
   # Turn to xml
   delivery_xml <- xml2::as_xml_document(delivery_list)
 
-
-
-  # DEV: WRITE XML ===============
-
-  xml2::write_xml(delivery_xml, "/home/file-server/01_Post/Graf/eCH_writer_output_0157.xml") # for dev purposes
-
   return(delivery_xml)
 
 }
@@ -157,9 +151,6 @@ write_eCH_0157 <- function(file){
 #' the eCH-0157.
 #'
 #' @return A list.
-#' @export
-#'
-#' @examples
 #'
 create_contest_list <- function(cont_data){
 
@@ -219,9 +210,6 @@ create_contest_list <- function(cont_data){
 #' the eCH-0157.
 #'
 #' @return A list.
-#' @export
-#'
-#' @examples
 #'
 create_election_list <- function(elec_data){
 
@@ -317,9 +305,6 @@ create_election_list <- function(elec_data){
 #' the eCH-0157.
 #'
 #' @return A list.
-#' @export
-#'
-#' @examples
 #'
 create_candidate_list <- function(cand_data){
 
@@ -383,7 +368,7 @@ create_candidate_list <- function(cand_data){
 
   # ASSEMBLE CANDIDATE LIST ====================================================
 
-# browser()
+
   # Hardcode everything since structure is fixed (fill in NAs if there was no nested language info)
   candidate_list <- list(
     candidateIdentification = list(cand_data$candidate_candidateIdentification),
@@ -424,39 +409,18 @@ create_candidate_list <- function(cand_data){
 
 
 
-#' Create list lists
-#'
-#' @description
-#' This helper function transforms list information to a list list.
-#'
-#' @param cand_data A tibble containing the necessary list information for the
-#' eCH-0157.
-#'
-#' @return A list.
-#' @export
-#'
-#' @examples
-#'
-create_list_list <- function(list_data){
-  list_data
-}
-
-
-
-
-
 #' Prepare specified data for further processing
 #'
 #' @description
-#' This helper function transforms specified columns into dataframes for further processing.
+#' This helper function transforms specified columns into dataframes for
+#' further processing.
 #'
-#' @param data A tibble containing columns, for which a characteristic of the content is defined by a tag in the column title.
-#' @param type A character vector defining the type of the specification. Either "language" or "relation".
+#' @param nested_data A tibble containing columns, for which a characteristic
+#' of the content is defined by a tag in the column title.
+#' @param type A character vector defining the type of the specification.
+#' Either "language" or "relation".
 #'
 #' @return A tibble.
-#' @export
-#'
-#' @examples
 #'
 transform_nested <- function(nested_data, type) {
 
