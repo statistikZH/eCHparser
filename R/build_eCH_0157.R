@@ -432,7 +432,7 @@ transform_nested <- function(nested_data, type) {
     selected_data <- nested_data |>
       dplyr::select(grep("-([0-9])", names(nested_data)))
   }
-
+browser()
   # Transform data to long and add names for the different levels in the list later on
   transformed_data <- selected_data |>
     # dplyr::select(dplyr::contains("-")) |>

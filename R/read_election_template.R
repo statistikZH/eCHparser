@@ -49,9 +49,7 @@ read_election_template <- function(input_path, election_type, date, election_tit
   base_msg <- "Die Datei kann nicht verarbeitet werden. "
 
   # General checks
-  if (any(sapply(data, function(x) any(grepl(c("\\[", "\\]"), x))))) { # gesamtes file auf Sonderzeichen prüfen
-    stop(paste0(base_msg, "Die Datei enthält nicht erlaubte Sonderzeichen."))
-  } else if (any(is.na(data$nachname) | nchar(data$nachname) > 100)) {
+  if (any(is.na(data$nachname) | nchar(data$nachname) > 100)) {
     stop(paste0(base_msg, "Es muss für alle Kandidierenden ein Nachname von maximal 100 Zeichen erfasst sein."))
   } else if (any(nchar(data$amtl_vorname, keepNA = FALSE) > 100)) {
     stop(paste0(base_msg, "Vornamen dürfen maximal 100 Zeichen lang sein."))
@@ -72,7 +70,7 @@ read_election_template <- function(input_path, election_type, date, election_tit
     stop(paste0(base_msg, "Die Strasse darf maximal 150 Zeichen enthalten."))
   } else if (any(nchar(data$hausnummer, keepNA = FALSE) > 30)) {
     stop(paste0(base_msg, "Die Hausnummer darf maximal 30 Zeichen enthalten."))
-  } else if (any(!nchar(data$plz, keepNA = FALSE) %in% c(2, 4)) | !is.numeric(data$plz)) {
+  } else if (any(!nchar(data$plz, keepNA = FALSE) %in% c(2, 4))) {
     stop(paste0(base_msg, "Die Postleitzahl muss genau 4 Ziffern lang sein."))
   } else if (any(nchar(data$ort, keepNA = FALSE) > 40)) {
     stop(paste0(base_msg, "Der Wohnort darf maximal 40 Zeichen enthalten."))
@@ -95,7 +93,7 @@ read_election_template <- function(input_path, election_type, date, election_tit
 
     if (!all(sort(names(data)) == sort(names(readRDS("inst/templates/eCH-0157_proportion_table_template.RDS"))))) {
       stop(paste0(base_msg, "Es sind nicht alle nötigen Spalten aus dem Template vorhanden."))
-    } else if (any(!is.numeric(data$listenposition))) {
+    } else if (any(!grepl("^[0-9]+$", data$listenposition))) {
       stop(paste0(base_msg, "Die Listenposition muss eine Zahl sein. Sie bezeichnet die genaue Position von Kandidierenden auf der Liste."))
     } else if (any(nchar(data$listennummer, keepNA = FALSE) > 12)) {
       stop(paste0(base_msg, "Die Listennummer darf maximal 12 Zeichen enthalten."))
@@ -103,7 +101,7 @@ read_election_template <- function(input_path, election_type, date, election_tit
       stop(paste0(base_msg, "Die Listenkurzbezeichnung darf maximal 20 Zeichen enthalten."))
     } else if (any(nchar(data$listenlangbezeichnung, keepNA = FALSE) > 100)) {
       stop(paste0(base_msg, "Die Listenbezeichnung darf maximal 100 Zeichen enthalten."))
-    } else if (any(!is.numeric(data$leere_zeilen))) {
+    } else if (any(!grepl("^[0-9]+$", data$leere_zeilen))) {
       stop(paste0(base_msg, "Die Anzahl leere Zeilen muss eine Zahl sein."))
     }
 
