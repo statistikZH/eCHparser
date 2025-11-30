@@ -220,20 +220,25 @@ create_election_list <- function(elec_data){
   ## Referenced Election -------------------------------------------------------
 
 
-  # Define and transform nested data for referenced elections and drop all rows with no value and duplicate rows if there are multiple referenced elections
-  data_nested <- transform_nested(elec_data, "relation") |>
-    dplyr::filter(!is.na(value)) |>
-    tidyr::separate_rows(value, sep = ", ")
+  # Check names for nested data of type relation
+  if (any(grepl("-([0-9])", names(file)))) {
 
-  # Work through multiple referenced elections
-  referencedElection <- lapply(1:nrow(data_nested), function(rownumber){
-    referencedElection <- list(
-      referencedElection = list(data_nested$value[rownumber]),
-      electionRelation = list(data_nested$relation[rownumber])
+    # Define and transform nested data for referenced elections and drop all rows with no value and duplicate rows if there are multiple referenced elections
+    data_nested <- transform_nested(elec_data, "relation") |>
+      dplyr::filter(!is.na(value)) |>
+      tidyr::separate_rows(value, sep = ", ")
+
+    # Work through multiple referenced elections
+    referencedElection <- lapply(1:nrow(data_nested), function(rownumber){
+      referencedElection <- list(
+        referencedElection = list(data_nested$value[rownumber]),
+        electionRelation = list(data_nested$relation[rownumber])
       )
     })
 
-  names(referencedElection) <- rep("referencedElection", length(referencedElection))
+    names(referencedElection) <- rep("referencedElection", length(referencedElection))
+
+  }
 
 
   ## Multilingual Information --------------------------------------------------
@@ -283,9 +288,10 @@ create_election_list <- function(elec_data){
     numberOfMandates = list(elec_data$election_numberOfMandates)
   )
 
-  # Add the referenced election(s) at the end
-  election_list <- c(election_list, referencedElection)
-
+  # Add the referenced election(s) at the end if object exists
+  if (exists("referencedElection")) {
+    election_list <- c(election_list, referencedElection)
+  }
 
   # Remove all NAs from the list
   election_list <- election_list[!sapply(election_list, function(x) all(is.na(x)))]
@@ -432,7 +438,7 @@ transform_nested <- function(nested_data, type) {
     selected_data <- nested_data |>
       dplyr::select(grep("-([0-9])", names(nested_data)))
   }
-browser()
+
   # Transform data to long and add names for the different levels in the list later on
   transformed_data <- selected_data |>
     # dplyr::select(dplyr::contains("-")) |>
