@@ -64,11 +64,11 @@ new_election_template <- function(election_type, output_path, overwrite = FALSE)
 #' write_eCH_0157(my_df, "path/to/my/xml_file.xml")
 #' }
 #'
-write_eCH_0157 <- function(data, output_path){
+write_eCH_0157 <- function(input_path, output_path){
 
   data <- build_eCH_0157(input_path)
 
-  xml2::write_xml(output_path)
+  xml2::write_xml(data, output_path)
 
 }
 

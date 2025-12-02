@@ -46,6 +46,29 @@ build_eCH_0157 <- function(data){
   ## Build Election Group Ballot List ------------------------------------------
 
 
+
+
+
+
+
+  # something here is not working... --> we need to include all needed variables into read_election_template!
+  # therefore, the problem is not here
+  browser()
+
+
+
+
+
+
+
+
+
+  # Add electionGroupBallot_index if there is none
+  if (!any(grepl("electionGroupBallot_index", names(data)))) {
+    data <- data |>
+      dplyr::mutate(electionGroupBallot_index = 1)
+  }
+
   electionGroupBallot <- lapply(unique(data$electionGroupBallot_index), function(egb_index){
 
     # Get the right data

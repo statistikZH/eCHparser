@@ -28,3 +28,13 @@ import_prop <- read_election_template(
  mandates = 7
 )
 
+#
+convert_to_eCH_0157(
+  input_path = "/home/file-server/01_Post/Graf/eCH-0157_testfiles/prop_template.xlsx",
+  output_path = "/home/file-server/01_Post/Graf/eCH-0157_testfiles/template_prop_0157.xml",
+  election_type = "Proportion",
+  date = "2030-01-02",
+  election_title_short = "Testwahl Prop",
+  election_title_long = "Testwahl Proporz lang",
+  mandates = 7
+)
