@@ -323,6 +323,13 @@ create_candidate_list <- function(cand_data){
   data_nested <- transform_nested(cand_data, "language") |>
     dplyr::filter(!is.na(value))
 
+
+
+  # STAND HIER: Problem in nested party data ===============================
+
+
+
+
   # Check if there is data left and if so, transform it into separate lists
   if(nrow(data_nested > 0)) {
 
