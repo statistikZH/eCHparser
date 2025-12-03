@@ -117,7 +117,8 @@ read_election_template <- function(input_path, election_type, date, election_tit
       election_numberOfMandates = mandates
     )
 
-  # Annotate and rename file
+
+  # Rename columns
   data <- data |>
     # rename variables
     dplyr::rename(dplyr::all_of(c(
@@ -134,30 +135,35 @@ read_election_template <- function(input_path, election_type, date, election_tit
       `partyAffiliationInfo-de_partyAffiliationShort` = "parteikurzbezeichnung",
       `occupationalTitleInfo-de_occupationalTitle` = "beruf",
       candidate_title = "titel"
-    ))) |>
-    # add variables for valid eCH-0157
+    )))
+
+
+  # Add columns
+  data <- data |>
     dplyr::mutate(
-      # adjust first name
+      # Add necessary columns with boiler plate content that will not be used by the receiving system but is necessary for valid eCH
+      contest_contestIdentification = paste0("contest-", contest_contestDate),
+      `contestDescriptionInfo-de_contestDescription` = paste0("urnengang_vom_", contest_contestDate),
+      electionGroupBallot_domainOfInfluenceIdentification = 1,
+      election_electionIdentification = paste0("wahl_vom_", contest_contestDate),
+      candidate_candidateIdentification = stringr::str_trunc(paste0(contest_contestDate, kand_nummer, candidate_familyName, candidate_firstName), 36, "right", ""),
+      # `candidateTextInfo-de_candidateText` = "candidateText", # not needed
+      swiss_origin = "-", # not needed
+
+      # Mutate columns with information to be used by receiving system
+      election_typeOfElection = ifelse(election_type == "proportion", 1, 2),
+      election_electionPosition = 0,
+      electionGroupBallot_index = 1,
       candidate_firstName = ifelse(is.na(candidate_firstName), candidate_callName, candidate_firstName),
-      # adjust date of birth (not necessary, this works while importing)
-      # candidate_dateOfBirth = as.character(paste0(
-      #   stringr::str_sub(candidate_dateOfBirth, 7, 10),
-      #   "-",
-      #   stringr::str_sub(candidate_dateOfBirth, 4, 5),
-      #   "-",
-      #   stringr::str_sub(candidate_dateOfBirth, 1, 2)
-      # )),
-      # change sex to numeric
       candidate_sex = ifelse(tolower(candidate_sex) %in% c("m", "männlich", "mann", "herr"), 1, 2),
       candidate_incumbentYesNo = ifelse(tolower(candidate_incumbentYesNo) %in% c("yes", "ja", "bisher", "true"), "true", "false"),
-      # add variables
       country_countryId = 8100,
       country_countryIdISO2 = "CH",
       country_countryNameShort = "Schweiz",
-      # swiss_origin = ,
       candidate_mrMrs = ifelse(candidate_sex == 1, 2, 1), # eCH-0010 and 0044 have different numerics for male/mr. -.-
       candidate_languageOfCorrespondence = "de"
     )
+
 
   # Majority specific adjustments
   if (election_type == "majority") {
@@ -172,6 +178,7 @@ read_election_template <- function(input_path, election_type, date, election_tit
       )
 
   }
+
 
   # Proportion specific adjustments
   if (election_type == "proportion") {
@@ -189,6 +196,7 @@ read_election_template <- function(input_path, election_type, date, election_tit
       dplyr::mutate(n_kand = dplyr::n()) |>
       dplyr::ungroup() |>
       dplyr::mutate(
+        `partyAffiliationInfo-de_partyAffiliationLong` = `partyAffiliationInfo-de_partyAffiliationShort`,
         list_listIndentureNumber = stringr::str_pad(as.numeric(list_listIndentureNumber), 2, "left", "0"),
         # candidate number: padded list number, padded last two positions on the cand number given
         candidatePosition_candidateReferenceOnPosition = paste0(
@@ -197,11 +205,6 @@ read_election_template <- function(input_path, election_type, date, election_tit
           stringr::str_pad(stringr::str_trunc(candidatePosition_candidateReferenceOnPosition, 2, "left", ellipsis = ""), 2, "left", "0")
         ),
         candidate_candidateReference = candidatePosition_candidateReferenceOnPosition,
-        candidate_candidateIdentification = stringr::str_trunc(
-          paste0(contest_contestDate, candidatePosition_candidateReferenceOnPosition, candidate_familyName, candidate_firstName),
-          36,
-          "right"
-        ),
         list_isEmptyList = "false",
         list_listOrderOfPrecedence = as.numeric(list_listIndentureNumber),
         candidatePosition_candidateIdentification = candidatePosition_candidateReferenceOnPosition,
@@ -219,6 +222,7 @@ read_election_template <- function(input_path, election_type, date, election_tit
       dplyr::ungroup()
 
   }
+
 
   return(data)
 
