@@ -135,6 +135,7 @@ read_election_template <- function(input_path, election_type, date, election_tit
       `occupationalTitleInfo-de_occupationalTitle` = "beruf",
       candidate_title = "titel"
     ))) |>
+    # add variables for valid eCH-0157
     dplyr::mutate(
       # adjust first name
       candidate_firstName = ifelse(is.na(candidate_firstName), candidate_callName, candidate_firstName),
@@ -194,6 +195,12 @@ read_election_template <- function(input_path, election_type, date, election_tit
           list_listIndentureNumber,
           ".",
           stringr::str_pad(stringr::str_trunc(candidatePosition_candidateReferenceOnPosition, 2, "left", ellipsis = ""), 2, "left", "0")
+        ),
+        candidate_candidateReference = candidatePosition_candidateReferenceOnPosition,
+        candidate_candidateIdentification = stringr::str_trunc(
+          paste0(contest_contestDate, candidatePosition_candidateReferenceOnPosition, candidate_familyName, candidate_firstName),
+          36,
+          "right"
         ),
         list_isEmptyList = "false",
         list_listOrderOfPrecedence = as.numeric(list_listIndentureNumber),
