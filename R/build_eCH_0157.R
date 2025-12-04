@@ -45,7 +45,6 @@ build_eCH_0157 <- function(data){
 
   ## Build Election Group Ballot List ------------------------------------------
 
-# browser()
 
   electionGroupBallot <- lapply(unique(data$electionGroupBallot_index), function(egb_index){
 
@@ -90,6 +89,20 @@ build_eCH_0157 <- function(data){
         candidate <- create_candidate_list(cand_data[1, ])
 
       })
+
+
+      ## Build List Information List -------------------------------------------
+
+
+
+
+
+      # STAND HIER ===============================================================================================================================
+
+
+
+
+
 
 
       # RENAME AND ASSEMBLE ====================================================
@@ -327,36 +340,70 @@ create_candidate_list <- function(cand_data){
 
   # STAND HIER: Problem in nested party data ===============================
 
-
+# browser()
 
 
   # Check if there is data left and if so, transform it into separate lists
-  if(nrow(data_nested > 0)) {
+  if(nrow(data_nested) > 0) {
 
-    # Create lists
+    # Create a list for each parent element
     data_nested_list <- lapply(data_nested$name_parent_element |> unique(), function(list_name) {
 
       # Filter data
       data_nested_parent <- data_nested |>
         dplyr::filter(name_parent_element == list_name)
 
-      data_nested_list <- lapply(1:nrow(data_nested_parent), function(element_number) {
+      # Build list for each language
+      data_nested_list <- lapply(unique(data_nested_parent$language), function(language) {
 
-        # Select relevant row
-        data_nested_child <- data_nested_parent[element_number, ]
+        # Filter for selected language
+        data_nested_child <- data_nested_parent |>
+          dplyr::filter(language == language)
 
-        # Build list
+        # Build initial list for the language
         data_nested_list <- list(
-          language = list(data_nested_child$language),
-          dynamic_name = list(data_nested_child$value)
+          language = list(data_nested_child$language[1])
         )
 
-        # Rename the second list element dynamically
-        names(data_nested_list)[2] <- data_nested_child$name_list_element
+        # For each row of the same parent element in the same language, add a list element
+        for (row in 1:nrow(data_nested_child)) {
+
+          data_nested_list_element <- list(
+            dynamic_name = list(data_nested_child$value[row])
+
+          )
+
+          data_nested_list <- c(
+            data_nested_list,
+            data_nested_list_element
+          )
+
+          # Rename the newly added element
+          names(data_nested_list)[length(data_nested_list)] <- data_nested_child$name_list_element[row]
+        }
 
         return(data_nested_list)
 
       })
+
+      # Old approach
+      # data_nested_list <- lapply(1:nrow(data_nested_parent), function(element_number) {
+      #
+      #   # Select relevant row
+      #   data_nested_child <- data_nested_parent[element_number, ]
+      #
+      #   # Build list
+      #   data_nested_list <- list(
+      #     language = list(data_nested_child$language),
+      #     dynamic_name = list(data_nested_child$value)
+      #   )
+      #
+      #   # Rename the second list element dynamically
+      #   names(data_nested_list)[2] <- data_nested_child$name_list_element
+      #
+      #   return(data_nested_list)
+      #
+      # })
 
       # Rename list elements
       names(data_nested_list) <- rep(unique(data_nested_parent$name_parent_element), length(data_nested_list))
@@ -414,12 +461,8 @@ create_candidate_list <- function(cand_data){
     partyAffiliation = if (exists("partyAffiliation")) partyAffiliation else NA
   )
 
-  # IN DEV =====================================================================
-
   # Remove all NAs from the list
-  # candidate_list <- candidate_list[!sapply(candidate_list, function(x) all(is.na(x)))]
-
-  # IN DEV =====================================================================
+  candidate_list <- candidate_list[!sapply(candidate_list, function(x) all(is.na(x)))]
 
 }
 
