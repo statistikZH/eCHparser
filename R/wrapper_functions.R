@@ -64,9 +64,9 @@ new_election_template <- function(election_type, output_path, overwrite = FALSE)
 #' write_eCH_0157(my_df, "path/to/my/xml_file.xml")
 #' }
 #'
-write_eCH_0157 <- function(input_path, output_path){
+write_eCH_0157 <- function(input_path, output_path, election_type){
 
-  data <- build_eCH_0157(input_path)
+  data <- build_eCH_0157(input_path, election_type)
 
   xml2::write_xml(data, output_path)
 
@@ -100,6 +100,6 @@ convert_to_eCH_0157 <- function(input_path, output_path, election_type, date, el
 
   data_df <- read_election_template(input_path, election_type, date, election_title_short, election_title_long, mandates)
 
-  write_eCH_0157(data_df, output_path)
+  write_eCH_0157(data_df, output_path, election_type)
 
 }

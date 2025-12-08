@@ -36,5 +36,5 @@ convert_to_eCH_0157(
   date = "2030-01-02",
   election_title_short = "Testwahl Prop",
   election_title_long = "Testwahl Proporz lang",
-  mandates = 7
+  mandates = 10
 )

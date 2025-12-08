@@ -208,7 +208,7 @@ read_election_template <- function(input_path, election_type, date, election_tit
         list_isEmptyList = "false",
         list_listOrderOfPrecedence = as.numeric(list_listIndentureNumber),
         candidatePosition_candidateIdentification = candidatePosition_candidateReferenceOnPosition,
-        list_listIdentification = list_listIndentureNumber
+        list_listIdentification = paste0("list_id", list_listIndentureNumber, "-", stringr::str_remove_all(`listDescriptionInfo-de_listDescription`, " "))
       ) |>
       dplyr::group_by(
         `listDescriptionInfo-de_listDescriptionShort`,
@@ -216,7 +216,7 @@ read_election_template <- function(input_path, election_type, date, election_tit
         list_listIndentureNumber
       ) |>
       dplyr::mutate(
-        list_totalPositionsOnList = dplyr::n_distinct(candidatePosition_candidateReferenceOnPosition),
+        list_totalPositionsOnList = max(as.numeric(candidatePosition_positionOnList)),
         list_emptyListPositions = mandates - list_totalPositionsOnList,
       ) |>
       dplyr::ungroup()

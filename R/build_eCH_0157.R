@@ -6,6 +6,7 @@
 #' blank template file.
 #'
 #' @param data A dataframe in the required format.
+#' @inheritParams get_election_template
 #'
 #' @return An XML file.
 #' @export
@@ -15,14 +16,20 @@
 #' my_xml_file <- build_eCH_0157(my_df)
 #' }
 #'
-build_eCH_0157 <- function(data){
+build_eCH_0157 <- function(data, election_type){
 
 
   # PREPARE DATA ===============================================================
 
 
+  election_type <- tolower(election_type)
+
+  if (!election_type %in% c("proportion", "majority")) {
+    stop("The election_type has to be either \"Proportion\" or \"Majority\"!")
+  }
+
   # Read file template including delivery header
-  template_path <- system.file("templates", "eCH-0157_majority_header_template.RDS", package = "eCHparser")
+  template_path <- system.file("templates", paste0("eCH-0157_", election_type, "_header_template.RDS"), package = "eCHparser")
   delivery <- readRDS(template_path)
 
   # Update deliveryHeader
@@ -31,7 +38,7 @@ build_eCH_0157 <- function(data){
   delivery[[1]][["messageDate"]] <- list(sub(" ", "T", as.character(Sys.time())))
 
   # Load namespaces file
-  ns_path <- system.file("templates", "eCH-0157_majority_namespaces.RDS", package = "eCHparser")
+  ns_path <- system.file("templates", paste0("eCH-0157_", election_type, "_namespaces.RDS"), package = "eCHparser")
   ns_list <- readRDS(ns_path)
 
 
@@ -90,6 +97,9 @@ build_eCH_0157 <- function(data){
 
       })
 
+      # Name sublists
+      names(candidate) <- rep("candidate", length(candidate))
+
 
       ## Build List Information List -------------------------------------------
 
@@ -108,30 +118,20 @@ build_eCH_0157 <- function(data){
 
         })
 
+        # Name sublists
+        names(list) <- rep("list", length(list))
+
       }
 
 
+      # ASSEMBLE LIST ==========================================================
 
 
-
-      # STAND HIER ===============================================================================================================================
-
-
-
-
-
-
-
-      # RENAME AND ASSEMBLE ====================================================
-
-
-      # Set the names of the candidate lists and add to data
-      names(candidate) <- rep("candidate", length(candidate))
+      # Add to electionInformation
       electionInformation <- c(electionInformation, candidate)
 
-      # If we have list data, set the names of the list information and add to data
+      # If we have list data, add to electionInformation
       if ("list_listIdentification" %in% names(elec_data)) {
-        names(list) <- rep("list", length(list))
         electionInformation <- c(electionInformation, list)
       }
 
@@ -381,7 +381,7 @@ create_candidate_list <- function(cand_data){
     familyName = list(cand_data$candidate_familyName),
     firstName = list(cand_data$candidate_firstName),
     callName = list(cand_data$candidate_callName),
-    candidateText = if(exists("candidateText")) candidateText else NA,
+    # candidateText = if(exists("candidateText")) candidateText else NA, # not needed
     dateOfBirth = list(cand_data$candidate_dateOfBirth),
     sex = list(cand_data$candidate_sex),
     occupationalTitle = if(exists("occupationalTitle")) occupationalTitle else NA,
@@ -449,28 +449,28 @@ create_list_list <- function(list_data){
   }
 
 
-  browser()
   # PREPARE CANDIDATE INFORMATION ==============================================
 
 
   candidate_position_list <- lapply(1:nrow(list_data), function(candidate) {
 
+    # Select data
+    list_data <- list_data[candidate, ]
 
-
-
-
+    # Write list (Hardcode everything since structure is fixed --> we don't need candidateText)
+    candidatePosition <- list(
+      positionOnList = list(list_data$candidatePosition_positionOnList),
+      candidateReferenceOnPosition = list(list_data$candidate_candidateReference),
+      candidateIdentification = list(list_data$candidate_candidateIdentification)
+    )
 
   })
 
+  # Name elements
+  names(candidate_position_list) <- rep("candidatePosition", length(candidate_position_list))
 
 
-
-
-
-
-
-
-  # ASSEMBLE CANDIDATE LIST ====================================================
+  # ASSEMBLE LIST LIST =========================================================
 
 
   # Hardcode everything since structure is fixed (fill in NAs if there was no nested language info)
@@ -483,51 +483,10 @@ create_list_list <- function(list_data){
     totalPositionsOnList = list(as.numeric(list_data$list_totalPositionsOnList)[1])
   )
 
+  # Add candidate list information
+  list_list <- c(list_list, candidate_position_list)
 
-
-
-
-
-
-
-
-
-  # ASSEMBLE CANDIDATE LIST ====================================================
-
-
-  # Hardcode everything since structure is fixed (fill in NAs if there was no nested language info)
-  candidate_list <- list(
-    candidateIdentification = list(cand_data$candidate_candidateIdentification),
-    familyName = list(cand_data$candidate_familyName),
-    firstName = list(cand_data$candidate_firstName),
-    callName = list(cand_data$candidate_callName),
-    candidateText = if(exists("candidateText")) candidateText else NA,
-    dateOfBirth = list(cand_data$candidate_dateOfBirth),
-    sex = list(cand_data$candidate_sex),
-    occupationalTitle = if(exists("occupationalTitle")) occupationalTitle else NA,
-    dwellingAddress = list(
-      street = list(cand_data$dwellingAddress_street),
-      houseNumber = list(cand_data$dwellingAddress_houseNumber),
-      town = list(cand_data$dwellingAddress_town),
-      swissZipCode = list(cand_data$dwellingAddress_swissZipCode),
-      country = list(
-        countryId = list(cand_data$country_countryId),
-        countryIdISO2 = list(cand_data$country_countryIdISO2),
-        countryNameShort = list(cand_data$country_countryNameShort)
-      )
-    ),
-    swiss = list(
-      origin = list(cand_data$swiss_origin)
-    ),
-    mrMrs = list(cand_data$candidate_mrMrs),
-    title = list(cand_data$candidate_title),
-    languageOfCorrespondence = list(cand_data$candidate_languageOfCorrespondence),
-    candidateReference = list(cand_data$candidate_candidateReference),
-    partyAffiliation = if (exists("partyAffiliation")) partyAffiliation else NA
-  )
-
-  # Remove all NAs from the list
-  candidate_list <- candidate_list[!sapply(candidate_list, function(x) all(is.na(x)))]
+  return(list_list)
 
 }
 
