@@ -94,6 +94,23 @@ build_eCH_0157 <- function(data){
       ## Build List Information List -------------------------------------------
 
 
+      # Only build this if lists are present in data
+      if ("list_listIdentification" %in% names(elec_data)) {
+        # Apply over unique list identification in this specific election
+        list <- lapply(unique(elec_data$list_listIdentification), function(list_id){
+
+          # Get the right data
+          list_data <- elec_data |>
+            dplyr::filter(list_listIdentification == list_id)
+
+          # Define the list info list (take the first element since nrow() must be 1 here)
+          list <- create_list_list(list_data)
+
+        })
+
+      }
+
+
 
 
 
@@ -108,10 +125,15 @@ build_eCH_0157 <- function(data){
       # RENAME AND ASSEMBLE ====================================================
 
 
-      # Set the names of the candidate lists
+      # Set the names of the candidate lists and add to data
       names(candidate) <- rep("candidate", length(candidate))
-
       electionInformation <- c(electionInformation, candidate)
+
+      # If we have list data, set the names of the list information and add to data
+      if ("list_listIdentification" %in% names(elec_data)) {
+        names(list) <- rep("list", length(list))
+        electionInformation <- c(electionInformation, list)
+      }
 
     })
 
@@ -336,95 +358,138 @@ create_candidate_list <- function(cand_data){
   data_nested <- transform_nested(cand_data, "language") |>
     dplyr::filter(!is.na(value))
 
+  # Check if there is data left and if so, transform it into separate lists
+  if(nrow(data_nested) > 0) {
+
+    result_list <- listify_language_table(data_nested)
+
+    # Unpack list
+    for (i in 1:length(result_list)) {
+      sublist <- result_list[[i]]
+      assign(names(result_list)[i], sublist)
+    }
+
+  }
 
 
-  # STAND HIER: Problem in nested party data ===============================
+  # ASSEMBLE CANDIDATE LIST ====================================================
 
-# browser()
 
+  # Hardcode everything since structure is fixed (fill in NAs if there was no nested language info)
+  candidate_list <- list(
+    candidateIdentification = list(cand_data$candidate_candidateIdentification),
+    familyName = list(cand_data$candidate_familyName),
+    firstName = list(cand_data$candidate_firstName),
+    callName = list(cand_data$candidate_callName),
+    candidateText = if(exists("candidateText")) candidateText else NA,
+    dateOfBirth = list(cand_data$candidate_dateOfBirth),
+    sex = list(cand_data$candidate_sex),
+    occupationalTitle = if(exists("occupationalTitle")) occupationalTitle else NA,
+    dwellingAddress = list(
+      street = list(cand_data$dwellingAddress_street),
+      houseNumber = list(cand_data$dwellingAddress_houseNumber),
+      town = list(cand_data$dwellingAddress_town),
+      swissZipCode = list(cand_data$dwellingAddress_swissZipCode),
+      country = list(
+        countryId = list(cand_data$country_countryId),
+        countryIdISO2 = list(cand_data$country_countryIdISO2),
+        countryNameShort = list(cand_data$country_countryNameShort)
+      )
+    ),
+    swiss = list(
+      origin = list(cand_data$swiss_origin)
+    ),
+    mrMrs = list(cand_data$candidate_mrMrs),
+    title = list(cand_data$candidate_title),
+    languageOfCorrespondence = list(cand_data$candidate_languageOfCorrespondence),
+    candidateReference = list(cand_data$candidate_candidateReference),
+    partyAffiliation = if (exists("partyAffiliation")) partyAffiliation else NA
+  )
+
+  # Remove all NAs from the list
+  candidate_list <- candidate_list[!sapply(candidate_list, function(x) all(is.na(x)))]
+
+}
+
+
+
+
+
+#' Create list information lists
+#'
+#' @description
+#' This helper function transforms list information to a list information list.
+#'
+#' @param list_data A tibble containing the necessary list information for
+#' the eCH-0157.
+#'
+#' @return A list.
+#'
+create_list_list <- function(list_data){
+
+
+  # PREPARE LIST LEVEL INFORMATION =============================================
+
+
+  # Take the first row of the list level nested information and parse it
+  list_info_nested_data <- list_data[1, grep("listDescriptionInfo-", names(list_data))]
+  data_nested <- transform_nested(list_info_nested_data, "language")
 
   # Check if there is data left and if so, transform it into separate lists
   if(nrow(data_nested) > 0) {
 
-    # Create a list for each parent element
-    data_nested_list <- lapply(data_nested$name_parent_element |> unique(), function(list_name) {
+    result_list <- listify_language_table(data_nested)
 
-      # Filter data
-      data_nested_parent <- data_nested |>
-        dplyr::filter(name_parent_element == list_name)
-
-      # Build list for each language
-      data_nested_list <- lapply(unique(data_nested_parent$language), function(language) {
-
-        # Filter for selected language
-        data_nested_child <- data_nested_parent |>
-          dplyr::filter(language == language)
-
-        # Build initial list for the language
-        data_nested_list <- list(
-          language = list(data_nested_child$language[1])
-        )
-
-        # For each row of the same parent element in the same language, add a list element
-        for (row in 1:nrow(data_nested_child)) {
-
-          data_nested_list_element <- list(
-            dynamic_name = list(data_nested_child$value[row])
-
-          )
-
-          data_nested_list <- c(
-            data_nested_list,
-            data_nested_list_element
-          )
-
-          # Rename the newly added element
-          names(data_nested_list)[length(data_nested_list)] <- data_nested_child$name_list_element[row]
-        }
-
-        return(data_nested_list)
-
-      })
-
-      # Old approach
-      # data_nested_list <- lapply(1:nrow(data_nested_parent), function(element_number) {
-      #
-      #   # Select relevant row
-      #   data_nested_child <- data_nested_parent[element_number, ]
-      #
-      #   # Build list
-      #   data_nested_list <- list(
-      #     language = list(data_nested_child$language),
-      #     dynamic_name = list(data_nested_child$value)
-      #   )
-      #
-      #   # Rename the second list element dynamically
-      #   names(data_nested_list)[2] <- data_nested_child$name_list_element
-      #
-      #   return(data_nested_list)
-      #
-      # })
-
-      # Rename list elements
-      names(data_nested_list) <- rep(unique(data_nested_parent$name_parent_element), length(data_nested_list))
-
-      return(data_nested_list)
-
-    })
-
-
-    # Split Up -------------------------------------------------------------------
-
-
-    # Define names
-    nested_list_names <- sub(pattern = "Info", replacement = "", unique(data_nested$name_parent_element))
-
-    # Assign the names to the lists. This gives us separate lists for candidateTextInfo, occupationalTitleInfo, partyAffiliationInfo
-    for (i in 1:length(nested_list_names)) {
-      assign(nested_list_names[i], data_nested_list[[i]])
+    # Unpack list
+    for (i in 1:length(result_list)) {
+      sublist <- result_list[[i]]
+      assign(names(result_list)[i], sublist)
     }
 
   }
+
+
+  browser()
+  # PREPARE CANDIDATE INFORMATION ==============================================
+
+
+  candidate_position_list <- lapply(1:nrow(list_data), function(candidate) {
+
+
+
+
+
+
+  })
+
+
+
+
+
+
+
+
+
+  # ASSEMBLE CANDIDATE LIST ====================================================
+
+
+  # Hardcode everything since structure is fixed (fill in NAs if there was no nested language info)
+  list_list <- list(
+    listIdentification = list(list_data$list_listIdentification),
+    listIndentureNumber = list(list_data$list_listIndentureNumber),
+    listDescription = if(exists("listDescription")) listDescription else NA,
+    isEmptyList = list("false"),
+    listOrderOfPrecedence = list(as.numeric(list_data$list_listIndentureNumber)[1]),
+    totalPositionsOnList = list(as.numeric(list_data$list_totalPositionsOnList)[1])
+  )
+
+
+
+
+
+
+
+
 
 
   # ASSEMBLE CANDIDATE LIST ====================================================
@@ -517,5 +582,93 @@ transform_nested <- function(nested_data, type) {
   }
 
   return(transformed_data)
+
+}
+
+
+
+
+
+#' Turn tables from nested language info into lists
+#'
+#' @description
+#' This helper function transforms tables created by transform_nested()
+#' containing language data into lists.
+#'
+#' @param language_data_table A tibble containing information created by the
+#' function transform_nested() for language data.
+#'
+#' @return A list.
+#'
+listify_language_table <- function(language_data_table) {
+
+  # Create a list for each parent element
+  data_nested_list <- lapply(language_data_table$name_parent_element |> unique(), function(list_name) {
+
+    # Filter data
+    data_nested_parent <- language_data_table |>
+      dplyr::filter(name_parent_element == list_name)
+
+    # Build list for each language
+    data_nested_list <- lapply(unique(data_nested_parent$language), function(language) {
+
+      # Filter for selected language
+      data_nested_child <- data_nested_parent |>
+        dplyr::filter(language == language)
+
+      # Build initial list for the language
+      data_nested_list <- list(
+        language = list(data_nested_child$language[1])
+      )
+
+      # For each row of the same parent element in the same language, add a list element
+      for (row in 1:nrow(data_nested_child)) {
+
+        data_nested_list_element <- list(
+          dynamic_name = list(data_nested_child$value[row])
+
+        )
+
+        data_nested_list <- c(
+          data_nested_list,
+          data_nested_list_element
+        )
+
+        # Rename the newly added element
+        names(data_nested_list)[length(data_nested_list)] <- data_nested_child$name_list_element[row]
+      }
+
+      return(data_nested_list)
+
+    })
+
+
+    # Rename list elements
+    names(data_nested_list) <- rep(unique(data_nested_parent$name_parent_element), length(data_nested_list))
+
+    return(data_nested_list)
+
+  })
+
+
+  # Split Up -------------------------------------------------------------------
+
+
+  # Define names
+  nested_list_names <- sub(pattern = "Info", replacement = "", unique(language_data_table$name_parent_element))
+
+  # Create empty list to be returned at the end of the function
+  result_list <- list()
+
+  # Assign the names to the lists. This gives us separate lists
+  for (i in 1:length(nested_list_names)) {
+    name <- nested_list_names[i]
+    assign(name, data_nested_list[[i]])
+
+    # Store in the list
+    result_list[[name]] <- get(name)
+  }
+
+  return(result_list)
 
 }
