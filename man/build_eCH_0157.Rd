@@ -4,10 +4,13 @@
 \alias{build_eCH_0157}
 \title{Convert an dataframe into an XML file with the format eCH-0157}
 \usage{
-build_eCH_0157(data)
+build_eCH_0157(data, election_type)
 }
 \arguments{
 \item{data}{A dataframe in the required format.}
+
+\item{election_type}{A character string specifying the election type.
+Must be one of: "Majority" or "Proportion"}
 }
 \value{
 An XML file.

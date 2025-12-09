@@ -45,7 +45,15 @@ into a valid XML file and saves it to the defined location.
 }
 \examples{
 \dontrun{
-write_eCH_0157("path/to/my/template.xlsx", "path/to/my/xml_file.xml")
+convert_to_eCH_0157(
+  "path/to/my/filled_template.xlsx",
+  "path/to/my/new_xml_file.xml",
+  "Proportion",
+  "2030-01-01",
+  "Title Short",
+  "Title Long",
+  10
+)
 }
 
 }

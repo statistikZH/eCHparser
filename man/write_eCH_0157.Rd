@@ -5,13 +5,16 @@
 \title{Convert an election dataframe (created by read_election_template) to an
 eCH-0157 XML file and write it to a specified location}
 \usage{
-write_eCH_0157(data, output_path)
+write_eCH_0157(data, output_path, election_type)
 }
 \arguments{
 \item{data}{A dataframe in the required format.}
 
 \item{output_path}{A character string specifying the path the file should be
 written to.}
+
+\item{election_type}{A character string specifying the election type.
+Must be one of: "Majority" or "Proportion"}
 }
 \value{
 A valid eCH-0157 XML file.
@@ -24,7 +27,7 @@ created with the new_election_template() function.
 }
 \examples{
 \dontrun{
-write_eCH_0157(my_df, "path/to/my/xml_file.xml")
+write_eCH_0157(my_df, "path/to/my/xml_file.xml", )
 }
 
 }

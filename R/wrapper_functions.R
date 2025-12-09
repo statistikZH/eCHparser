@@ -61,12 +61,12 @@ new_election_template <- function(election_type, output_path, overwrite = FALSE)
 #'
 #' @examples
 #' \dontrun{
-#' write_eCH_0157(my_df, "path/to/my/xml_file.xml")
+#' write_eCH_0157(my_df, "path/to/my/xml_file.xml", )
 #' }
 #'
-write_eCH_0157 <- function(input_path, output_path, election_type){
+write_eCH_0157 <- function(data, output_path, election_type){
 
-  data <- build_eCH_0157(input_path, election_type)
+  data <- build_eCH_0157(data, election_type)
 
   xml2::write_xml(data, output_path)
 
@@ -93,7 +93,15 @@ write_eCH_0157 <- function(input_path, output_path, election_type){
 #'
 #' @examples
 #' \dontrun{
-#' write_eCH_0157("path/to/my/template.xlsx", "path/to/my/xml_file.xml")
+#' convert_to_eCH_0157(
+#'   "path/to/my/filled_template.xlsx",
+#'   "path/to/my/new_xml_file.xml",
+#'   "Proportion",
+#'   "2030-01-01",
+#'   "Title Short",
+#'   "Title Long",
+#'   10
+#' )
 #' }
 #'
 convert_to_eCH_0157 <- function(input_path, output_path, election_type, date, election_title_short, election_title_long, mandates){
