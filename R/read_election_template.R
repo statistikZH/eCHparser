@@ -55,8 +55,8 @@ read_election_template <- function(input_path, election_type, date, election_tit
     stop(paste0(base_msg, "Vornamen dürfen maximal 100 Zeichen lang sein."))
   } else if (any(is.na(data$pol_vorname) | nchar(data$pol_vorname) > 100)) {
     stop(paste0(base_msg, "Es muss für alle Kandidierenden ein Vorname von maximal 100 Zeichen erfasst sein."))
-    # } else if (any(!grepl("\\d{2}\\.\\d{2}\\.\\d{4}", data$geburtsdatum))) {
-  } else if (any(!grepl("\\d{4}\\-\\d{2}\\-\\d{2}", data$geburtsdatum))) {
+  } else if (any(!grepl("\\d{2}\\.\\d{2}\\.\\d{4}", data$geburtsdatum))) {
+  # } else if (any(!grepl("\\d{4}\\-\\d{2}\\-\\d{2}", data$geburtsdatum))) {
     stop(paste0(base_msg, "Alle Geburtsdaten müssen im Format TT.MM.JJJJ erfasst sein (also z. B. 19.04.1979)."))
   } else if (any(!tolower(data$geschlecht) %in% c("männlich", "mann", "m", "weiblich", "w", "frau", "f"))) {
     stop(paste0(base_msg, "Das Geschlecht aller Kandidierenden muss gemäss den Informationen aus dem Einwohnerregister als \"m\" oder \"w\" erfasst sein."))
@@ -162,6 +162,14 @@ read_election_template <- function(input_path, election_type, date, election_tit
       election_electionPosition = 0,
       electionGroupBallot_index = 1,
       candidate_firstName = ifelse(is.na(candidate_firstName), candidate_callName, candidate_firstName),
+      # adjust date of birth
+      candidate_dateOfBirth = as.character(paste0(
+        stringr::str_sub(candidate_dateOfBirth, 7, 10),
+        "-",
+        stringr::str_sub(candidate_dateOfBirth, 4, 5),
+        "-",
+        stringr::str_sub(candidate_dateOfBirth, 1, 2)
+      )),
       candidate_sex = ifelse(tolower(candidate_sex) %in% c("m", "männlich", "mann", "herr"), 1, 2),
       candidate_incumbentYesNo = ifelse(tolower(candidate_incumbentYesNo) %in% c("yes", "ja", "bisher", "true"), "true", "false"),
       country_countryId = 8100,
