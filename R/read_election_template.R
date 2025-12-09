@@ -147,7 +147,14 @@ read_election_template <- function(input_path, election_type, date, election_tit
       electionGroupBallot_domainOfInfluenceIdentification = 1,
       election_electionIdentification = paste0("wahl_vom_", contest_contestDate),
       candidate_candidateIdentification = stringr::str_trunc(paste0(contest_contestDate, kand_nummer, candidate_familyName, candidate_firstName), 36, "right", ""),
-      # `candidateTextInfo-de_candidateText` = "candidateText", # not needed
+      `candidateTextInfo-de_candidateText` = paste0(
+        stringr::str_trunc(candidate_dateOfBirth, 4, "right", ""),
+        ", ",
+        dwellingAddress_town,
+        ", ",
+        `occupationalTitleInfo-de_occupationalTitle`,
+        ifelse(tolower(candidate_incumbentYesNo) %in% c("yes", "ja", "bisher", "true"), ", bisher", "")
+      ),
       swiss_origin = "-", # not needed
 
       # Mutate columns with information to be used by receiving system
