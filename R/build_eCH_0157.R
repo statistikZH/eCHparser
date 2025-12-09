@@ -29,8 +29,8 @@ build_eCH_0157 <- function(data, election_type){
   }
 
   # Read file template including delivery header
-  template_path <- system.file("templates", paste0("eCH-0157_", election_type, "_header_template.RDS"), package = "eCHparser")
-  delivery <- readRDS(template_path)
+  header_template_path <- system.file("templates", "eCH-0157_header_template.RDS", package = "eCHparser")
+  delivery <- readRDS(header_template_path)
 
   # Update deliveryHeader
   delivery[[1]][["messageId"]] <- list(substr(paste0("STAT_", sub(" ", "T", as.character(Sys.time()))), 1, 36))
@@ -457,11 +457,29 @@ create_list_list <- function(list_data){
     # Select data
     list_data <- list_data[candidate, ]
 
-    # Write list (Hardcode everything since structure is fixed --> we don't need candidateText)
+    # Take the first row of the list level nested information and parse it
+    candidate_position_nested_data <- list_data[1, grep("candidateTextInfo-", names(list_data))]
+    data_nested <- transform_nested(candidate_position_nested_data, "language")
+
+    # Check if there is data left and if so, transform it into separate lists
+    if(nrow(data_nested) > 0) {
+
+      result_list <- listify_language_table(data_nested)
+
+      # Unpack list
+      for (i in 1:length(result_list)) {
+        sublist <- result_list[[i]]
+        assign(names(result_list)[i], sublist)
+      }
+
+    }
+
+    # Write list (Hardcode everything since structure is fixed)
     candidatePosition <- list(
       positionOnList = list(list_data$candidatePosition_positionOnList),
       candidateReferenceOnPosition = list(list_data$candidate_candidateReference),
-      candidateIdentification = list(list_data$candidate_candidateIdentification)
+      candidateIdentification = list(list_data$candidate_candidateIdentification),
+      candidateTextOnPosition = if(exists("candidateText")) candidateText else NA
     )
 
   })
