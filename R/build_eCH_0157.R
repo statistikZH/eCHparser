@@ -493,7 +493,11 @@ create_list_list <- function(list_data){
 
   # Hardcode everything since structure is fixed (fill in NAs if there was no nested language info)
   list_list <- list(
-    listIdentification = list(list_data$list_listIdentification),
+    # if we use the pasted listIdentification, in some cases, the string length
+    # gets bigger than the allowed 50 characters. I fixed it here and not at the
+    # original paste(), because i saw, that you make a some matchings in the process.
+    # Seemed the easiest location for the quick-fix
+    listIdentification = list(gsub("-.*", "",list_data$list_listIdentification)),
     listIndentureNumber = list(list_data$list_listIndentureNumber),
     listDescription = if(exists("listDescription")) listDescription else NA,
     isEmptyList = list("false"),
