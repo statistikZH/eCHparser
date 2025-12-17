@@ -30,7 +30,13 @@ read_election_template <- function(input_path, election_type, date, election_tit
   election_type <- tolower(election_type)
 
   # Read the file
-  data <- readxl::read_xlsx(input_path)
+  data <- readxl::read_xlsx(input_path) |>
+    # since the dates came in different formats, i needed to create
+    # a new column in the excel with this function: # =TEXT(geburtsdatum-spalte; "TT.MM.JJJJ").
+    # thus, the excel has a new column: geburtsdatum_korr, that should be used
+    # for the process, thus the renaming and unselecting of the not needed column.
+    dplyr::select(-geburtsdatum) |>
+    dplyr::rename(geburtsdatum = geburtsdatum_korr)
 
   # Check input params
   if (!grepl("^(19|20)\\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$", date)) {
