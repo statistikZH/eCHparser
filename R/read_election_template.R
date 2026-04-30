@@ -29,14 +29,9 @@ read_election_template <- function(input_path, election_type, date, election_tit
   # Transform input params
   election_type <- tolower(election_type)
 
-  # Read the file
+  # Read the file and immediately transform the date column to character
   data <- readxl::read_xlsx(input_path) |>
-    # since the dates came in different formats, i needed to create
-    # a new column in the excel with this function: # =TEXT(geburtsdatum-spalte; "TT.MM.JJJJ").
-    # thus, the excel has a new column: geburtsdatum_korr, that should be used
-    # for the process, thus the renaming and unselecting of the not needed column.
-    dplyr::select(-geburtsdatum) |>
-    dplyr::rename(geburtsdatum = geburtsdatum_korr)
+    dplyr::mutate(geburtsdatum = as.character(geburtsdatum))
 
   # Check input params
   if (!grepl("^(19|20)\\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$", date)) {
@@ -61,9 +56,8 @@ read_election_template <- function(input_path, election_type, date, election_tit
     stop(paste0(base_msg, "Vornamen dürfen maximal 100 Zeichen lang sein."))
   } else if (any(is.na(data$pol_vorname) | nchar(data$pol_vorname) > 100)) {
     stop(paste0(base_msg, "Es muss für alle Kandidierenden ein Vorname von maximal 100 Zeichen erfasst sein."))
-  } else if (any(!grepl("\\d{2}\\.\\d{2}\\.\\d{4}", data$geburtsdatum))) {
-  # } else if (any(!grepl("\\d{4}\\-\\d{2}\\-\\d{2}", data$geburtsdatum))) {
-    stop(paste0(base_msg, "Alle Geburtsdaten müssen im Format TT.MM.JJJJ erfasst sein (also z. B. 19.04.1979)."))
+  } else if (any(!grepl("\\d{2}\\.\\d{2}\\.\\d{4}", data$geburtsdatum) & !grepl("\\d{4}-\\d{2}-\\d{2}", data$geburtsdatum))) {
+    stop(paste0(base_msg, "Alle Geburtsdaten müssen all in demselben Format (TT.MM.JJJJ oder JJJJ-MM-TT) erfasst sein."))
   } else if (any(!tolower(data$geschlecht) %in% c("männlich", "mann", "m", "weiblich", "w", "frau", "f"))) {
     stop(paste0(base_msg, "Das Geschlecht aller Kandidierenden muss gemäss den Informationen aus dem Einwohnerregister als \"m\" oder \"w\" erfasst sein."))
   } else if (any(!tolower(data$bisher) %in% c("ja", "nein", NA))) {
@@ -131,7 +125,7 @@ read_election_template <- function(input_path, election_type, date, election_tit
       candidate_familyName = "nachname",
       candidate_firstName = "amtl_vorname",
       candidate_callName = "pol_vorname",
-      candidate_dateOfBirth = "geburtsdatum",
+      candidate_dateOfBirth = "geburtsdatum", # readxlsx() transforms date inputs to YYYY-MM-DD automatically
       candidate_sex = "geschlecht",
       candidate_incumbentYesNo = "bisher",
       dwellingAddress_street = "strasse",
@@ -168,14 +162,6 @@ read_election_template <- function(input_path, election_type, date, election_tit
       election_electionPosition = 0,
       electionGroupBallot_index = 1,
       candidate_firstName = ifelse(is.na(candidate_firstName), candidate_callName, candidate_firstName),
-      # adjust date of birth
-      candidate_dateOfBirth = as.character(paste0(
-        stringr::str_sub(candidate_dateOfBirth, 7, 10),
-        "-",
-        stringr::str_sub(candidate_dateOfBirth, 4, 5),
-        "-",
-        stringr::str_sub(candidate_dateOfBirth, 1, 2)
-      )),
       candidate_sex = ifelse(tolower(candidate_sex) %in% c("m", "männlich", "mann", "herr"), 1, 2),
       candidate_incumbentYesNo = ifelse(tolower(candidate_incumbentYesNo) %in% c("yes", "ja", "bisher", "true"), "true", "false"),
       country_countryId = 8100,
