@@ -135,6 +135,9 @@ build_eCH_0157 <- function(data, election_type){
         electionInformation <- c(electionInformation, list)
       }
 
+      # return(electionInformation)
+      electionInformation
+
     })
 
     # Set the names of the election lists
@@ -198,7 +201,9 @@ create_contest_list <- function(cont_data){
 
 
   # Define and transform nested data for multilingual information
-  data_nested <- transform_nested(cont_data, "language")
+  data_nested <- transform_nested(cont_data, "language") |>
+    # Filter to include only contest descriptions
+    dplyr::filter(name_list_element == "contestDescription")
 
   # Create lists
   contestDescription <- lapply(data_nested$language |> unique(), function(language) {
@@ -493,11 +498,12 @@ create_list_list <- function(list_data){
 
   # Hardcode everything since structure is fixed (fill in NAs if there was no nested language info)
   list_list <- list(
-    # if we use the pasted listIdentification, in some cases, the string length
-    # gets bigger than the allowed 50 characters. I fixed it here and not at the
-    # original paste(), because i saw, that you make a some matchings in the process.
-    # Seemed the easiest location for the quick-fix
-    listIdentification = list(gsub("-.*", "",list_data$list_listIdentification)),
+    listIdentification = list(list_data$list_listIdentification),
+    # # if we use the pasted listIdentification, in some cases, the string length
+    # # gets bigger than the allowed 50 characters. I fixed it here and not at the
+    # # original paste(), because i saw, that you make a some matchings in the process.
+    # # Seemed the easiest location for the quick-fix
+    # listIdentification = list(gsub("-.*", "",list_data$list_listIdentification)),
     listIndentureNumber = list(list_data$list_listIndentureNumber),
     listDescription = if(exists("listDescription")) listDescription else NA,
     isEmptyList = list("false"),
