@@ -3,6 +3,9 @@ test_that("Built eCH-0157 file output is an XML and matches corresponding file",
   # Get the list of parsed test files
   testfiles <- list.files(testthat::test_path("testdata/files_parsed/eCH-0157"))
 
+  # Define election types for test files
+  election_types <- c("Majority", "Proportion")
+
   # Initialize a new environment (necessary to actually assign values inside of tryCatch)
   errorenv <- new.env()
 
@@ -16,7 +19,7 @@ test_that("Built eCH-0157 file output is an XML and matches corresponding file",
 
     # Load and transform file
     file <- readRDS(filepath)
-    file_out <- build_eCH_0157(file)
+    file_out <- build_eCH_0157(file, election_types[i])
 
     # # Ensure the output is a data frame
     # testthat::expect_true(is.data.frame(file_out), info = paste("File:", testfiles[i]))
