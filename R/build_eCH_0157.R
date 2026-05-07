@@ -262,7 +262,7 @@ create_election_list <- function(elec_data){
 
 
   # Check names for nested data of type relation
-  if (any(grepl("-([0-9])", names(file)))) {
+  if (any(grepl("-([0-9])", names(elec_data)))) {
 
     # Define and transform nested data for referenced elections and drop all rows with no value and duplicate rows if there are multiple referenced elections
     data_nested <- transform_nested(elec_data, "relation") |>
@@ -386,7 +386,7 @@ create_candidate_list <- function(cand_data){
     familyName = list(cand_data$candidate_familyName),
     firstName = list(cand_data$candidate_firstName),
     callName = list(cand_data$candidate_callName),
-    # candidateText = if(exists("candidateText")) candidateText else NA, # not needed
+    candidateText = if(exists("candidateText")) candidateText else NA, # not needed but does not hurt atm
     dateOfBirth = list(cand_data$candidate_dateOfBirth),
     sex = list(cand_data$candidate_sex),
     occupationalTitle = if(exists("occupationalTitle")) occupationalTitle else NA,
@@ -407,6 +407,7 @@ create_candidate_list <- function(cand_data){
     mrMrs = list(cand_data$candidate_mrMrs),
     title = list(cand_data$candidate_title),
     languageOfCorrespondence = list(cand_data$candidate_languageOfCorrespondence),
+    incumbentYesNo = list(cand_data$candidate_incumbentYesNo),
     candidateReference = list(cand_data$candidate_candidateReference),
     partyAffiliation = if (exists("partyAffiliation")) partyAffiliation else NA
   )
