@@ -1,7 +1,7 @@
 test_that("Read in file matches corresponding RDS file", {
 
   # Get the list of unparsed test files
-  testfiles <- list.files(testthat::test_path("testdata/files_unparsed/election_templates"))
+  testfiles <- list.files(testthat::test_path("testdata/input/election_templates"))
 
   # Initialize a new environment (necessary to actually assign values inside of tryCatch)
   errorenv <- new.env()
@@ -12,7 +12,7 @@ test_that("Read in file matches corresponding RDS file", {
   for (i in seq_along(testfiles)) {
 
     # Get the full file path
-    filepath <- testthat::test_path("testdata/files_unparsed/election_templates", paste0(testfiles[i]))
+    filepath <- testthat::test_path("testdata/input/election_templates", paste0(testfiles[i]))
 
     # Define election type (only relevant for template conversion)
     election_type <- ifelse(testfiles[i] == "maj_template.xlsx", "Majority", "Proportion")
@@ -29,7 +29,7 @@ test_that("Read in file matches corresponding RDS file", {
     )
 
     # Load the corresponding RDS file from the testdata folder (use testthat::test_path for the test to work also with devtools::test())
-    rds_filepath <- testthat::test_path("testdata/files_parsed/election_templates", paste0(sub("\\.[^.]*$", "", testfiles[i]), ".RDS")) # the sub() removes the .xsls extension
+    rds_filepath <- testthat::test_path("testdata/expected/election_templates", paste0(sub("\\.[^.]*$", "", testfiles[i]), ".RDS")) # the sub() removes the .xsls extension
 
     if (file.exists(rds_filepath)) {
       expected_out <- readRDS(rds_filepath)

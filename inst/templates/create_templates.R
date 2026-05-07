@@ -2,14 +2,14 @@
 
 
 # This script parses can be used to parse through stored data and create templates for exporting.
-# It depends on up to date files in test/testthat/testdata/files_unparsed.
+# It depends on up to date files in test/testthat/testdata/input.
 
 
 # SETUP ========================================================================
 
 
 # Define path to testfiles
-path_xml_0157_raw <- "tests/testthat/testdata/files_unparsed/eCH-0157/"
+path_xml_0157_raw <- "tests/testthat/testdata/input/eCH-0157/"
 
 # Define path to destination
 path_destination_raw <- "inst/templates/"
