@@ -1,0 +1,17 @@
+---
+title: "README"
+output: html_document
+---
+
+This file explains the test data, how you can adapt it and explains what should and should not be altered by hand.
+
+The data is structured as follows:
+
+-   **input**: This folder contains original data. To update it, files need to be copied here. If files are updated here, the corresponding files in the **expected** folder need to be updated (using the `parse_and_save_all.R` script) for the tests to run through.
+    -   **eCH-0157**: Contains original eCH-0157 data, exported from a source system like Abraxas' VOTING application.
+    -   **eCH-0252**: Contains original eCH-0157 data, exported from a source system like Abraxas' VOTING application.
+    -   **election_templates**: Contains filled-in election templates. To create election templates, you can use the `new_election_template` function. Then, fill in the information and store it here.
+-   **expected**: This folder contains data created by the functions of the package. The data, on which it is based, is stored in the input folder. To update the data in these folders, you should use the `parse_and_save_all.R` script.
+    -   **eCH-0157**: Contains RDS files created by parsing original eCH-0157 files. It also contains xml files that were built from tabular input data. That data is not retrieved from from the **input** folder but uses the RDS files inside of this folder. However, the files are also generated with the `parse_and_save_all.R` script in the same iteration as the two RDS files.
+    -   **eCH-0252**: Contains RDS files created by parsing original eCH-0252 files.
+    -   **election_templates**: Contains RDS files created by reading filled in templates.
