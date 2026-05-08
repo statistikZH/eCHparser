@@ -16,9 +16,11 @@ Must be one of: "Majority" or "Proportion"}
 An XML file.
 }
 \description{
-This function transforms an xlsx file in a defined structure into a xml file
-in the format eCH-0157. Use the function "open_eCH_0157_xlsx" to open a
-blank template file.
+This function transforms a dataframe containing information on an election
+into an xml file in the format eCH-0157. The original data has to be in a
+specified format. To get the data into said format, create a new blank xlsx
+file using the function "new_election_template", fill in the information and
+load the file using the "read_election_template" function.
 }
 \examples{
 \dontrun{

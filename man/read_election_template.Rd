@@ -41,7 +41,14 @@ additional information such as the date of the election or the name of it.
 }
 \examples{
 \dontrun{
-my_df <- read_election_template("path/to/my/template.xlsx")
+my_df <- read_election_template(
+  "path/to/my/template.xlsx",
+  "Majority",
+  "2030-01-01",
+  "Election of the Test Body",
+  "Election of the Test Body in the Test Municipality",
+  7
+)
 }
 
 }

@@ -27,7 +27,7 @@ created with the new_election_template() function.
 }
 \examples{
 \dontrun{
-write_eCH_0157(my_df, "path/to/my/xml_file.xml", )
+write_eCH_0157(my_df, "path/to/my/xml_file.xml", "Majority")
 }
 
 }
