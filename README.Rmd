@@ -3,6 +3,7 @@ output: github_document
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
 <!-- You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this. -->
 
 ```{r, include = FALSE}
@@ -17,8 +18,9 @@ knitr::opts_chunk$set(
 # eCHparser
 
 <!-- badges: start -->
-[![tic](https://github.com/statistikZH/eCHparser/workflows/tic/badge.svg)](https://github.com/statistikZH/eCHparser/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+[![tic](https://github.com/statistikZH/eCHparser/workflows/tic/badge.svg)](https://github.com/statistikZH/eCHparser/actions) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 <!-- badges: end -->
 
 Convert XML files containing data in the eCH-0252 standard format to easy-to-use dataframes using the eCHparser package.
@@ -37,7 +39,6 @@ devtools::install_github("statistikZH/eCHparser")
 The [eCH-0252 standard](https://www.ech.ch/de/ech/ech-0252/1.0.0) is used to feed voting data from cantonal IT systems to the voteInfo API, which then uses the data to display live vote counting information, for example via the voteInfo App or the [Results and Information Plattform](https://app.statistik.zh.ch/wahlen_abstimmungen/prod/Actual) of the Canton of Zurich. This data will be publicly available in this format starting in 2025. However, example files are already available in this package (see example bellow).
 
 The function `parse_eCH_0252()` allows users to transform these XML files to easy-to-use dataframes.
-
 
 ```{r example, eval=FALSE}
 library(eCHparser)
