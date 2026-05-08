@@ -21,7 +21,14 @@
 #'
 #' @examples
 #' \dontrun{
-#' my_df <- read_election_template("path/to/my/template.xlsx")
+#' my_df <- read_election_template(
+#'   "path/to/my/template.xlsx",
+#'   "Majority",
+#'   "2030-01-01",
+#'   "Election of the Test Body",
+#'   "Election of the Test Body in the Test Municipality",
+#'   7
+#' )
 #' }
 #'
 read_election_template <- function(input_path, election_type, date, election_title_short, election_title_long, mandates){
