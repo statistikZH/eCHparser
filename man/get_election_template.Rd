@@ -8,7 +8,7 @@ get_election_template(election_type)
 }
 \arguments{
 \item{election_type}{A character string specifying the election type.
-Must be one of: "Majority" or "Proportion"}
+Must be either "Majority" or "Proportion".}
 }
 \value{
 A dataframe.

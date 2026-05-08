@@ -14,5 +14,5 @@ the eCH-0157.}
 A list.
 }
 \description{
-This helper function transforms candidate information to a candidate list.
+This helper function transforms candidate information into a candidate list.
 }

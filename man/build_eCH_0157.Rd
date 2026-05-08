@@ -10,21 +10,21 @@ build_eCH_0157(data, election_type)
 \item{data}{A dataframe in the required format.}
 
 \item{election_type}{A character string specifying the election type.
-Must be one of: "Majority" or "Proportion"}
+Must be either "Majority" or "Proportion".}
 }
 \value{
 An XML file.
 }
 \description{
-This function transforms a dataframe containing information on an election
-into an xml file in the format eCH-0157. The original data has to be in a
-specified format. To get the data into said format, create a new blank xlsx
-file using the function "new_election_template", fill in the information and
-load the file using the "read_election_template" function.
+This function transforms a dataframe containing election information into an
+XML file in the eCH-0157 format. The original data must adhere to a specific
+format. To obtain this format, create a new blank XLSX file using the
+\code{new_election_template()} function, fill in the information, and load the file
+using the \code{read_election_template()} function.
 }
 \examples{
 \dontrun{
-my_xml_file <- build_eCH_0157(my_df)
+my_xml_file <- build_eCH_0157(my_df, "Majority")
 }
 
 }

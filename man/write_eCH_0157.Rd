@@ -2,7 +2,7 @@
 % Please edit documentation in R/wrapper_functions.R
 \name{write_eCH_0157}
 \alias{write_eCH_0157}
-\title{Convert an election dataframe (created by read_election_template) to an
+\title{Convert an election dataframe created by \code{read_election_template()} to an
 eCH-0157 XML file and write it to a specified location}
 \usage{
 write_eCH_0157(data, output_path, election_type)
@@ -14,7 +14,7 @@ write_eCH_0157(data, output_path, election_type)
 written to.}
 
 \item{election_type}{A character string specifying the election type.
-Must be one of: "Majority" or "Proportion"}
+Must be either "Majority" or "Proportion".}
 }
 \value{
 A valid eCH-0157 XML file.
@@ -22,8 +22,8 @@ A valid eCH-0157 XML file.
 \description{
 This function turns tabular election data into a valid XML file and saves it
 to the defined location. The structure of the tabular data corresponds to
-a data frame created using read_election_template() function on a template,
-created with the new_election_template() function.
+a data frame created using \code{read_election_template()} function on a template,
+created with the \code{new_election_template()} function.
 }
 \examples{
 \dontrun{

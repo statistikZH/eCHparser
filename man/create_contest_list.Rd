@@ -14,5 +14,5 @@ the eCH-0157.}
 A list.
 }
 \description{
-This helper function transforms contest information to a contest list.
+This helper function transforms contest information into a contest list.
 }

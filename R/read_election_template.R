@@ -2,8 +2,9 @@
 #'
 #' @description
 #' This function reads tabular election data, the templates for which can be
-#' generated with the write_election_template function. The user has to define
-#' additional information such as the date of the election or the name of it.
+#' generated with the `write_election_template()` function. The user has to
+#' define additional information such as the date of the election or the name
+#' of it.
 #'
 #' @param input_path Path to your xlsx file.
 #' @inheritParams get_election_template
@@ -88,8 +89,7 @@ read_election_template <- function(input_path, election_type, date, election_tit
 
     # Majority specific checks
   } else if (election_type == "majority") {
-
-    if (!all(sort(names(data)) == sort(names(readRDS("inst/templates/eCH-0157_majority_table_template.RDS"))))) {
+    if (!all(sort(names(data)) == sort(names(readRDS(system.file("templates/eCH-0157_majority_table_template.RDS", package = "eCHparser")))))) {
       stop(paste0(base_msg, "Es sind nicht alle nötigen Spalten aus dem Template vorhanden."))
     } else if (any(nchar(data$parteilangbezeichnung, keepNA = FALSE)  > 100)) {
       stop(paste0(base_msg, "Die Parteibezeichnung darf maximal 100 Zeichen enthalten."))
@@ -98,7 +98,7 @@ read_election_template <- function(input_path, election_type, date, election_tit
     # Proportional specific checks
   } else if (election_type == "proportion") {
 
-    if (!all(sort(names(data)) == sort(names(readRDS("inst/templates/eCH-0157_proportion_table_template.RDS"))))) {
+    if (!all(sort(names(data)) == sort(names(readRDS(system.file("templates/eCH-0157_proportion_table_template.RDS", package = "eCHparser")))))) {
       stop(paste0(base_msg, "Es sind nicht alle nötigen Spalten aus dem Template vorhanden."))
     } else if (any(!grepl("^[0-9]+$", data$listenposition))) {
       stop(paste0(base_msg, "Die Listenposition muss eine Zahl sein. Sie bezeichnet die genaue Position von Kandidierenden auf der Liste."))
@@ -114,7 +114,6 @@ read_election_template <- function(input_path, election_type, date, election_tit
 
   }
 
-
   # Add information from params
   data <- data |>
     dplyr::mutate(
@@ -123,7 +122,6 @@ read_election_template <- function(input_path, election_type, date, election_tit
       `electionDescriptionInfo-de_electionDescription` = election_title_long,
       election_numberOfMandates = mandates
     )
-
 
   # Rename columns
   data <- data |>
@@ -143,7 +141,6 @@ read_election_template <- function(input_path, election_type, date, election_tit
       `occupationalTitleInfo-de_occupationalTitle` = "beruf",
       candidate_title = "titel"
     )))
-
 
   # Add columns
   data <- data |>
@@ -178,7 +175,6 @@ read_election_template <- function(input_path, election_type, date, election_tit
       candidate_languageOfCorrespondence = "de"
     )
 
-
   # Majority specific adjustments
   if (election_type == "majority") {
 
@@ -192,7 +188,6 @@ read_election_template <- function(input_path, election_type, date, election_tit
       )
 
   }
-
 
   # Proportion specific adjustments
   if (election_type == "proportion") {
@@ -246,7 +241,6 @@ read_election_template <- function(input_path, election_type, date, election_tit
       dplyr::ungroup()
 
   }
-
 
   return(data)
 

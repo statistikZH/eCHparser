@@ -3,7 +3,7 @@
 #'
 #' @description
 #' This function creates an empty xlsx file that can be transformed into an XML
-#' file in the format eCH-0157.
+#' file in the format eCH-0157 using `convert_to_eCH_0157()`.
 #'
 #' @inheritParams get_election_template
 #' @param output_path A character string specifying the path the file should be
@@ -42,14 +42,14 @@ new_election_template <- function(election_type, output_path, overwrite = FALSE)
 
 
 
-#' Convert an election dataframe (created by read_election_template) to an
+#' Convert an election dataframe created by `read_election_template()` to an
 #' eCH-0157 XML file and write it to a specified location
 #'
 #' @description
 #' This function turns tabular election data into a valid XML file and saves it
 #' to the defined location. The structure of the tabular data corresponds to
-#' a data frame created using read_election_template() function on a template,
-#' created with the new_election_template() function.
+#' a data frame created using `read_election_template()` function on a template,
+#' created with the `new_election_template()` function.
 #'
 #' @inheritParams build_eCH_0157
 #' @param output_path A character string specifying the path the file should be

@@ -17,7 +17,7 @@ read_election_template(
 \item{input_path}{Path to your xlsx file.}
 
 \item{election_type}{A character string specifying the election type.
-Must be one of: "Majority" or "Proportion"}
+Must be either "Majority" or "Proportion".}
 
 \item{date}{A character string with the format "YYYY-MM-DD".}
 
@@ -36,8 +36,9 @@ with the write_eCH_0157() function.
 }
 \description{
 This function reads tabular election data, the templates for which can be
-generated with the write_election_template function. The user has to define
-additional information such as the date of the election or the name of it.
+generated with the \code{write_election_template()} function. The user has to
+define additional information such as the date of the election or the name
+of it.
 }
 \examples{
 \dontrun{

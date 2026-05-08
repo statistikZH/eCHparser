@@ -14,5 +14,6 @@ the eCH-0157.}
 A list.
 }
 \description{
-This helper function transforms list information to a list information list.
+This helper function transforms list information into a list information
+list.
 }

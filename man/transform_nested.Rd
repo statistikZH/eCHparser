@@ -18,5 +18,8 @@ A tibble.
 }
 \description{
 This helper function transforms specified columns into dataframes for
-further processing.
+further processing. It specifically deals with elements that carry a
+qualitative attribute not in the element title but specify the element's
+parent by using a child. Examples of this are specifications of the language
+of the element or the type of relation the element marks.
 }

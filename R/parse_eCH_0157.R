@@ -1,9 +1,8 @@
 #' Convert eCH-0157 XML file into a dataframe
 #'
 #' @description
-#'`parse_eCH_0157()` turns an eCH-0157 XML file for an election day into a
-#' dataframe. Currently, the function supports input files for votes generated
-#' by the application VOTING.
+#' This function turns an eCH-0157 XML file for an election day into a
+#' dataframe.
 #'
 #' @param input_path Path to your XML file.
 #'
@@ -12,13 +11,7 @@
 #' @export
 #'
 #' @examples
-#' filepath <- system.file(
-#'   "extdata",
-#'   "eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xml",
-#'   package = "eCHparser"
-#' )
-#'
-#' votedata <- parse_eCH_0157(filepath)
+#' votedata <- parse_eCH_0157(system.file("extdata/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xml", package = "eCHparser"))
 #'
 parse_eCH_0157 <- function(input_path){
 

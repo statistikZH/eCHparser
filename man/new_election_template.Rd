@@ -9,7 +9,7 @@ new_election_template(election_type, output_path, overwrite = FALSE)
 }
 \arguments{
 \item{election_type}{A character string specifying the election type.
-Must be one of: "Majority" or "Proportion"}
+Must be either "Majority" or "Proportion".}
 
 \item{output_path}{A character string specifying the path the file should be
 written to.}
@@ -22,7 +22,7 @@ An XLSX file, saved to the given output_path.
 }
 \description{
 This function creates an empty xlsx file that can be transformed into an XML
-file in the format eCH-0157.
+file in the format eCH-0157 using \code{convert_to_eCH_0157()}.
 }
 \examples{
 \dontrun{

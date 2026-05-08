@@ -22,7 +22,7 @@ convert_to_eCH_0157(
 written to.}
 
 \item{election_type}{A character string specifying the election type.
-Must be one of: "Majority" or "Proportion"}
+Must be either "Majority" or "Proportion".}
 
 \item{date}{A character string with the format "YYYY-MM-DD".}
 

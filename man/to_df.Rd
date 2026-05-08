@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{to_df}
 \alias{to_df}
-\title{Unlist list to dataframe}
+\title{Unlist list into a dataframe}
 \usage{
 to_df(data, names)
 }
@@ -15,5 +15,5 @@ to_df(data, names)
 A dataframe.
 }
 \description{
-Unlist list to dataframe
+Unlist list into a dataframe
 }

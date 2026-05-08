@@ -14,5 +14,5 @@ the eCH-0157.}
 A list.
 }
 \description{
-This helper function transforms election information to an election list.
+This helper function transforms election information into an election list.
 }

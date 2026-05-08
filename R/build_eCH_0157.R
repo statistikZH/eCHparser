@@ -1,11 +1,11 @@
 #' Convert an dataframe into an XML file with the format eCH-0157
 #'
 #' @description
-#' This function transforms a dataframe containing information on an election
-#' into an xml file in the format eCH-0157. The original data has to be in a
-#' specified format. To get the data into said format, create a new blank xlsx
-#' file using the function "new_election_template", fill in the information and
-#' load the file using the "read_election_template" function.
+#' This function transforms a dataframe containing election information into an
+#' XML file in the eCH-0157 format. The original data must adhere to a specific
+#' format. To obtain this format, create a new blank XLSX file using the
+#' `new_election_template()` function, fill in the information, and load the file
+#' using the `read_election_template()` function.
 #'
 #' @param data A dataframe in the required format.
 #' @inheritParams get_election_template
@@ -15,7 +15,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' my_xml_file <- build_eCH_0157(my_df)
+#' my_xml_file <- build_eCH_0157(my_df, "Majority")
 #' }
 #'
 build_eCH_0157 <- function(data, election_type){
@@ -186,7 +186,7 @@ build_eCH_0157 <- function(data, election_type){
 #' Create contest lists
 #'
 #' @description
-#' This helper function transforms contest information to a contest list.
+#' This helper function transforms contest information into a contest list.
 #'
 #' @param cont_data A tibble containing the necessary contest information for
 #' the eCH-0157.
@@ -247,7 +247,7 @@ create_contest_list <- function(cont_data){
 #' Create election lists
 #'
 #' @description
-#' This helper function transforms election information to an election list.
+#' This helper function transforms election information into an election list.
 #'
 #' @param elec_data A tibble containing the necessary election information for
 #' the eCH-0157.
@@ -348,7 +348,7 @@ create_election_list <- function(elec_data){
 #' Create candidate lists
 #'
 #' @description
-#' This helper function transforms candidate information to a candidate list.
+#' This helper function transforms candidate information into a candidate list.
 #'
 #' @param cand_data A tibble containing the necessary candidate information for
 #' the eCH-0157.
@@ -426,7 +426,8 @@ create_candidate_list <- function(cand_data){
 #' Create list information lists
 #'
 #' @description
-#' This helper function transforms list information to a list information list.
+#' This helper function transforms list information into a list information
+#' list.
 #'
 #' @param list_data A tibble containing the necessary list information for
 #' the eCH-0157.
@@ -524,7 +525,10 @@ create_list_list <- function(list_data){
 #'
 #' @description
 #' This helper function transforms specified columns into dataframes for
-#' further processing.
+#' further processing. It specifically deals with elements that carry a
+#' qualitative attribute not in the element title but specify the element's
+#' parent by using a child. Examples of this are specifications of the language
+#' of the element or the type of relation the element marks.
 #'
 #' @param nested_data A tibble containing columns, for which a characteristic
 #' of the content is defined by a tag in the column title.
@@ -611,7 +615,6 @@ listify_language_table <- function(language_data_table) {
 
         data_nested_list_element <- list(
           dynamic_name = list(data_nested_child$value[row])
-
         )
 
         data_nested_list <- c(
@@ -652,6 +655,7 @@ listify_language_table <- function(language_data_table) {
 
     # Store in the list
     result_list[[name]] <- get(name)
+
   }
 
   return(result_list)
