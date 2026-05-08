@@ -222,7 +222,17 @@ read_election_template <- function(input_path, election_type, date, election_tit
         list_isEmptyList = "false",
         list_listOrderOfPrecedence = as.numeric(list_listIndentureNumber),
         candidatePosition_candidateIdentification = candidatePosition_candidateReferenceOnPosition,
-        list_listIdentification = paste0("list_id", list_listIndentureNumber, "-", stringr::str_remove_all(`listDescriptionInfo-de_listDescription`, " "))
+        # create a unique yet short list ID
+        list_listIdentification = paste0(
+          "list_id-",
+          as.integer(factor(paste(
+            contest_contestDate,
+            `electionDescriptionInfo-de_electionDescriptionShort`,
+            `electionDescriptionInfo-de_electionDescription`,
+            election_numberOfMandates,
+            list_listIndentureNumber,
+            sep = "-")))
+        )
       ) |>
       dplyr::group_by(
         `listDescriptionInfo-de_listDescriptionShort`,

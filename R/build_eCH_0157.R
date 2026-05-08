@@ -1,9 +1,11 @@
 #' Convert an dataframe into an XML file with the format eCH-0157
 #'
 #' @description
-#' This function transforms an xlsx file in a defined structure into a xml file
-#' in the format eCH-0157. Use the function "open_eCH_0157_xlsx" to open a
-#' blank template file.
+#' This function transforms a dataframe containing information on an election
+#' into an xml file in the format eCH-0157. The original data has to be in a
+#' specified format. To get the data into said format, create a new blank xlsx
+#' file using the function "new_election_template", fill in the information and
+#' load the file using the "read_election_template" function.
 #'
 #' @param data A dataframe in the required format.
 #' @inheritParams get_election_template
@@ -500,11 +502,6 @@ create_list_list <- function(list_data){
   # Hardcode everything since structure is fixed (fill in NAs if there was no nested language info)
   list_list <- list(
     listIdentification = list(list_data$list_listIdentification),
-    # # if we use the pasted listIdentification, in some cases, the string length
-    # # gets bigger than the allowed 50 characters. I fixed it here and not at the
-    # # original paste(), because i saw, that you make a some matchings in the process.
-    # # Seemed the easiest location for the quick-fix
-    # listIdentification = list(gsub("-.*", "",list_data$list_listIdentification)),
     listIndentureNumber = list(list_data$list_listIndentureNumber),
     listDescription = if(exists("listDescription")) listDescription else NA,
     isEmptyList = list("false"),
