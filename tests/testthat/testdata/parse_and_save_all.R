@@ -97,7 +97,7 @@ if (type == "0157") {
     testfilepath_out <- sub(".RDS", ".xml", testfilepath_out)
 
     # Save file
-    saveRDS(file_out, testfilepath_out)
+    xml2::write_xml(file_out, testfilepath_out)
 
   }
 
