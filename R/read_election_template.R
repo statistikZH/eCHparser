@@ -59,57 +59,57 @@ read_election_template <- function(input_path, election_type, date, election_tit
 
   # General checks
   if (any(is.na(data$nachname) | nchar(data$nachname) > 100)) {
-    stop(paste0(base_msg, "Es muss für alle Kandidierenden ein Nachname von maximal 100 Zeichen erfasst sein."))
+    stop(paste0(base_msg, "You need to define a Nachname of not more than 100 characters for all candidates."))
   } else if (any(nchar(data$amtl_vorname, keepNA = FALSE) > 100)) {
-    stop(paste0(base_msg, "Vornamen dürfen maximal 100 Zeichen lang sein."))
+    stop(paste0(base_msg, "Vornamen must not exceed 100 characters."))
   } else if (any(is.na(data$pol_vorname) | nchar(data$pol_vorname) > 100)) {
-    stop(paste0(base_msg, "Es muss für alle Kandidierenden ein Vorname von maximal 100 Zeichen erfasst sein."))
+    stop(paste0(base_msg, "You need to define a Vorname of not more than 100 characters for all candidates."))
   } else if (any(!grepl("\\d{2}\\.\\d{2}\\.\\d{4}", data$geburtsdatum) & !grepl("\\d{4}-\\d{2}-\\d{2}", data$geburtsdatum))) {
-    stop(paste0(base_msg, "Alle Geburtsdaten müssen all in demselben Format (TT.MM.JJJJ oder JJJJ-MM-TT) erfasst sein."))
+    stop(paste0(base_msg, "All Geburtsdaten have to be in the same format (DD.MM.YYYY or YYYY-MM-DD)."))
   } else if (any(!tolower(data$geschlecht) %in% c("männlich", "mann", "m", "weiblich", "w", "frau", "f"))) {
-    stop(paste0(base_msg, "Das Geschlecht aller Kandidierenden muss gemäss den Informationen aus dem Einwohnerregister als \"m\" oder \"w\" erfasst sein."))
+    stop(paste0(base_msg, "The Geschlecht of all candidates have to be defined as \"m\" or \"w\" according to the inforation in the population register."))
   } else if (any(!tolower(data$bisher) %in% c("ja", "nein", NA))) {
-    stop(paste0(base_msg, "Die Spalte bisher darf nur die Werte \"Ja\" oder \"Nein\" enthalten oder leer sein."))
+    stop(paste0(base_msg, "The column bisher must only contain \"Ja\" or \"Nein\"."))
   } else if (any(nchar(data$beruf, keepNA = FALSE) > 250)) {
-    stop(paste0(base_msg, "Die Berufsbezeichnung darf maximal 250 Zeichen enthalten."))
+    stop(paste0(base_msg, "The column Berufsbezeichnung must not exceed 200 characters."))
   } else if (any(nchar(data$titel, keepNA = FALSE) > 250)) {
-    stop(paste0(base_msg, "Der Titel darf maximal 250 Zeichen enthalten."))
+    stop(paste0(base_msg, "The column Titel must not exceed 250 characters."))
   } else if (any(nchar(data$strasse, keepNA = FALSE) > 150)) {
-    stop(paste0(base_msg, "Die Strasse darf maximal 150 Zeichen enthalten."))
+    stop(paste0(base_msg, "The column Strasse must not exceed 150 characters."))
   } else if (any(nchar(data$hausnummer, keepNA = FALSE) > 30)) {
-    stop(paste0(base_msg, "Die Hausnummer darf maximal 30 Zeichen enthalten."))
+    stop(paste0(base_msg, "The column Hausnummer must not exceed 30 characters."))
   } else if (any(!nchar(data$plz, keepNA = FALSE) %in% c(2, 4))) {
-    stop(paste0(base_msg, "Die Postleitzahl muss genau 4 Ziffern lang sein."))
+    stop(paste0(base_msg, "The column Postleitzahl must be exactly 4 characters."))
   } else if (any(nchar(data$ort, keepNA = FALSE) > 40)) {
-    stop(paste0(base_msg, "Der Wohnort darf maximal 40 Zeichen enthalten."))
+    stop(paste0(base_msg, "The column Wohnort must not exceed 40 characters."))
   } else if (any(nchar(data$kand_nummer, keepNA = FALSE) > 10)) {
-    stop(paste0(base_msg, "Die Kandidierendennummer darf maximal 10 Zeichen enthalten."))
+    stop(paste0(base_msg, "The column Kandidierendennummer must not exceed 10 characters."))
   } else if (any(nchar(data$parteikurzbezeichnung, keepNA = FALSE) > 12)) {
-    stop(paste0(base_msg, "Die Parteikurzbezeichnung darf maximal 12 Zeichen enthalten."))
+    stop(paste0(base_msg, "The column Parteikurzbezeichnung must not exceed 12 characters."))
 
     # Majority specific checks
   } else if (election_type == "majority") {
     if (!all(sort(names(data)) == sort(names(readRDS(system.file("templates/eCH-0157_majority_table_template.RDS", package = "eCHparser")))))) {
-      stop(paste0(base_msg, "Es sind nicht alle nötigen Spalten aus dem Template vorhanden."))
+      stop(paste0(base_msg, "Your file does not contain all necessary columns as defined in the template."))
     } else if (any(nchar(data$parteilangbezeichnung, keepNA = FALSE)  > 100)) {
-      stop(paste0(base_msg, "Die Parteibezeichnung darf maximal 100 Zeichen enthalten."))
+      stop(paste0(base_msg, "The column Parteibezeichnung must not exceed 100 characters."))
     }
 
     # Proportional specific checks
   } else if (election_type == "proportion") {
 
     if (!all(sort(names(data)) == sort(names(readRDS(system.file("templates/eCH-0157_proportion_table_template.RDS", package = "eCHparser")))))) {
-      stop(paste0(base_msg, "Es sind nicht alle nötigen Spalten aus dem Template vorhanden."))
+      stop(paste0(base_msg, "Your file does not contain all necessary columns as defined in the template."))
     } else if (any(!grepl("^[0-9]+$", data$listenposition))) {
       stop(paste0(base_msg, "Die Listenposition muss eine Zahl sein. Sie bezeichnet die genaue Position von Kandidierenden auf der Liste."))
     } else if (any(nchar(data$listennummer, keepNA = FALSE) > 12)) {
-      stop(paste0(base_msg, "Die Listennummer darf maximal 12 Zeichen enthalten."))
+      stop(paste0(base_msg, "The column Listennummer must not exceed 12 characters."))
     } else if (any(nchar(data$listenkurzbezeichnung, keepNA = FALSE) > 20)) {
-      stop(paste0(base_msg, "Die Listenkurzbezeichnung darf maximal 20 Zeichen enthalten."))
+      stop(paste0(base_msg, "The column Listenkurzbezeichnung must not exceed 20 characters."))
     } else if (any(nchar(data$listenlangbezeichnung, keepNA = FALSE) > 100)) {
-      stop(paste0(base_msg, "Die Listenbezeichnung darf maximal 100 Zeichen enthalten."))
+      stop(paste0(base_msg, "The column Listenbezeichnung must not exceed 100 characters."))
     } else if (any(!grepl("^[0-9]+$", data$leere_zeilen))) {
-      stop(paste0(base_msg, "Die Anzahl leere Zeilen muss eine Zahl sein."))
+      stop(paste0(base_msg, "The column leere Zeilen must only contain digits."))
     }
 
   }
