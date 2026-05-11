@@ -1,7 +1,7 @@
-test_that("Parsed file output is a dataframe and matches corresponding RDS file", {
+test_that("Read in file matches corresponding RDS file", {
 
   # Get the list of unparsed test files
-  testfiles <- list.files(testthat::test_path("testdata/input/eCH-0252"))
+  testfiles <- list.files(testthat::test_path("testdata/input/election_templates"))
 
   # Initialize a new environment (necessary to actually assign values inside of tryCatch)
   errorenv <- new.env()
@@ -12,16 +12,24 @@ test_that("Parsed file output is a dataframe and matches corresponding RDS file"
   for (i in seq_along(testfiles)) {
 
     # Get the full file path
-    filepath <- testthat::test_path("testdata/input/eCH-0252", paste0(testfiles[i]))
+    filepath <- testthat::test_path("testdata/input/election_templates", paste0(testfiles[i]))
 
-    # Parse the file using the parse_eCH_0252 function
-    file_out <- parse_eCH_0252(filepath)
+    # Define election type (only relevant for template conversion)
+    election_type <- ifelse(testfiles[i] == "maj_template.xlsx", "Majority", "Proportion")
+    mandates <- ifelse(testfiles[i] == "maj_template.xlsx", 5, 10)
 
-    # Ensure the output is a data frame
-    testthat::expect_true(is.data.frame(file_out), info = paste("File:", testfiles[i]))
+    # Read and transform file
+    file_out <- read_election_template(
+      input_path = filepath,
+      election_type = election_type,
+      date = "2030-01-01",
+      election_title_short = "Testtitle short",
+      election_title_long = "Testtitle long",
+      mandates = mandates
+    )
 
     # Load the corresponding RDS file from the testdata folder (use testthat::test_path for the test to work also with devtools::test())
-    rds_filepath <- testthat::test_path("testdata/expected/eCH-0252", paste0(sub("\\.[^.]*$", "", testfiles[i]), ".RDS")) # the sub() removes the .xml extension
+    rds_filepath <- testthat::test_path("testdata/expected/election_templates", paste0(sub("\\.[^.]*$", "", testfiles[i]), ".RDS")) # the sub() removes the .xsls extension
 
     if (file.exists(rds_filepath)) {
       expected_out <- readRDS(rds_filepath)

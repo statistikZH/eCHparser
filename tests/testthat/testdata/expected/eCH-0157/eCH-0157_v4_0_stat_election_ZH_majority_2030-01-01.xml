@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<delivery xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.ech.ch/xmlns/eCH-0157/4">
+  <deliveryHeader>
+    <senderId xmlns="http://www.ech.ch/xmlns/eCH-0058/5">STAT</senderId>
+    <messageId xmlns="http://www.ech.ch/xmlns/eCH-0058/5">STAT_2026-05-08T13:19:33.552465</messageId>
+    <messageType xmlns="http://www.ech.ch/xmlns/eCH-0058/5">1710967</messageType>
+    <sendingApplication xmlns="http://www.ech.ch/xmlns/eCH-0058/5">
+      <manufacturer>Statistisches Amt ZH</manufacturer>
+      <product>eCHparser</product>
+      <productVersion>0.0.1.9001</productVersion>
+    </sendingApplication>
+    <messageDate xmlns="http://www.ech.ch/xmlns/eCH-0058/5">2026-05-08T13:19:33.553301</messageDate>
+    <action xmlns="http://www.ech.ch/xmlns/eCH-0058/5">1</action>
+    <testDeliveryFlag xmlns="http://www.ech.ch/xmlns/eCH-0058/5">true</testDeliveryFlag>
+  </deliveryHeader>
+  <initialDelivery>
+    <contest>
+      <contestIdentification xmlns="http://www.ech.ch/xmlns/eCH-0155/4">804329b2-3149-46c4-ae13-75ca10cd3cda</contestIdentification>
+      <contestDate xmlns="http://www.ech.ch/xmlns/eCH-0155/4">2030-01-01</contestDate>
+      <contestDescription xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+        <contestDescriptionInfo>
+          <language>de</language>
+          <contestDescription>Urnengang Anleitungen</contestDescription>
+        </contestDescriptionInfo>
+      </contestDescription>
+    </contest>
+    <electionGroupBallot>
+      <domainOfInfluenceIdentification>0b103973-2a61-4dd8-899d-38b1cc82b57d</domainOfInfluenceIdentification>
+      <electionInformation>
+        <election>
+          <electionIdentification xmlns="http://www.ech.ch/xmlns/eCH-0155/4">d138d7db-5eec-487e-94d6-878bc4fef48f</electionIdentification>
+          <typeOfElection xmlns="http://www.ech.ch/xmlns/eCH-0155/4">2</typeOfElection>
+          <electionPosition xmlns="http://www.ech.ch/xmlns/eCH-0155/4">0</electionPosition>
+          <electionDescription xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <electionDescriptionInfo>
+              <language>de</language>
+              <electionDescriptionShort>Wahl Präsidium</electionDescriptionShort>
+              <electionDescription>Wahl Gemeindepräsidium für die Amtsdauer von 2030 - 2034</electionDescription>
+            </electionDescriptionInfo>
+          </electionDescription>
+          <numberOfMandates xmlns="http://www.ech.ch/xmlns/eCH-0155/4">1</numberOfMandates>
+          <referencedElection xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <referencedElection>6541cad0-c82e-484b-b60c-a27ef817ac91</referencedElection>
+            <electionRelation>1</electionRelation>
+          </referencedElection>
+        </election>
+        <candidate>
+          <candidateIdentification xmlns="http://www.ech.ch/xmlns/eCH-0155/4">ab96d72c-a192-4c6d-9762-26ae41248bf3</candidateIdentification>
+          <familyName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Muster</familyName>
+          <firstName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Anne-Marie</firstName>
+          <callName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Marie</callName>
+          <candidateText xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <candidateTextInfo>
+              <language>de</language>
+              <candidateText>11.05.1996, Rheinau, FDP, bisher</candidateText>
+            </candidateTextInfo>
+          </candidateText>
+          <dateOfBirth xmlns="http://www.ech.ch/xmlns/eCH-0155/4">1996-05-11</dateOfBirth>
+          <sex xmlns="http://www.ech.ch/xmlns/eCH-0155/4">2</sex>
+          <occupationalTitle xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <occupationalTitleInfo>
+              <language>de</language>
+              <occupationalTitle>Kinderärztin, Praxisleiterin, Dr. med.</occupationalTitle>
+            </occupationalTitleInfo>
+          </occupationalTitle>
+          <dwellingAddress xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <street xmlns="http://www.ech.ch/xmlns/eCH-0010/6">Hornbach</street>
+            <houseNumber xmlns="http://www.ech.ch/xmlns/eCH-0010/6">17</houseNumber>
+            <town xmlns="http://www.ech.ch/xmlns/eCH-0010/6">Rheinau</town>
+            <swissZipCode xmlns="http://www.ech.ch/xmlns/eCH-0010/6">8464</swissZipCode>
+            <country xmlns="http://www.ech.ch/xmlns/eCH-0010/6">
+              <countryId>8100</countryId>
+              <countryIdISO2>CH</countryIdISO2>
+              <countryNameShort>Schweiz</countryNameShort>
+            </country>
+          </dwellingAddress>
+          <swiss xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <origin>-</origin>
+          </swiss>
+          <mrMrs xmlns="http://www.ech.ch/xmlns/eCH-0155/4">1</mrMrs>
+          <languageOfCorrespondence xmlns="http://www.ech.ch/xmlns/eCH-0155/4">de</languageOfCorrespondence>
+          <incumbentYesNo>true</incumbentYesNo>
+          <candidateReference xmlns="http://www.ech.ch/xmlns/eCH-0155/4">01</candidateReference>
+          <partyAffiliation xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <partyAffiliationInfo>
+              <language>de</language>
+              <partyAffiliationShort>FDP</partyAffiliationShort>
+              <partyAffiliationLong>FDP.Die Liberalen</partyAffiliationLong>
+            </partyAffiliationInfo>
+          </partyAffiliation>
+        </candidate>
+        <candidate>
+          <candidateIdentification xmlns="http://www.ech.ch/xmlns/eCH-0155/4">009f0e41-7625-4e24-8862-13d7c914f332</candidateIdentification>
+          <familyName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Sägesser</familyName>
+          <firstName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Rudolf</firstName>
+          <callName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Ruedi</callName>
+          <candidateText xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <candidateTextInfo>
+              <language>de</language>
+              <candidateText>21.10.1956, Rheinau, GRÜNE</candidateText>
+            </candidateTextInfo>
+          </candidateText>
+          <dateOfBirth xmlns="http://www.ech.ch/xmlns/eCH-0155/4">1956-10-21</dateOfBirth>
+          <sex xmlns="http://www.ech.ch/xmlns/eCH-0155/4">1</sex>
+          <occupationalTitle xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <occupationalTitleInfo>
+              <language>de</language>
+              <occupationalTitle>pensionierter Elektro-Ingenieur ETH, Jagdvorstand</occupationalTitle>
+            </occupationalTitleInfo>
+          </occupationalTitle>
+          <dwellingAddress xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <street xmlns="http://www.ech.ch/xmlns/eCH-0010/6">Müllerstotz</street>
+            <houseNumber xmlns="http://www.ech.ch/xmlns/eCH-0010/6">47</houseNumber>
+            <town xmlns="http://www.ech.ch/xmlns/eCH-0010/6">Rheinau</town>
+            <swissZipCode xmlns="http://www.ech.ch/xmlns/eCH-0010/6">8464</swissZipCode>
+            <country xmlns="http://www.ech.ch/xmlns/eCH-0010/6">
+              <countryId>8100</countryId>
+              <countryIdISO2>CH</countryIdISO2>
+              <countryNameShort>Schweiz</countryNameShort>
+            </country>
+          </dwellingAddress>
+          <swiss xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <origin>-</origin>
+          </swiss>
+          <mrMrs xmlns="http://www.ech.ch/xmlns/eCH-0155/4">2</mrMrs>
+          <languageOfCorrespondence xmlns="http://www.ech.ch/xmlns/eCH-0155/4">de</languageOfCorrespondence>
+          <incumbentYesNo>false</incumbentYesNo>
+          <candidateReference xmlns="http://www.ech.ch/xmlns/eCH-0155/4">05</candidateReference>
+          <partyAffiliation xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <partyAffiliationInfo>
+              <language>de</language>
+              <partyAffiliationShort>GRÜNE</partyAffiliationShort>
+              <partyAffiliationLong>GRÜNE</partyAffiliationLong>
+            </partyAffiliationInfo>
+          </partyAffiliation>
+        </candidate>
+      </electionInformation>
+      <electionInformation>
+        <election>
+          <electionIdentification xmlns="http://www.ech.ch/xmlns/eCH-0155/4">6541cad0-c82e-484b-b60c-a27ef817ac91</electionIdentification>
+          <typeOfElection xmlns="http://www.ech.ch/xmlns/eCH-0155/4">2</typeOfElection>
+          <electionPosition xmlns="http://www.ech.ch/xmlns/eCH-0155/4">0</electionPosition>
+          <electionDescription xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <electionDescriptionInfo>
+              <language>de</language>
+              <electionDescriptionShort>Wahl Gemeinderat</electionDescriptionShort>
+              <electionDescription>Gesamterneuerungswahl Gemeinderat Rheinau für die Amtsperiode 2030 - 2034, 1. Wahlgang</electionDescription>
+            </electionDescriptionInfo>
+          </electionDescription>
+          <numberOfMandates xmlns="http://www.ech.ch/xmlns/eCH-0155/4">5</numberOfMandates>
+          <referencedElection xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <referencedElection>d138d7db-5eec-487e-94d6-878bc4fef48f</referencedElection>
+            <electionRelation>2</electionRelation>
+          </referencedElection>
+        </election>
+        <candidate>
+          <candidateIdentification xmlns="http://www.ech.ch/xmlns/eCH-0155/4">dd233af6-b18e-4be8-9b71-fc3dc47a3397</candidateIdentification>
+          <familyName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Muster</familyName>
+          <firstName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Anne-Marie</firstName>
+          <callName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Marie</callName>
+          <candidateText xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <candidateTextInfo>
+              <language>de</language>
+              <candidateText>11.05.1996, Rheinau, FDP, bisher</candidateText>
+            </candidateTextInfo>
+          </candidateText>
+          <dateOfBirth xmlns="http://www.ech.ch/xmlns/eCH-0155/4">1996-05-11</dateOfBirth>
+          <sex xmlns="http://www.ech.ch/xmlns/eCH-0155/4">2</sex>
+          <occupationalTitle xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <occupationalTitleInfo>
+              <language>de</language>
+              <occupationalTitle>Kinderärztin, Praxisleiterin, Dr. med.</occupationalTitle>
+            </occupationalTitleInfo>
+          </occupationalTitle>
+          <dwellingAddress xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <street xmlns="http://www.ech.ch/xmlns/eCH-0010/6">Hornbach</street>
+            <houseNumber xmlns="http://www.ech.ch/xmlns/eCH-0010/6">17</houseNumber>
+            <town xmlns="http://www.ech.ch/xmlns/eCH-0010/6">Rheinau</town>
+            <swissZipCode xmlns="http://www.ech.ch/xmlns/eCH-0010/6">8464</swissZipCode>
+            <country xmlns="http://www.ech.ch/xmlns/eCH-0010/6">
+              <countryId>8100</countryId>
+              <countryIdISO2>CH</countryIdISO2>
+              <countryNameShort>Schweiz</countryNameShort>
+            </country>
+          </dwellingAddress>
+          <swiss xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <origin>-</origin>
+          </swiss>
+          <mrMrs xmlns="http://www.ech.ch/xmlns/eCH-0155/4">1</mrMrs>
+          <languageOfCorrespondence xmlns="http://www.ech.ch/xmlns/eCH-0155/4">de</languageOfCorrespondence>
+          <incumbentYesNo>true</incumbentYesNo>
+          <candidateReference xmlns="http://www.ech.ch/xmlns/eCH-0155/4">01</candidateReference>
+          <partyAffiliation xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <partyAffiliationInfo>
+              <language>de</language>
+              <partyAffiliationShort>FDP</partyAffiliationShort>
+              <partyAffiliationLong>FDP.Die Liberalen</partyAffiliationLong>
+            </partyAffiliationInfo>
+          </partyAffiliation>
+        </candidate>
+        <candidate>
+          <candidateIdentification xmlns="http://www.ech.ch/xmlns/eCH-0155/4">b6a6c613-7669-4223-b887-6d5869fcfba1</candidateIdentification>
+          <familyName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Müller</familyName>
+          <firstName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Fritz</firstName>
+          <callName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Fritz</callName>
+          <candidateText xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <candidateTextInfo>
+              <language>de</language>
+              <candidateText>02.03.2000, Rheinau, EVP, bisher</candidateText>
+            </candidateTextInfo>
+          </candidateText>
+          <dateOfBirth xmlns="http://www.ech.ch/xmlns/eCH-0155/4">2000-03-02</dateOfBirth>
+          <sex xmlns="http://www.ech.ch/xmlns/eCH-0155/4">1</sex>
+          <occupationalTitle xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <occupationalTitleInfo>
+              <language>de</language>
+              <occupationalTitle>Chauffeur</occupationalTitle>
+            </occupationalTitleInfo>
+          </occupationalTitle>
+          <dwellingAddress xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <street xmlns="http://www.ech.ch/xmlns/eCH-0010/6">Dorfstrasse</street>
+            <houseNumber xmlns="http://www.ech.ch/xmlns/eCH-0010/6">120</houseNumber>
+            <town xmlns="http://www.ech.ch/xmlns/eCH-0010/6">Rheinau</town>
+            <swissZipCode xmlns="http://www.ech.ch/xmlns/eCH-0010/6">8464</swissZipCode>
+            <country xmlns="http://www.ech.ch/xmlns/eCH-0010/6">
+              <countryId>8100</countryId>
+              <countryIdISO2>CH</countryIdISO2>
+              <countryNameShort>Schweiz</countryNameShort>
+            </country>
+          </dwellingAddress>
+          <swiss xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <origin>-</origin>
+          </swiss>
+          <mrMrs xmlns="http://www.ech.ch/xmlns/eCH-0155/4">2</mrMrs>
+          <languageOfCorrespondence xmlns="http://www.ech.ch/xmlns/eCH-0155/4">de</languageOfCorrespondence>
+          <incumbentYesNo>true</incumbentYesNo>
+          <candidateReference xmlns="http://www.ech.ch/xmlns/eCH-0155/4">02</candidateReference>
+          <partyAffiliation xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <partyAffiliationInfo>
+              <language>de</language>
+              <partyAffiliationShort>EVP</partyAffiliationShort>
+              <partyAffiliationLong>Evangelische Volkspartei</partyAffiliationLong>
+            </partyAffiliationInfo>
+          </partyAffiliation>
+        </candidate>
+        <candidate>
+          <candidateIdentification xmlns="http://www.ech.ch/xmlns/eCH-0155/4">82d76c53-dd2c-4aa7-8017-83f9597bae20</candidateIdentification>
+          <familyName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Opfiker</familyName>
+          <firstName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Sandra Maria</firstName>
+          <callName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Sandra</callName>
+          <candidateText xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <candidateTextInfo>
+              <language>de</language>
+              <candidateText>06.12.1978, Rheinau, SVP, bisher</candidateText>
+            </candidateTextInfo>
+          </candidateText>
+          <dateOfBirth xmlns="http://www.ech.ch/xmlns/eCH-0155/4">1978-12-06</dateOfBirth>
+          <sex xmlns="http://www.ech.ch/xmlns/eCH-0155/4">2</sex>
+          <occupationalTitle xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <occupationalTitleInfo>
+              <language>de</language>
+              <occupationalTitle>Käserin, EFZ</occupationalTitle>
+            </occupationalTitleInfo>
+          </occupationalTitle>
+          <dwellingAddress xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <street xmlns="http://www.ech.ch/xmlns/eCH-0010/6">Seeblickstrasse</street>
+            <houseNumber xmlns="http://www.ech.ch/xmlns/eCH-0010/6">2</houseNumber>
+            <town xmlns="http://www.ech.ch/xmlns/eCH-0010/6">Rheinau</town>
+            <swissZipCode xmlns="http://www.ech.ch/xmlns/eCH-0010/6">8464</swissZipCode>
+            <country xmlns="http://www.ech.ch/xmlns/eCH-0010/6">
+              <countryId>8100</countryId>
+              <countryIdISO2>CH</countryIdISO2>
+              <countryNameShort>Schweiz</countryNameShort>
+            </country>
+          </dwellingAddress>
+          <swiss xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <origin>-</origin>
+          </swiss>
+          <mrMrs xmlns="http://www.ech.ch/xmlns/eCH-0155/4">1</mrMrs>
+          <languageOfCorrespondence xmlns="http://www.ech.ch/xmlns/eCH-0155/4">de</languageOfCorrespondence>
+          <incumbentYesNo>true</incumbentYesNo>
+          <candidateReference xmlns="http://www.ech.ch/xmlns/eCH-0155/4">03</candidateReference>
+          <partyAffiliation xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <partyAffiliationInfo>
+              <language>de</language>
+              <partyAffiliationShort>SVP</partyAffiliationShort>
+              <partyAffiliationLong>Schweizerische Volkspartei</partyAffiliationLong>
+            </partyAffiliationInfo>
+          </partyAffiliation>
+        </candidate>
+        <candidate>
+          <candidateIdentification xmlns="http://www.ech.ch/xmlns/eCH-0155/4">cf89bb33-6952-4f11-b337-c428c6a7a4c4</candidateIdentification>
+          <familyName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Pfister-Hauser</familyName>
+          <firstName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Regula</firstName>
+          <callName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Regula</callName>
+          <candidateText xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <candidateTextInfo>
+              <language>de</language>
+              <candidateText>06.09.1981, Rheinau, SP</candidateText>
+            </candidateTextInfo>
+          </candidateText>
+          <dateOfBirth xmlns="http://www.ech.ch/xmlns/eCH-0155/4">1981-09-06</dateOfBirth>
+          <sex xmlns="http://www.ech.ch/xmlns/eCH-0155/4">2</sex>
+          <occupationalTitle xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <occupationalTitleInfo>
+              <language>de</language>
+              <occupationalTitle>Primarlehrerin, Heilpädagogin, Pilzexpertin</occupationalTitle>
+            </occupationalTitleInfo>
+          </occupationalTitle>
+          <dwellingAddress xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <street xmlns="http://www.ech.ch/xmlns/eCH-0010/6">Hermanngasse</street>
+            <houseNumber xmlns="http://www.ech.ch/xmlns/eCH-0010/6">9</houseNumber>
+            <town xmlns="http://www.ech.ch/xmlns/eCH-0010/6">Rheinau</town>
+            <swissZipCode xmlns="http://www.ech.ch/xmlns/eCH-0010/6">8464</swissZipCode>
+            <country xmlns="http://www.ech.ch/xmlns/eCH-0010/6">
+              <countryId>8100</countryId>
+              <countryIdISO2>CH</countryIdISO2>
+              <countryNameShort>Schweiz</countryNameShort>
+            </country>
+          </dwellingAddress>
+          <swiss xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <origin>-</origin>
+          </swiss>
+          <mrMrs xmlns="http://www.ech.ch/xmlns/eCH-0155/4">1</mrMrs>
+          <title xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Dr.</title>
+          <languageOfCorrespondence xmlns="http://www.ech.ch/xmlns/eCH-0155/4">de</languageOfCorrespondence>
+          <incumbentYesNo>false</incumbentYesNo>
+          <candidateReference xmlns="http://www.ech.ch/xmlns/eCH-0155/4">04</candidateReference>
+          <partyAffiliation xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <partyAffiliationInfo>
+              <language>de</language>
+              <partyAffiliationShort>SP</partyAffiliationShort>
+              <partyAffiliationLong>Sozialdemokratische Partei</partyAffiliationLong>
+            </partyAffiliationInfo>
+          </partyAffiliation>
+        </candidate>
+        <candidate>
+          <candidateIdentification xmlns="http://www.ech.ch/xmlns/eCH-0155/4">24d9faed-2b24-41dd-b722-681ea17ae80a</candidateIdentification>
+          <familyName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Sägesser</familyName>
+          <firstName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Rudolf</firstName>
+          <callName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Ruedi</callName>
+          <candidateText xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <candidateTextInfo>
+              <language>de</language>
+              <candidateText>21.10.1956, Rheinau, GRÜNE, bisher</candidateText>
+            </candidateTextInfo>
+          </candidateText>
+          <dateOfBirth xmlns="http://www.ech.ch/xmlns/eCH-0155/4">1956-10-21</dateOfBirth>
+          <sex xmlns="http://www.ech.ch/xmlns/eCH-0155/4">1</sex>
+          <occupationalTitle xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <occupationalTitleInfo>
+              <language>de</language>
+              <occupationalTitle>pensionierter Elektro-Ingenieur ETH, Jagdvorstand</occupationalTitle>
+            </occupationalTitleInfo>
+          </occupationalTitle>
+          <dwellingAddress xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <street xmlns="http://www.ech.ch/xmlns/eCH-0010/6">Müllerstotz</street>
+            <houseNumber xmlns="http://www.ech.ch/xmlns/eCH-0010/6">47</houseNumber>
+            <town xmlns="http://www.ech.ch/xmlns/eCH-0010/6">Rheinau</town>
+            <swissZipCode xmlns="http://www.ech.ch/xmlns/eCH-0010/6">8464</swissZipCode>
+            <country xmlns="http://www.ech.ch/xmlns/eCH-0010/6">
+              <countryId>8100</countryId>
+              <countryIdISO2>CH</countryIdISO2>
+              <countryNameShort>Schweiz</countryNameShort>
+            </country>
+          </dwellingAddress>
+          <swiss xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <origin>-</origin>
+          </swiss>
+          <mrMrs xmlns="http://www.ech.ch/xmlns/eCH-0155/4">2</mrMrs>
+          <languageOfCorrespondence xmlns="http://www.ech.ch/xmlns/eCH-0155/4">de</languageOfCorrespondence>
+          <incumbentYesNo>true</incumbentYesNo>
+          <candidateReference xmlns="http://www.ech.ch/xmlns/eCH-0155/4">05</candidateReference>
+          <partyAffiliation xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <partyAffiliationInfo>
+              <language>de</language>
+              <partyAffiliationShort>GRÜNE</partyAffiliationShort>
+              <partyAffiliationLong>GRÜNE</partyAffiliationLong>
+            </partyAffiliationInfo>
+          </partyAffiliation>
+        </candidate>
+        <candidate>
+          <candidateIdentification xmlns="http://www.ech.ch/xmlns/eCH-0155/4">4f0518a2-b1ff-4f14-ba97-8805dadff69c</candidateIdentification>
+          <familyName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Trub</familyName>
+          <firstName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Samuel</firstName>
+          <callName xmlns="http://www.ech.ch/xmlns/eCH-0155/4">Samuel</callName>
+          <candidateText xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <candidateTextInfo>
+              <language>de</language>
+              <candidateText>19.11.1990, Rheinau, parteilos</candidateText>
+            </candidateTextInfo>
+          </candidateText>
+          <dateOfBirth xmlns="http://www.ech.ch/xmlns/eCH-0155/4">1990-11-19</dateOfBirth>
+          <sex xmlns="http://www.ech.ch/xmlns/eCH-0155/4">1</sex>
+          <occupationalTitle xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <occupationalTitleInfo>
+              <language>de</language>
+              <occupationalTitle>Chemielaborant</occupationalTitle>
+            </occupationalTitleInfo>
+          </occupationalTitle>
+          <dwellingAddress xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <street xmlns="http://www.ech.ch/xmlns/eCH-0010/6">Pfingstweid</street>
+            <houseNumber xmlns="http://www.ech.ch/xmlns/eCH-0010/6">6</houseNumber>
+            <town xmlns="http://www.ech.ch/xmlns/eCH-0010/6">Rheinau</town>
+            <swissZipCode xmlns="http://www.ech.ch/xmlns/eCH-0010/6">8464</swissZipCode>
+            <country xmlns="http://www.ech.ch/xmlns/eCH-0010/6">
+              <countryId>8100</countryId>
+              <countryIdISO2>CH</countryIdISO2>
+              <countryNameShort>Schweiz</countryNameShort>
+            </country>
+          </dwellingAddress>
+          <swiss xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <origin>-</origin>
+          </swiss>
+          <mrMrs xmlns="http://www.ech.ch/xmlns/eCH-0155/4">2</mrMrs>
+          <languageOfCorrespondence xmlns="http://www.ech.ch/xmlns/eCH-0155/4">de</languageOfCorrespondence>
+          <incumbentYesNo>false</incumbentYesNo>
+          <candidateReference xmlns="http://www.ech.ch/xmlns/eCH-0155/4">06</candidateReference>
+          <partyAffiliation xmlns="http://www.ech.ch/xmlns/eCH-0155/4">
+            <partyAffiliationInfo>
+              <language>de</language>
+              <partyAffiliationShort>parteilos</partyAffiliationShort>
+              <partyAffiliationLong>parteilos</partyAffiliationLong>
+            </partyAffiliationInfo>
+          </partyAffiliation>
+        </candidate>
+      </electionInformation>
+    </electionGroupBallot>
+  </initialDelivery>
+</delivery>

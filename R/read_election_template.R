@@ -1,0 +1,247 @@
+#' Read an xlsx file, created by the write_election_template function
+#'
+#' @description
+#' This function reads tabular election data, the templates for which can be
+#' generated with the `write_election_template()` function. The user has to
+#' define additional information such as the date of the election or the name
+#' of it.
+#'
+#' @param input_path Path to your xlsx file.
+#' @inheritParams get_election_template
+#' @param date A character string with the format "YYYY-MM-DD".
+#' @param election_title_short A character string with a maximum of 100
+#' characters.
+#' @param election_title_long A character string with a maximum of 255
+#' characters.
+#' @param mandates A numeric string indicating the number of mandates for the
+#' election.
+#'
+#' @return A dataframe that can be transformed into a valid eCH-0157 XML file
+#' with the write_eCH_0157() function.
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' my_df <- read_election_template(
+#'   "path/to/my/template.xlsx",
+#'   "Majority",
+#'   "2030-01-01",
+#'   "Election of the Test Body",
+#'   "Election of the Test Body in the Test Municipality",
+#'   7
+#' )
+#' }
+#'
+read_election_template <- function(input_path, election_type, date, election_title_short, election_title_long, mandates){
+
+  # Transform input params
+  election_type <- tolower(election_type)
+
+  # Read the file and immediately transform the date column to character
+  data <- readxl::read_xlsx(input_path) |>
+    dplyr::mutate(geburtsdatum = as.character(geburtsdatum))
+
+  # Check input params
+  if (!grepl("^(19|20)\\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$", date)) {
+    stop("Your \"date\" does not have the correct format. A correct example would be \"2008-09-15\".")
+  } else if (nchar(election_title_short) > 100) {
+    stop("Your \"election_title_short\" exceeds 100 characters.")
+  } else if (nchar(election_title_long) > 255) {
+    stop("Your \"election_title_long\" exceeds 255 characters.")
+  } else if (!is.numeric(mandates)) {
+    stop("Your input \"mandates\" must be numeric.")
+  } else if (!election_type %in% c("proportion", "majority")) {
+    stop("The parameter \"election_type\" must be either \"Majority\" or \"Proportion\". ")
+  }
+
+  # Check input file
+  base_msg <- "Die Datei kann nicht verarbeitet werden. "
+
+  # General checks
+  if (any(is.na(data$nachname) | nchar(data$nachname) > 100)) {
+    stop(paste0(base_msg, "You need to define a Nachname of not more than 100 characters for all candidates."))
+  } else if (any(nchar(data$amtl_vorname, keepNA = FALSE) > 100)) {
+    stop(paste0(base_msg, "Vornamen must not exceed 100 characters."))
+  } else if (any(is.na(data$pol_vorname) | nchar(data$pol_vorname) > 100)) {
+    stop(paste0(base_msg, "You need to define a Vorname of not more than 100 characters for all candidates."))
+  } else if (any(!grepl("\\d{2}\\.\\d{2}\\.\\d{4}", data$geburtsdatum) & !grepl("\\d{4}-\\d{2}-\\d{2}", data$geburtsdatum))) {
+    stop(paste0(base_msg, "All Geburtsdaten have to be in the same format (DD.MM.YYYY or YYYY-MM-DD)."))
+  } else if (any(!tolower(data$geschlecht) %in% c("männlich", "mann", "m", "weiblich", "w", "frau", "f"))) {
+    stop(paste0(base_msg, "The Geschlecht of all candidates have to be defined as \"m\" or \"w\" according to the inforation in the population register."))
+  } else if (any(!tolower(data$bisher) %in% c("ja", "nein", NA))) {
+    stop(paste0(base_msg, "The column bisher must only contain \"Ja\" or \"Nein\"."))
+  } else if (any(nchar(data$beruf, keepNA = FALSE) > 250)) {
+    stop(paste0(base_msg, "The column Berufsbezeichnung must not exceed 200 characters."))
+  } else if (any(nchar(data$titel, keepNA = FALSE) > 250)) {
+    stop(paste0(base_msg, "The column Titel must not exceed 250 characters."))
+  } else if (any(nchar(data$strasse, keepNA = FALSE) > 150)) {
+    stop(paste0(base_msg, "The column Strasse must not exceed 150 characters."))
+  } else if (any(nchar(data$hausnummer, keepNA = FALSE) > 30)) {
+    stop(paste0(base_msg, "The column Hausnummer must not exceed 30 characters."))
+  } else if (any(!nchar(data$plz, keepNA = FALSE) %in% c(2, 4))) {
+    stop(paste0(base_msg, "The column Postleitzahl must be exactly 4 characters."))
+  } else if (any(nchar(data$ort, keepNA = FALSE) > 40)) {
+    stop(paste0(base_msg, "The column Wohnort must not exceed 40 characters."))
+  } else if (any(nchar(data$kand_nummer, keepNA = FALSE) > 10)) {
+    stop(paste0(base_msg, "The column Kandidierendennummer must not exceed 10 characters."))
+  } else if (any(nchar(data$parteikurzbezeichnung, keepNA = FALSE) > 12)) {
+    stop(paste0(base_msg, "The column Parteikurzbezeichnung must not exceed 12 characters."))
+
+    # Majority specific checks
+  } else if (election_type == "majority") {
+    if (!all(sort(names(data)) == sort(names(readRDS(system.file("templates/eCH-0157_majority_table_template.RDS", package = "eCHparser")))))) {
+      stop(paste0(base_msg, "Your file does not contain all necessary columns as defined in the template."))
+    } else if (any(nchar(data$parteilangbezeichnung, keepNA = FALSE)  > 100)) {
+      stop(paste0(base_msg, "The column Parteibezeichnung must not exceed 100 characters."))
+    }
+
+    # Proportional specific checks
+  } else if (election_type == "proportion") {
+
+    if (!all(sort(names(data)) == sort(names(readRDS(system.file("templates/eCH-0157_proportion_table_template.RDS", package = "eCHparser")))))) {
+      stop(paste0(base_msg, "Your file does not contain all necessary columns as defined in the template."))
+    } else if (any(!grepl("^[0-9]+$", data$listenposition))) {
+      stop(paste0(base_msg, "Die Listenposition muss eine Zahl sein. Sie bezeichnet die genaue Position von Kandidierenden auf der Liste."))
+    } else if (any(nchar(data$listennummer, keepNA = FALSE) > 12)) {
+      stop(paste0(base_msg, "The column Listennummer must not exceed 12 characters."))
+    } else if (any(nchar(data$listenkurzbezeichnung, keepNA = FALSE) > 20)) {
+      stop(paste0(base_msg, "The column Listenkurzbezeichnung must not exceed 20 characters."))
+    } else if (any(nchar(data$listenlangbezeichnung, keepNA = FALSE) > 100)) {
+      stop(paste0(base_msg, "The column Listenbezeichnung must not exceed 100 characters."))
+    } else if (any(!grepl("^[0-9]+$", data$leere_zeilen))) {
+      stop(paste0(base_msg, "The column leere Zeilen must only contain digits."))
+    }
+
+  }
+
+  # Add information from params
+  data <- data |>
+    dplyr::mutate(
+      contest_contestDate = date,
+      `electionDescriptionInfo-de_electionDescriptionShort` = election_title_short,
+      `electionDescriptionInfo-de_electionDescription` = election_title_long,
+      election_numberOfMandates = mandates
+    )
+
+  # Rename columns
+  data <- data |>
+    # rename variables
+    dplyr::rename(dplyr::all_of(c(
+      candidate_familyName = "nachname",
+      candidate_firstName = "amtl_vorname",
+      candidate_callName = "pol_vorname",
+      candidate_dateOfBirth = "geburtsdatum", # readxlsx() transforms date inputs to YYYY-MM-DD automatically
+      candidate_sex = "geschlecht",
+      candidate_incumbentYesNo = "bisher",
+      dwellingAddress_street = "strasse",
+      dwellingAddress_houseNumber = "hausnummer",
+      dwellingAddress_swissZipCode = "plz",
+      dwellingAddress_town = "ort",
+      `partyAffiliationInfo-de_partyAffiliationShort` = "parteikurzbezeichnung",
+      `occupationalTitleInfo-de_occupationalTitle` = "beruf",
+      candidate_title = "titel"
+    )))
+
+  # Add columns
+  data <- data |>
+    dplyr::mutate(
+      # Add necessary columns with boiler plate content that will not be used by the receiving system but is necessary for valid eCH
+      contest_contestIdentification = paste0("contest-", contest_contestDate),
+      `contestDescriptionInfo-de_contestDescription` = paste0("urnengang_vom_", contest_contestDate),
+      electionGroupBallot_domainOfInfluenceIdentification = 1,
+      election_electionIdentification = paste0("wahl_vom_", contest_contestDate),
+      candidate_candidateIdentification = stringr::str_trunc(paste0(contest_contestDate, kand_nummer, candidate_familyName, candidate_firstName), 36, "right", ""),
+      `candidateTextInfo-de_candidateText` = paste0(
+        stringr::str_trunc(candidate_dateOfBirth, 4, "right", ""),
+        ", ",
+        dwellingAddress_town,
+        ", ",
+        `occupationalTitleInfo-de_occupationalTitle`,
+        ifelse(tolower(candidate_incumbentYesNo) %in% c("yes", "ja", "bisher", "true"), ", bisher", "")
+      ),
+      swiss_origin = "-", # not needed
+
+      # Mutate columns with information to be used by receiving system
+      election_typeOfElection = ifelse(election_type == "proportion", 1, 2),
+      election_electionPosition = 0,
+      electionGroupBallot_index = 1,
+      candidate_firstName = ifelse(is.na(candidate_firstName), candidate_callName, candidate_firstName),
+      candidate_sex = ifelse(tolower(candidate_sex) %in% c("m", "männlich", "mann", "herr"), 1, 2),
+      candidate_incumbentYesNo = ifelse(tolower(candidate_incumbentYesNo) %in% c("yes", "ja", "bisher", "true"), "true", "false"),
+      country_countryId = 8100,
+      country_countryIdISO2 = "CH",
+      country_countryNameShort = "Schweiz",
+      candidate_mrMrs = ifelse(candidate_sex == 1, 2, 1), # eCH-0010 and 0044 have different numerics for male/mr. -.-
+      candidate_languageOfCorrespondence = "de"
+    )
+
+  # Majority specific adjustments
+  if (election_type == "majority") {
+
+    data <- data |>
+      dplyr::rename(dplyr::all_of(c(
+        candidate_candidateReference = "kand_nummer",
+        `partyAffiliationInfo-de_partyAffiliationLong` = "parteilangbezeichnung"
+      ))) |>
+      dplyr::mutate(
+        candidate_candidateReference = stringr::str_pad(candidate_candidateReference, 2, "left", "0")
+      )
+
+  }
+
+  # Proportion specific adjustments
+  if (election_type == "proportion") {
+
+    data <- data |>
+      dplyr::rename(dplyr::all_of(c(
+        list_listIndentureNumber = "listennummer",
+        `listDescriptionInfo-de_listDescriptionShort` = "listenkurzbezeichnung",
+        `listDescriptionInfo-de_listDescription` = "listenlangbezeichnung",
+        list_emptyListPositions = "leere_zeilen",
+        candidatePosition_positionOnList = "listenposition",
+        candidatePosition_candidateReferenceOnPosition = "kand_nummer"
+      ))) |>
+      dplyr::group_by(list_listIndentureNumber) |>
+      dplyr::mutate(n_kand = dplyr::n()) |>
+      dplyr::ungroup() |>
+      dplyr::mutate(
+        `partyAffiliationInfo-de_partyAffiliationLong` = `partyAffiliationInfo-de_partyAffiliationShort`,
+        list_listIndentureNumber = stringr::str_pad(as.numeric(list_listIndentureNumber), 2, "left", "0"),
+        # candidate number: padded list number, padded last two positions on the cand number given
+        candidatePosition_candidateReferenceOnPosition = paste0(
+          list_listIndentureNumber,
+          ".",
+          stringr::str_pad(stringr::str_trunc(candidatePosition_candidateReferenceOnPosition, 2, "left", ellipsis = ""), 2, "left", "0")
+        ),
+        candidate_candidateReference = candidatePosition_candidateReferenceOnPosition,
+        list_isEmptyList = "false",
+        list_listOrderOfPrecedence = as.numeric(list_listIndentureNumber),
+        candidatePosition_candidateIdentification = candidatePosition_candidateReferenceOnPosition,
+        # create a unique yet short list ID
+        list_listIdentification = paste0(
+          "list_id-",
+          as.integer(factor(paste(
+            contest_contestDate,
+            `electionDescriptionInfo-de_electionDescriptionShort`,
+            `electionDescriptionInfo-de_electionDescription`,
+            election_numberOfMandates,
+            list_listIndentureNumber,
+            sep = "-")))
+        )
+      ) |>
+      dplyr::group_by(
+        `listDescriptionInfo-de_listDescriptionShort`,
+        `listDescriptionInfo-de_listDescription`,
+        list_listIndentureNumber
+      ) |>
+      dplyr::mutate(
+        list_totalPositionsOnList = max(as.numeric(candidatePosition_positionOnList)),
+        list_emptyListPositions = mandates - list_totalPositionsOnList,
+      ) |>
+      dplyr::ungroup()
+
+  }
+
+  return(data)
+
+}
