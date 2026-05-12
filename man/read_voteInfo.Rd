@@ -9,29 +9,11 @@ read_voteInfo(xml_node, index)
 \arguments{
 \item{xml_node}{Node voteBaseDelivery of the XML file.}
 
-\item{index}{Index of the voteInfo nodes of interest.}
+\item{index}{Index of the voteInfo node of interest.}
 }
 \value{
 A dataframe.
 }
 \description{
 Convert an eCH-0252 voteInfo node into a dataframe
-}
-\examples{
-filepath <- system.file(
-  "extdata",
-  "eCH-0252_abraxas_vote_ZH_counting_2024-11-24.xml",
-  package = "eCHparser"
-)
-
-# Load file
-xml_data <- xml2::read_xml(filepath)
-
-# Strip namespaces
-xml_data_stripped <- strip_namespaces(xml_data)
-
-# Load base delivery part of the file
-node_voteBaseDelivery <- xml2::xml_find_first(xml_data_stripped, ".//voteBaseDelivery")
-
-read_voteInfo(node_voteBaseDelivery, 3)
 }
