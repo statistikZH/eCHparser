@@ -11,7 +11,8 @@ parse_eCH_0252(input_path, doi = "all")
 
 \item{doi}{Domains of influence of the votes that you want included.
 If set to "all" (the default), all votes are included.
-\href{https://www.ech.ch/de/ech/ech-0155/4.1}{eCH-0155} defines the following domains of influence:
+\href{https://www.ech.ch/de/ech/ech-0155/4.1}{eCH-0155} defines the following
+domains of influence:
 \itemize{
 \item CH = Bund
 \item CT = Kanton
@@ -33,6 +34,12 @@ This function turns an eCH-0252 XML file for a contest including multiple
 votes into a dataframe.
 }
 \examples{
-votedata <- parse_eCH_0252(system.file("extdata/eCH-0252_abraxas_vote_ZH_counting_2024-11-24.xml", package = "eCHparser"), doi = c("CH", "CT", "MU"))
+votedata <- parse_eCH_0252(
+  system.file(
+    "extdata/eCH-0252_abraxas_vote_ZH_counting_2024-11-24.xml",
+    package = "eCHparser"
+  ),
+  doi = c("CH", "CT", "MU")
+)
 
 }

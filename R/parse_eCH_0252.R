@@ -7,7 +7,8 @@
 #' @param input_path Path to your XML file.
 #' @param doi Domains of influence of the votes that you want included.
 #' If set to "all" (the default), all votes are included.
-#' [eCH-0155](https://www.ech.ch/de/ech/ech-0155/4.1) defines the following domains of influence:
+#' [eCH-0155](https://www.ech.ch/de/ech/ech-0155/4.1) defines the following
+#' domains of influence:
 #' * CH = Bund
 #' * CT = Kanton
 #' * BZ = Bezirk / Amt / Verwaltungskreis
@@ -24,7 +25,13 @@
 #' @export
 #'
 #' @examples
-#' votedata <- parse_eCH_0252(system.file("extdata/eCH-0252_abraxas_vote_ZH_counting_2024-11-24.xml", package = "eCHparser"), doi = c("CH", "CT", "MU"))
+#' votedata <- parse_eCH_0252(
+#'   system.file(
+#'     "extdata/eCH-0252_abraxas_vote_ZH_counting_2024-11-24.xml",
+#'     package = "eCHparser"
+#'   ),
+#'   doi = c("CH", "CT", "MU")
+#' )
 #'
 parse_eCH_0252 <- function(input_path, doi = "all"){
 

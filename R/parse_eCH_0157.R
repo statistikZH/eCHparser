@@ -11,7 +11,12 @@
 #' @export
 #'
 #' @examples
-#' votedata <- parse_eCH_0157(system.file("extdata/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xml", package = "eCHparser"))
+#' votedata <- parse_eCH_0157(
+#'   system.file(
+#'     "extdata/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xml",
+#'     package = "eCHparser"
+#'   )
+#' )
 #'
 parse_eCH_0157 <- function(input_path){
 

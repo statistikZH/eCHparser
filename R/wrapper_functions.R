@@ -61,7 +61,11 @@ new_election_template <- function(election_type, output_path, overwrite = FALSE)
 #'
 #' @examples
 #' \dontrun{
-#' write_eCH_0157(my_df, "path/to/my/xml_file.xml", "Majority")
+#' write_eCH_0157(
+#'   my_df,
+#'   "path/to/my/xml_file.xml",
+#'   "Majority"
+#' )
 #' }
 #'
 write_eCH_0157 <- function(data, output_path, election_type){

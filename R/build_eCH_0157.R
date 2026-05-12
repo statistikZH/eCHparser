@@ -4,8 +4,8 @@
 #' This function transforms a dataframe containing election information into an
 #' XML file in the eCH-0157 format. The original data must adhere to a specific
 #' format. To obtain this format, create a new blank XLSX file using the
-#' `new_election_template()` function, fill in the information, and load the file
-#' using the `read_election_template()` function.
+#' `new_election_template()` function, fill in the information, and load the
+#' file using the `read_election_template()` function.
 #'
 #' @param data A dataframe in the required format.
 #' @inheritParams get_election_template

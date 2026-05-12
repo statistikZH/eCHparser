@@ -19,8 +19,8 @@ An XML file.
 This function transforms a dataframe containing election information into an
 XML file in the eCH-0157 format. The original data must adhere to a specific
 format. To obtain this format, create a new blank XLSX file using the
-\code{new_election_template()} function, fill in the information, and load the file
-using the \code{read_election_template()} function.
+\code{new_election_template()} function, fill in the information, and load the
+file using the \code{read_election_template()} function.
 }
 \examples{
 \dontrun{

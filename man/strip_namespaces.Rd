@@ -17,7 +17,13 @@ This function strips all namespaces of eCH-0157 and eCH-0252 XML files.
 }
 \examples{
 # Load file
-xml_data <- xml2::read_xml(system.file("extdata", "eCH-0252_abraxas_vote_ZH_counting_2024-11-24.xml", package = "eCHparser"))
+xml_data <- xml2::read_xml(
+  system.file(
+    "extdata",
+    "eCH-0252_abraxas_vote_ZH_counting_2024-11-24.xml",
+    package = "eCHparser"
+  )
+)
 
 # Strip namespaces
 xml_data_stripped <- strip_namespaces(xml_data)

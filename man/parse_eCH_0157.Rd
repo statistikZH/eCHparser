@@ -17,6 +17,11 @@ This function turns an eCH-0157 XML file for an election day into a
 dataframe.
 }
 \examples{
-votedata <- parse_eCH_0157(system.file("extdata/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xml", package = "eCHparser"))
+votedata <- parse_eCH_0157(
+  system.file(
+    "extdata/eCH-0157_abraxas_elections_ZH_majority_2026-06-16.xml",
+    package = "eCHparser"
+  )
+)
 
 }
