@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<delivery xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.ech.ch/xmlns/eCH-0252/2">
+	<deliveryHeader>
+		<senderId xmlns="http://www.ech.ch/xmlns/eCH-0058/5">ABX-VOTING</senderId>
+		<messageId xmlns="http://www.ech.ch/xmlns/eCH-0058/5">423094117fbb41abbb88e5ed4dfbd23d</messageId>
+		<messageType xmlns="http://www.ech.ch/xmlns/eCH-0058/5">1198</messageType>
+		<sendingApplication xmlns="http://www.ech.ch/xmlns/eCH-0058/5">
+			<manufacturer>Abraxas Informatik AG</manufacturer>
+			<product>Voting.Ausmittlung</product>
+			<productVersion>2.95.3+53d</productVersion>
+		</sendingApplication>
+		<comment xmlns="http://www.ech.ch/xmlns/eCH-0058/5">UAT / Testphase</comment>
+		<messageDate xmlns="http://www.ech.ch/xmlns/eCH-0058/5">2026-05-18T14:11:54.9591251Z</messageDate>
+		<action xmlns="http://www.ech.ch/xmlns/eCH-0058/5">1</action>
+		<testDeliveryFlag xmlns="http://www.ech.ch/xmlns/eCH-0058/5">true</testDeliveryFlag>
+	</deliveryHeader>
+	<electionResultDelivery>
+		<cantonId>1</cantonId>
+		<pollingDay>2070-01-01</pollingDay>
+		<electionGroupResult>
+			<electionGroupIdentification>b16b9f50-b44d-4126-8a77-c05da5a63330</electionGroupIdentification>
+			<electionResult>
+				<electionIdentification>b16b9f50-b44d-4126-8a77-c05da5a63330</electionIdentification>
+				<countingCircleResult>
+					<countingCircle>
+						<countingCircleId>211</countingCircleId>
+						<countingCircleName>Altikon</countingCircleName>
+						<domainOfInfluenceType>MU</domainOfInfluenceType>
+					</countingCircle>
+				</countingCircleResult>
+				<countingCircleResult>
+					<countingCircle>
+						<countingCircleId>10261</countingCircleId>
+						<countingCircleName>Zürich Stadtkreise 1 und 2</countingCircleName>
+						<domainOfInfluenceType>SK</domainOfInfluenceType>
+					</countingCircle>
+					<resultData>
+						<countOfVotersInformation>
+							<countOfVotersTotal>5000</countOfVotersTotal>
+							<subtotalInfo>
+								<countOfVoters>2500</countOfVoters>
+								<voterType>1</voterType>
+								<sex>1</sex>
+							</subtotalInfo>
+							<subtotalInfo>
+								<countOfVoters>2500</countOfVoters>
+								<voterType>1</voterType>
+								<sex>2</sex>
+							</subtotalInfo>
+						</countOfVotersInformation>
+						<votingCardInformation>
+							<countOfVotingCardsReceivedInBallotBox>20</countOfVotingCardsReceivedInBallotBox>
+							<countOfVotingCardsReceivedPrematurelyInBallotBox>10</countOfVotingCardsReceivedPrematurelyInBallotBox>
+							<countOfVotingCardsReceivedByMail>2970</countOfVotingCardsReceivedByMail>
+							<countOfInvalidVotingCardsReceivedByMail>0</countOfInvalidVotingCardsReceivedByMail>
+						</votingCardInformation>
+						<isFullyCounted>true</isFullyCounted>
+						<releasedTimestamp>2026-05-18T14:08:19.161221Z</releasedTimestamp>
+						<lockoutTimestamp>2026-05-18T14:08:19.16141Z</lockoutTimestamp>
+						<voterTurnout>58.00</voterTurnout>
+						<countOfReceivedBallots>2900</countOfReceivedBallots>
+						<countOfBlankBallots>10</countOfBlankBallots>
+						<countOfInvalidBallots>0</countOfInvalidBallots>
+						<countOfValidBallots>2890</countOfValidBallots>
+						<electionResult>
+							<electionIdentification>b16b9f50-b44d-4126-8a77-c05da5a63330</electionIdentification>
+							<majorityElection>
+								<candidateResult>
+									<candidateOrWriteInCandidate>
+										<candidateIdentification>1f5c1c78-b0ea-46f7-a679-668529d37d93</candidateIdentification>
+										<candidateReference>1</candidateReference>
+									</candidateOrWriteInCandidate>
+									<countOfVotesTotal>1500</countOfVotesTotal>
+								</candidateResult>
+								<candidateResult>
+									<candidateOrWriteInCandidate>
+										<candidateIdentification>10fd4787-79b0-4f03-9cb9-b172342d3f7d</candidateIdentification>
+										<candidateReference>2</candidateReference>
+									</candidateOrWriteInCandidate>
+									<countOfVotesTotal>1000</countOfVotesTotal>
+								</candidateResult>
+								<candidateResult>
+									<candidateOrWriteInCandidate>
+										<writeInCandidate>
+											<candidateIdentification xmlns="http://www.ech.ch/xmlns/eCH-0155/5">70dbc50f-1fd5-4896-8c3f-9dc0c3020287</candidateIdentification>
+											<familyName xmlns="http://www.ech.ch/xmlns/eCH-0155/5">Muster</familyName>
+											<firstName xmlns="http://www.ech.ch/xmlns/eCH-0155/5">Ernst</firstName>
+											<politicalFamilyName xmlns="http://www.ech.ch/xmlns/eCH-0155/5">Muster</politicalFamilyName>
+											<politicalFirstName xmlns="http://www.ech.ch/xmlns/eCH-0155/5">Ernst</politicalFirstName>
+											<callName xmlns="http://www.ech.ch/xmlns/eCH-0155/5">Ernst</callName>
+											<sex xmlns="http://www.ech.ch/xmlns/eCH-0155/5">3</sex>
+											<dwellingAddress xmlns="http://www.ech.ch/xmlns/eCH-0155/5">
+												<street xmlns="http://www.ech.ch/xmlns/eCH-0010/6"/>
+												<houseNumber xmlns="http://www.ech.ch/xmlns/eCH-0010/6"/>
+												<town xmlns="http://www.ech.ch/xmlns/eCH-0010/6"/>
+												<foreignZipCode xmlns="http://www.ech.ch/xmlns/eCH-0010/6"/>
+												<country xmlns="http://www.ech.ch/xmlns/eCH-0010/6">
+													<countryId>8100</countryId>
+													<countryIdISO2>CH</countryIdISO2>
+													<countryNameShort>Schweiz</countryNameShort>
+												</country>
+											</dwellingAddress>
+											<title xmlns="http://www.ech.ch/xmlns/eCH-0155/5"/>
+											<languageOfCorrespondence xmlns="http://www.ech.ch/xmlns/eCH-0155/5">de</languageOfCorrespondence>
+											<incumbentYesNo xmlns="http://www.ech.ch/xmlns/eCH-0155/5">false</incumbentYesNo>
+											<candidateReference xmlns="http://www.ech.ch/xmlns/eCH-0155/5">01</candidateReference>
+										</writeInCandidate>
+									</candidateOrWriteInCandidate>
+									<countOfVotesTotal>10</countOfVotesTotal>
+								</candidateResult>
+								<countOfInvalidVotesTotal>80</countOfInvalidVotesTotal>
+								<countOfBlankVotesTotal>0</countOfBlankVotesTotal>
+								<countOfIndividualVotesTotal>300</countOfIndividualVotesTotal>
+							</majorityElection>
+						</electionResult>
+						<namedElement>
+							<elementName>countingStatus</elementName>
+							<text>6</text>
+						</namedElement>
+						<namedElement>
+							<elementName>lastCountingStatusChange</elementName>
+							<text>2026-05-18T14:08:19Z</text>
+						</namedElement>
+					</resultData>
+				</countingCircleResult>
+			</electionResult>
+		</electionGroupResult>
+		<electionGroupResult>
+			<electionGroupIdentification>66cd4641-030d-48c5-9e15-51d60cf74249</electionGroupIdentification>
+			<electionResult>
+				<electionIdentification>66cd4641-030d-48c5-9e15-51d60cf74249</electionIdentification>
+				<countingCircleResult>
+					<countingCircle>
+						<countingCircleId>211</countingCircleId>
+						<countingCircleName>Altikon</countingCircleName>
+						<domainOfInfluenceType>MU</domainOfInfluenceType>
+					</countingCircle>
+				</countingCircleResult>
+			</electionResult>
+		</electionGroupResult>
+		<numberOfEntries>2</numberOfEntries>
+	</electionResultDelivery>
+</delivery>
