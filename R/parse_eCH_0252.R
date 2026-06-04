@@ -506,104 +506,36 @@ parse_eCH_0252_elections_result <- function(input_path, doi = "all"){
   # ELECTION INFORMATION =======================================================
 
 
+  ## Parse Elections -----------------------------------------------------------
+
+
+  # Define election group result nodes
+  electionGroupResult_nodes <- xml2::xml_find_all(node_electionResultDelivery, ".//electionGroupResult")
+
+
+  ## Parse Relevant Elections --------------------------------------------------
+
+
+  # Transform relevant data to list
+  out_list <- lapply(seq_along(electionGroupResult_nodes), function(result_index) {
+
+    read_electionGroupResult(
+      xml_node = electionGroupResult_nodes,
+      index = result_index
+    )
+
+  })
+
 
   # STAND HIER =================================================================
 
 
 
-  # Define domain of influence types found in data
-  domainofOnfluenceType <- xml2::xml_find_all(node_electionResultDelivery, ".//domainOfInfluence") |>
-    xml2::xml_find_all(paste0(".//domainOfInfluenceType")) |>
-    xml2::xml_text()
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  # Load election information delivery part of the file
-  node_electionInformationDelivery <- xml2::xml_find_first(xml_data_stripped, ".//electionInformationDelivery")
-
-
-  # POLLING DAY INFORMATION ====================================================
-
-
-  # Define canton id
-  cantonId <- xml2::xml_find_first(node_electionInformationDelivery, paste0(".//cantonId")) |>
-    xml2::xml_integer()
-
-  # Define polling day
-  pollingDay <- xml2::xml_find_first(node_electionInformationDelivery, paste0(".//pollingDay")) |>
-    xml2::xml_text()
-
-
-  # VOTE INFORMATION ===========================================================
-
-
-  # Define domain of influence types found in data
-  domainofOnfluenceType <- xml2::xml_find_all(node_electionInformationDelivery, ".//domainOfInfluence") |>
-    xml2::xml_find_all(paste0(".//domainOfInfluenceType")) |>
-    xml2::xml_text()
-
-  # Define the index of the first electionGroupInfo node
-  index_addition <- match("electionGroupInfo", xml2::xml_name(xml2::xml_children(node_electionInformationDelivery))) - 1
-
-  # Define index of votes with the relevant domain of influence types (out of all electionGroupInfo nodes)
-  if ("all" %in% doi) {
-    relevant <- seq_along(domainofOnfluenceType) + index_addition
-  } else {
-    relevant <- which(grepl(paste0(doi, collapse = "|"), domainofOnfluenceType)) + index_addition
-  }
-
-  # Stop if there are no relevant votes
-  if (length(relevant) == 0) {
-    stop(paste0("There are no votes matching your defined domains of influence (", paste0(doi, collapse = ", "), ")."))
-  }
-
-
-  ## Define Election Association -----------------------------------------------
-
-
-  # Define election association nodes
-  electionAssociation_nodes <- xml2::xml_find_all(node_electionInformationDelivery, ".//electionAssociation")
-
-  # Parse through all electionAssociation nodes
-  electionAssociation_list <- lapply(seq_along(electionAssociation_nodes), function(electionAssociation_index){
-
-    # Isolate relevant electionAssociation
-    node_electionAssociation <- electionAssociation_nodes[electionAssociation_index]
-
-    # Specify language node
-    specify_node(node_electionAssociation, "language")
-
-    # Turn into list
-    electionAssociation_unlist <- node_electionAssociation |>
-      xml2::as_list() |>
-      unlist()
-
-  })
-
-  # Bind rows to df
-  electionAssociations <- dplyr::bind_rows(electionAssociation_list)
 
 
   ## Parse Relevant Elections --------------------------------------------------
@@ -654,28 +586,28 @@ parse_eCH_0252_elections_result <- function(input_path, doi = "all"){
 #'
 #' @return A dataframe.
 #'
-read_electionGroupInfo <- function(xml_node, index){
+read_electionGroupResult <- function(xml_node, index){
 
-  # Get electionGroupInfo element
-  electionGroupInfo_xml <- xml2::xml_child(xml_node, index)
+  # Get electionGroupResult element
+  electionGroupResult_xml <- xml2::xml_child(xml_node, index)
 
 
   # SPECIFY SPECIAL NODES' NAMES ===============================================
 
 
   # Nodes containing language nodes
-  specify_node(electionGroupInfo_xml, "language")
+  specify_node(electionGroupResult_xml, "language")
 
 
   # TURN TO DF =================================================================
 
 
   # Get structure of the indexed node as a list
-  electionGroupInfo <- electionGroupInfo_xml |>
+  electionGroupResult <- electionGroupResult_xml |>
     xml2::as_list()
 
   # Drop the countingCircle elements
-  electionGroupInfo <- electionGroupInfo[["electionGroup"]]
+  electionGroupResult <- electionGroupResult[["electionGroup"]]
 
   # Separate the electionInformation (candidates etc.)
   electionInfo <- electionGroupInfo[["electionInformation"]]
