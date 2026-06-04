@@ -216,7 +216,7 @@ read_voteInfo <- function(xml_node, index){
 #'
 #' @description
 #' This function turns an eCH-0252 XML file for a contest including multiple
-#' votes into a dataframe.
+#' elections into a dataframe.
 #'
 #' @inheritParams parse_eCH_0252
 #'
@@ -250,7 +250,7 @@ parse_eCH_0252_elections_info <- function(input_path, doi = "all"){
     xml2::xml_text()
 
 
-  # VOTE INFORMATION ===========================================================
+  # ELECTION INFORMATION =======================================================
 
 
   # Define domain of influence types found in data
@@ -275,6 +275,7 @@ parse_eCH_0252_elections_info <- function(input_path, doi = "all"){
 
 
   ## Define Election Association -----------------------------------------------
+
 
   # Define election association nodes
   electionAssociation_nodes <- xml2::xml_find_all(node_electionInformationDelivery, ".//electionAssociation")
@@ -312,19 +313,6 @@ parse_eCH_0252_elections_info <- function(input_path, doi = "all"){
 
   })
 
-
-
-
-
-
-
-
-
-
-
-
-
-
   # Transform relevant data to df
   out_df <- dplyr::bind_rows(out_list)
 
@@ -346,14 +334,6 @@ parse_eCH_0252_elections_info <- function(input_path, doi = "all"){
   }
 
   return(out_df)
-
-
-
-
-
-
-
-
 
 }
 
@@ -453,19 +433,88 @@ read_electionGroupInfo <- function(xml_node, index){
       keep_empty = TRUE
     )
 
-  # Define variables of both tables
-  join_var <- intersect(names(candidate_info), names(list_info))
+  # Check if we are dealing with a proportional election
+  if (length(list_info) > 0) {
 
-  # Join info (start with list to keep the WoP)
-  candidate_list_info <- list_info |>
-    dplyr::left_join(candidate_info, by = c(join_var, "candidatePosition_candidateIdentification" = "candidate_candidateIdentification"))
+    # Define variables of both tables
+    join_var <- intersect(names(candidate_info), names(list_info))
+
+    # Join info (start with list to keep the WoP)
+    candidate_list_info <- list_info |>
+      dplyr::left_join(candidate_info, by = c(join_var, "candidatePosition_candidateIdentification" = "candidate_candidateIdentification"))
+
+  } else {
+
+    candidate_list_info <- candidate_info
+
+  }
+
+
 
 
   ## Join All Data -------------------------------------------------------------
 
 
-  electionGroup_info
-  candidate_list_info
+  electionGroup_data_complete <- dplyr::bind_cols(candidate_list_info, electionGroup_info)
+
+  return(electionGroup_data_complete)
+
+}
+
+
+
+
+
+#' Convert an eCH-0252 election results XML file into a dataframe
+#'
+#' @description
+#' This function turns an eCH-0252 XML file for a contest including multiple
+#' elections into a dataframe.
+#'
+#' @inheritParams parse_eCH_0252
+#'
+#' @return A dataframe.
+#'
+#' @export
+#'
+#' @examples
+#'
+parse_eCH_0252_elections_result <- function(input_path, doi = "all"){
+
+  # Load file
+  xml_data <- xml2::read_xml(input_path)
+
+  # Strip namespaces
+  xml_data_stripped <- strip_namespaces(xml_data)
+
+  # Load election information delivery part of the file
+  node_electionResultDelivery <- xml2::xml_find_first(xml_data_stripped, ".//electionResultDelivery")
+
+
+  # POLLING DAY INFORMATION ====================================================
+
+
+  # Define canton id
+  cantonId <- xml2::xml_find_first(node_electionResultDelivery, paste0(".//cantonId")) |>
+    xml2::xml_integer()
+
+  # Define polling day
+  pollingDay <- xml2::xml_find_first(node_electionResultDelivery, paste0(".//pollingDay")) |>
+    xml2::xml_text()
+
+
+  # ELECTION INFORMATION =======================================================
+
+
+
+  # STAND HIER =================================================================
+
+
+
+  # Define domain of influence types found in data
+  domainofOnfluenceType <- xml2::xml_find_all(node_electionResultDelivery, ".//domainOfInfluence") |>
+    xml2::xml_find_all(paste0(".//domainOfInfluenceType")) |>
+    xml2::xml_text()
 
 
 
@@ -474,32 +523,205 @@ read_electionGroupInfo <- function(xml_node, index){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  # Load election information delivery part of the file
+  node_electionInformationDelivery <- xml2::xml_find_first(xml_data_stripped, ".//electionInformationDelivery")
+
+
+  # POLLING DAY INFORMATION ====================================================
+
+
+  # Define canton id
+  cantonId <- xml2::xml_find_first(node_electionInformationDelivery, paste0(".//cantonId")) |>
+    xml2::xml_integer()
+
+  # Define polling day
+  pollingDay <- xml2::xml_find_first(node_electionInformationDelivery, paste0(".//pollingDay")) |>
+    xml2::xml_text()
+
+
+  # VOTE INFORMATION ===========================================================
+
+
+  # Define domain of influence types found in data
+  domainofOnfluenceType <- xml2::xml_find_all(node_electionInformationDelivery, ".//domainOfInfluence") |>
+    xml2::xml_find_all(paste0(".//domainOfInfluenceType")) |>
+    xml2::xml_text()
+
+  # Define the index of the first electionGroupInfo node
+  index_addition <- match("electionGroupInfo", xml2::xml_name(xml2::xml_children(node_electionInformationDelivery))) - 1
+
+  # Define index of votes with the relevant domain of influence types (out of all electionGroupInfo nodes)
+  if ("all" %in% doi) {
+    relevant <- seq_along(domainofOnfluenceType) + index_addition
+  } else {
+    relevant <- which(grepl(paste0(doi, collapse = "|"), domainofOnfluenceType)) + index_addition
+  }
+
+  # Stop if there are no relevant votes
+  if (length(relevant) == 0) {
+    stop(paste0("There are no votes matching your defined domains of influence (", paste0(doi, collapse = ", "), ")."))
+  }
+
+
+  ## Define Election Association -----------------------------------------------
+
+
+  # Define election association nodes
+  electionAssociation_nodes <- xml2::xml_find_all(node_electionInformationDelivery, ".//electionAssociation")
+
+  # Parse through all electionAssociation nodes
+  electionAssociation_list <- lapply(seq_along(electionAssociation_nodes), function(electionAssociation_index){
+
+    # Isolate relevant electionAssociation
+    node_electionAssociation <- electionAssociation_nodes[electionAssociation_index]
+
+    # Specify language node
+    specify_node(node_electionAssociation, "language")
+
+    # Turn into list
+    electionAssociation_unlist <- node_electionAssociation |>
+      xml2::as_list() |>
+      unlist()
+
+  })
+
+  # Bind rows to df
+  electionAssociations <- dplyr::bind_rows(electionAssociation_list)
+
+
+  ## Parse Relevant Elections --------------------------------------------------
+
+
+  # Transform relevant data to list
+  out_list <- lapply(relevant, function(relevant_index) {
+
+    read_electionGroupInfo(
+      xml_node = node_electionInformationDelivery,
+      index = relevant_index
+    )
+
+  })
+
+  # Transform relevant data to df
+  out_df <- dplyr::bind_rows(out_list)
+
+
+  ## Finalise Data -------------------------------------------------------------
+
+
+  # Add contest information
+  out_df <- out_df |>
+    dplyr::mutate(
+      cantonId = cantonId,
+      pollingDay = pollingDay
+    )
+
+  # Drop unique_id column
+  if ("unique_id" %in% names(out_df)) {
+    out_df <- out_df |>
+      dplyr::select(-unique_id)
+  }
+
+  return(out_df)
+
+}
+
+
+
+
+
+#' Convert an eCH-0252 electionGroupInfo node into a dataframe
+#'
+#' @param xml_node Node electionInformationDelivery of the XML file.
+#' @param index Index of the electionGroupInfo node of interest.
+#'
+#' @return A dataframe.
+#'
+read_electionGroupInfo <- function(xml_node, index){
+
+  # Get electionGroupInfo element
+  electionGroupInfo_xml <- xml2::xml_child(xml_node, index)
+
+
+  # SPECIFY SPECIAL NODES' NAMES ===============================================
+
+
+  # Nodes containing language nodes
+  specify_node(electionGroupInfo_xml, "language")
 
 
   # TURN TO DF =================================================================
 
 
   # Get structure of the indexed node as a list
-  voteInfo <- voteInfo_xml |>
+  electionGroupInfo <- electionGroupInfo_xml |>
     xml2::as_list()
 
-  # Number the names to create unique names
-  names(voteInfo) <- paste0(1:length(voteInfo),"_", names(voteInfo))
+  # Drop the countingCircle elements
+  electionGroupInfo <- electionGroupInfo[["electionGroup"]]
+
+  # Separate the electionInformation (candidates etc.)
+  electionInfo <- electionGroupInfo[["electionInformation"]]
+
+  # Drop the electionInformation elements
+  electionGroupInfo[["electionInformation"]] <- NULL
 
   # Unlist the list
-  voteInfo_unlist <- unlist(voteInfo)
+  electionGroupInfo_unlist <- unlist(electionGroupInfo)
 
   # List to df and add unique id
-  voteInfo_df_long <- to_df(voteInfo_unlist, names(voteInfo_unlist)) |>
-    dplyr::mutate(unique_id = gsub("^(\\d+)_.*", "\\1", var))
+  electionGroupInfo_df_long <- to_df(electionGroupInfo_unlist, names(electionGroupInfo_unlist))
 
 
-  ## Vote Information ----------------------------------------------------------
+  ## Election Information ------------------------------------------------------
 
 
   # Define vote information
-  vote_info <- voteInfo_df_long |>
-    dplyr::filter(grepl("vote\\.", var)) |>
+  electionGroup_info <- electionGroupInfo_df_long |>
+    to_wide() |>
+    tidyr::unnest_longer(
+      tidyselect::everything(),
+      keep_empty = TRUE
+    )
+
+  # Add second level to names if not there already
+  single_level_positions <- grep("_", names(electionGroup_info), invert = TRUE)
+  names(electionGroup_info)[single_level_positions] <- paste0("electionGroup_", names(electionGroup_info)[single_level_positions])
+
+
+  ## Candidate and List Information --------------------------------------------
+
+
+  # Number the names to create unique names
+  names(electionInfo) <- paste0(1:length(electionInfo),"_", names(electionInfo))
+
+  # Unlist the list
+  electionInfo_unlist <- unlist(electionInfo)
+
+  # List to df and add unique id
+  electionInfo_df_long <- to_df(electionInfo_unlist, names(electionInfo_unlist)) |>
+    dplyr::mutate(unique_id = gsub("^(\\d+)_.*", "\\1", var))
+
+  # Define candidate information
+  candidate_info <- electionInfo_df_long |>
+    dplyr::filter(grepl("candidate\\.", var)) |>
     to_wide() |>
     dplyr::select(-unique_id) |>
     tidyr::unnest_longer(
@@ -507,34 +729,42 @@ read_electionGroupInfo <- function(xml_node, index){
       keep_empty = TRUE
     )
 
-
-  ## Vote Results --------------------------------------------------------------
-
-
-  # Define vote results
-  vote_result <- voteInfo_df_long |>
-    dplyr::filter(!grepl("vote\\.", var)) |>
+  # Define list information
+  list_info <- electionInfo_df_long |>
+    dplyr::filter(grepl("list\\.", var)) |>
     to_wide() |>
-    as.data.frame()
-
-  # Replace all NULL with NA
-  vote_result[vote_result == "NULL"] <- NA
-
-  # Unnest
-  vote_result_full <- vote_result |>
+    dplyr::select(-unique_id) |>
     tidyr::unnest_longer(
       tidyselect::everything(),
       keep_empty = TRUE
-    ) |>
-    dplyr::mutate(vote_voteIdentification = vote_info$vote_voteIdentification)
+    )
 
-  # Join result and information data
-  vote_data_complete <- vote_result_full |>
-    dplyr::left_join(vote_info, by = "vote_voteIdentification")
+  # Check if we are dealing with a proportional election
+  if (length(list_info) > 0) {
 
-  return(vote_data_complete)
+    # Define variables of both tables
+    join_var <- intersect(names(candidate_info), names(list_info))
+
+    # Join info (start with list to keep the WoP)
+    candidate_list_info <- list_info |>
+      dplyr::left_join(candidate_info, by = c(join_var, "candidatePosition_candidateIdentification" = "candidate_candidateIdentification"))
+
+  } else {
+
+    candidate_list_info <- candidate_info
+
+  }
+
+
+
+
+  ## Join All Data -------------------------------------------------------------
+
+
+  electionGroup_data_complete <- dplyr::bind_cols(candidate_list_info, electionGroup_info)
+
+  return(electionGroup_data_complete)
 
 }
-
 
 
