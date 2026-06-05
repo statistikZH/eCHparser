@@ -506,21 +506,23 @@ parse_eCH_0252_elections_result <- function(input_path, doi = "all"){
   # ELECTION INFORMATION =======================================================
 
 
-  ## Parse Elections -----------------------------------------------------------
-
-
   # Define election group result nodes
-  electionGroupResult_nodes <- xml2::xml_find_all(node_electionResultDelivery, ".//electionGroupResult")
+  results <- which(grepl("electionGroupResult", xml2::xml_name(xml2::xml_children(node_electionResultDelivery))))
+
+  # Stop if there are no result nodes
+  if (length(results) == 0) {
+    stop(paste0("There are no votes matching your defined domains of influence (", paste0(doi, collapse = ", "), ")."))
+  }
 
 
   ## Parse Relevant Elections --------------------------------------------------
 
 
-  # Transform relevant data to list
-  out_list <- lapply(seq_along(electionGroupResult_nodes), function(result_index) {
+  # Transform results data to list
+  out_list <- lapply(results, function(result_index) {
 
     read_electionGroupResult(
-      xml_node = electionGroupResult_nodes,
+      xml_node = node_electionResultDelivery,
       index = result_index
     )
 
@@ -606,32 +608,91 @@ read_electionGroupResult <- function(xml_node, index){
   electionGroupResult <- electionGroupResult_xml |>
     xml2::as_list()
 
-  # Drop the countingCircle elements
-  electionGroupResult <- electionGroupResult[["electionGroup"]]
+  # Get election group ID
+  electionGroupID <- electionGroupResult[["electionGroupIdentification"]] |>
+    unlist()
 
-  # Separate the electionInformation (candidates etc.)
-  electionInfo <- electionGroupInfo[["electionInformation"]]
+  # Get election result indices
+  electionResult_indices <- which(grepl("electionResult", names(electionGroupResult)))
 
-  # Drop the electionInformation elements
-  electionGroupInfo[["electionInformation"]] <- NULL
+  # Parse through election results
+  out_list <- lapply(electionResult_indices, function(electionResult_index) {
+
+    # Define electionGroupResult element
+    electionResult <- electionGroupResult[[electionResult_index]]
+
+    # Get election ID
+    electionID <- electionResult[["electionIdentification"]] |>
+      unlist()
+
+    # Get counting circle result indices
+    countingCircleResult_indices <- which(grepl("ountingCircleResult", names(electionResult)))
+
+    # Parse through election results
+    out_list <- lapply(countingCircleResult_indices, function(countingCircleResult_index) {
+
+      # Define countingCircleResult element
+      countingCircleResult <- electionResult[[countingCircleResult_index]]
+
+      # Unlist the list
+      countingCircleResult_unlist <- unlist(countingCircleResult)
+
+      # List to df and add unique id
+      countingCircleResult_df_long <- to_df(countingCircleResult_unlist, names(countingCircleResult_unlist))
+
+      # Transform to table
+      countingCircle_result <- countingCircleResult_df_long |>
+        to_wide() |>
+        tidyr::unnest_longer(
+          tidyselect::everything(),
+          keep_empty = TRUE
+        )
+
+    })
+
+
+
+  })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  # Drop the election group ID elements
+  electionGroupResult[["electionGroupIdentification"]] <- NULL
 
   # Unlist the list
-  electionGroupInfo_unlist <- unlist(electionGroupInfo)
+  electionGroupResult_unlist <- unlist(electionGroupResult)
 
   # List to df and add unique id
-  electionGroupInfo_df_long <- to_df(electionGroupInfo_unlist, names(electionGroupInfo_unlist))
+  electionGroupResult_df_long <- to_df(electionGroupResult_unlist, names(electionGroupResult_unlist))
 
 
   ## Election Information ------------------------------------------------------
 
 
-  # Define vote information
-  electionGroup_info <- electionGroupInfo_df_long |>
+  # Define election results
+  electionGroup_result <- electionGroupResult_df_long |>
     to_wide() |>
     tidyr::unnest_longer(
       tidyselect::everything(),
       keep_empty = TRUE
     )
+
+
+
+
+
 
   # Add second level to names if not there already
   single_level_positions <- grep("_", names(electionGroup_info), invert = TRUE)
