@@ -600,8 +600,17 @@ read_electionGroupResult <- function(xml_node, index){
   # Nodes containing language nodes
   specify_node(electionGroupResult_xml, "language")
 
+  # namedElement nodes
+  specify_node(electionGroupResult_xml, "elementName")
+
+  # Subtotal voter nodes
+  specify_voter_node(electionGroupResult_xml)
+
 
   # TURN TO DF =================================================================
+
+
+  ## Election Group Results ----------------------------------------------------
 
 
   # Get structure of the indexed node as a list
@@ -634,6 +643,12 @@ read_electionGroupResult <- function(xml_node, index){
       # Define countingCircleResult element
       countingCircleResult <- electionResult[[countingCircleResult_index]]
 
+      # Split into counting circle level and candidate results
+      if ("resultData" %in% names(countingCircleResult)) {
+        electionResult <- countingCircleResult[["resultData"]][["electionResult"]]
+        countingCircleResult[["resultData"]][["electionResult"]] <- NULL
+      }
+
       # Unlist the list
       countingCircleResult_unlist <- unlist(countingCircleResult)
 
@@ -647,6 +662,55 @@ read_electionGroupResult <- function(xml_node, index){
           tidyselect::everything(),
           keep_empty = TRUE
         )
+
+
+      ## Election Results ------------------------------------------------------
+
+
+      if (exists("electionResult")) {
+
+        # Define election ID, then drop it
+        electionID <- electionResult[["electionIdentification"]]
+        electionResult[["electionIdentification"]] <- NULL
+
+        out_list <- lapply(seq_along(electionResult), function(result_index) {
+          browser()
+          # Define candidateResult element
+          candidateResult <- electionResult[[result_index]]
+
+          # Unlist the list
+          candidateResult_unlist <- unlist(candidateResult)
+
+          # List to df and add unique id
+          candidateResult_df_long <- to_df(candidateResult_unlist, names(candidateResult_unlist))
+
+          # Transform to table
+          candidate_result <- candidateResult_df_long |>
+            to_wide() |>
+            tidyr::unnest_longer(
+              tidyselect::everything(),
+              keep_empty = TRUE
+            )
+
+          # return(candidate_result)
+
+
+        })
+
+        # Transform relevant data to df
+        out_df <- dplyr::bind_rows(out_list)
+
+        # Add contest information
+        out_df <- out_df |>
+          dplyr::mutate(
+            electionID = electionID
+          )
+
+        return(out_df)
+
+      }
+
+
 
     })
 
