@@ -643,7 +643,7 @@ read_electionGroupResult <- function(xml_node, index){
       # Define countingCircleResult element
       countingCircleResult <- electionResult[[countingCircleResult_index]]
 
-      # Split into counting circle level and candidate results
+      # Split into counting circle information and result data
       if ("resultData" %in% names(countingCircleResult)) {
         electionResult <- countingCircleResult[["resultData"]][["electionResult"]]
         countingCircleResult[["resultData"]][["electionResult"]] <- NULL
@@ -667,16 +667,25 @@ read_electionGroupResult <- function(xml_node, index){
       ## Election Results ------------------------------------------------------
 
 
-      if (exists("electionResult")) {
+      if ("resultData" %in% names(countingCircleResult)) {
 
         # Define election ID, then drop it
         electionID <- electionResult[["electionIdentification"]]
         electionResult[["electionIdentification"]] <- NULL
 
-        out_list <- lapply(seq_along(electionResult), function(result_index) {
-          browser()
+        out_list <- lapply(seq_along(electionResult[[1]]), function(result_index) {
+browser()
+
+
+
+          # STAND HIER ======================================================================================================================
+          # Müssen wohl noch einmal ufteilen in candidateResult und die restlichen
+
+
+
+
           # Define candidateResult element
-          candidateResult <- electionResult[[result_index]]
+          candidateResult <- electionResult[[1]][[result_index]]
 
           # Unlist the list
           candidateResult_unlist <- unlist(candidateResult)
@@ -694,7 +703,6 @@ read_electionGroupResult <- function(xml_node, index){
 
           # return(candidate_result)
 
-
         })
 
         # Transform relevant data to df
@@ -709,8 +717,6 @@ read_electionGroupResult <- function(xml_node, index){
         return(out_df)
 
       }
-
-
 
     })
 
