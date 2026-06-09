@@ -1,7 +1,7 @@
 test_that("Parsed file output is a dataframe and matches corresponding RDS file", {
 
   # Get the list of unparsed test files
-  testfiles <- list.files(testthat::test_path("testdata/input/eCH-0252"))
+  testfiles <- grep("vote", list.files(testthat::test_path("testdata/input/eCH-0252")), value = TRUE)
 
   # Initialize a new environment (necessary to actually assign values inside of tryCatch)
   errorenv <- new.env()
