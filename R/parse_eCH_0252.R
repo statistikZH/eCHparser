@@ -673,28 +673,24 @@ read_electionGroupResult <- function(xml_node, index){
         electionID <- electionResult[["electionIdentification"]]
         electionResult[["electionIdentification"]] <- NULL
 
-        out_list <- lapply(seq_along(electionResult[[1]]), function(result_index) {
-browser()
+        # Divide into candidate/list result bit and rest
+        result_indices <- grep("Result", names(electionResult[[1]]))
+        votes_indices <- which(!grepl("Result", names(electionResult[[1]])))
 
+        # Apply through result list
+        out_list <- lapply(seq_along(result_indices), function(result_index) {
 
-
-          # STAND HIER ======================================================================================================================
-          # Müssen wohl noch einmal ufteilen in candidateResult und die restlichen
-
-
-
-
-          # Define candidateResult element
-          candidateResult <- electionResult[[1]][[result_index]]
+          # Define candidate or list result element
+          result <- electionResult[[1]][[result_index]]
 
           # Unlist the list
-          candidateResult_unlist <- unlist(candidateResult)
+          result_unlist <- unlist(result)
 
           # List to df and add unique id
-          candidateResult_df_long <- to_df(candidateResult_unlist, names(candidateResult_unlist))
+          result_df_long <- to_df(result_unlist, names(result_unlist))
 
           # Transform to table
-          candidate_result <- candidateResult_df_long |>
+          result <- result_df_long |>
             to_wide() |>
             tidyr::unnest_longer(
               tidyselect::everything(),
@@ -708,18 +704,40 @@ browser()
         # Transform relevant data to df
         out_df <- dplyr::bind_rows(out_list)
 
+        # Add invalid/empty votes
+        if (length(votes_indices) > 0) {
+          votes <- electionResult[[1]][votes_indices]
+
+          # Unlist
+          votes_unlist <- unlist(votes)
+
+          # List to df and add unique id
+          votes_df_long <- to_df(votes_unlist, names(votes_unlist))
+
+          # Transform to table
+          votes <- votes_df_long |>
+            to_wide() |>
+            tidyr::unnest_longer(
+              tidyselect::everything(),
+              keep_empty = TRUE
+            )
+
+          # Add votes to results
+          out_df <- out_df |>
+            dplyr::bind_cols(votes)
+
+        }
+
         # Add contest information
         out_df <- out_df |>
           dplyr::mutate(
             electionID = electionID
           )
 
-        return(out_df)
-
       }
 
     })
-
+browser()
 
 
   })
