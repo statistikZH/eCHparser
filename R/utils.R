@@ -126,12 +126,17 @@ specify_voter_node <- function(node) {
   # Define all sex nodes
   sex_nodes <- xml2::xml_find_all(node, ".//sex")
 
+  # Define parent nodes
+  parent_nodes <- xml2::xml_parent(sex_nodes)
+
+  # Drop all write-in candidates (necessary exception for 252 maj elections)
+  writeIn_indices <- grep("candidateIdentification", parent_nodes)
+  sex_nodes[writeIn_indices] <- NULL
+  parent_nodes[writeIn_indices] <- NULL
+
   # Get all sexes
   sexes <- sex_nodes |>
     xml2::xml_text()
-
-  # Define parent nodes
-  parent_nodes <- xml2::xml_parent(sex_nodes)
 
   # Get all parents' original names
   parents_names <- xml2::xml_name(parent_nodes)
