@@ -36,10 +36,10 @@
 parse_eCH_0252 <- function(input_path, doi = "all"){
 
   # Load file
-  xml_data <- xml2::read_xml(input_path)
+  # xml_data <- xml2::read_xml(input_path)
 
-  # Strip namespaces
-  xml_data_stripped <- strip_namespaces(xml_data)
+  # Load file and strip namespaces
+  xml_data_stripped <- strip_namespaces(input_path)
 
   # Load base delivery part of the file
   node_voteBaseDelivery <- xml2::xml_find_first(xml_data_stripped, ".//voteBaseDelivery")
@@ -228,11 +228,8 @@ read_voteInfo <- function(xml_node, index){
 #'
 parse_eCH_0252_elections_info <- function(input_path, doi = "all"){
 
-  # Load file
-  xml_data <- xml2::read_xml(input_path)
-
-  # Strip namespaces
-  xml_data_stripped <- strip_namespaces(xml_data)
+  # Load file and strip namespaces
+  xml_data_stripped <- strip_namespaces(input_path)
 
   # Load election information delivery part of the file
   node_electionInformationDelivery <- xml2::xml_find_first(xml_data_stripped, ".//electionInformationDelivery")
@@ -365,16 +362,6 @@ read_electionGroupInfo <- function(xml_node, index){
   # TURN TO DF =================================================================
 
 
-
-
-
-  browser()
-
-
-
-
-
-
   # Get structure of the indexed node as a list
   electionGroup <- electionGroup_xml |>
     xml2::as_list()
@@ -395,8 +382,8 @@ read_electionGroupInfo <- function(xml_node, index){
 
   # Define vote information
   electionGroup_info <- electionGroup_df_long |>
-    dplyr::select(-unique_id) |>
     dplyr::filter(!grepl("electionInformation\\.", var)) |>
+    dplyr::select(-unique_id) |>
     to_wide() |>
     tidyr::unnest_longer(
       tidyselect::everything(),
@@ -407,9 +394,22 @@ read_electionGroupInfo <- function(xml_node, index){
   ## Vote Results --------------------------------------------------------------
 
 
+
+
+  # STAND HIER ==========================================================================================================================
+  # Problem: Wir wissen nicht, bei welchem Kand wir uns befinden, da unique_id die electionGroup bezeichnet und nicht den Kand
+  # Entsprechen können wir so nicht completen. Allenfalls brauchen wir also noch eine id auf Kand-Ebene aber da muss man sich sicher
+  # Anschauen, wie sich das auf die restlichen Fälle auswirkt.
+
+
+
   # Define vote results
   election_info <- electionGroup_df_long |>
     dplyr::filter(grepl("electionInformation\\.", var)) |>
+    dplyr::right_join(
+      tidyr::expand(electionGroup_df_long, unique_id, var_short),
+      by = c("unique_id", "var_short")
+    ) |> # This completes the vars in case there are some missing (like politischer Name etc.)
     to_wide() |>
     as.data.frame()
 
@@ -422,7 +422,7 @@ read_electionGroupInfo <- function(xml_node, index){
       tidyselect::everything(),
       keep_empty = TRUE
     )
-
+  browser()
   # Join result and information data
   election_data_complete <- election_info_full |>
     dplyr::bind_cols(electionGroup_info)
@@ -433,118 +433,118 @@ read_electionGroupInfo <- function(xml_node, index){
 
 
 
-# # Get electionGroupInfo element
-# electionGroupInfo_xml <- xml2::xml_child(xml_node, index)
-#
-#
-# # SPECIFY SPECIAL NODES' NAMES ===============================================
-#
-#
-# # Nodes containing language nodes
-# specify_node(electionGroupInfo_xml, "language")
-#
-#
-# # TURN TO DF =================================================================
-#   # Get structure of the indexed node as a list
-#   electionGroupInfo <- electionGroupInfo_xml |>
-#     xml2::as_list()
-#
-#   # Drop the countingCircle elements
-#   electionGroupInfo <- electionGroupInfo[["electionGroup"]]
-#
-#   # Separate the electionInformation (candidates etc.)
-#   electionInfo <- electionGroupInfo[names(electionGroupInfo) == "electionInformation"]
-#
-#   # Drop the electionInformation elements
-#   electionGroupInfo[names(electionGroupInfo) == "electionInformation"] <- NULL
-#
-#   # Unlist the list
-#   electionGroupInfo_unlist <- unlist(electionGroupInfo)
-#
-#   # List to df and add unique id
-#   electionGroupInfo_df_long <- to_df(electionGroupInfo_unlist, names(electionGroupInfo_unlist))
-#
-#
-#   ## Election Group Information ------------------------------------------------------
-#
-#
-#   # Define vote information
-#   electionGroup_info <- electionGroupInfo_df_long |>
-#     to_wide() |>
-#     tidyr::unnest_longer(
-#       tidyselect::everything(),
-#       keep_empty = TRUE
-#     )
-#
-#   # Add second level to names if not there already
-#   single_level_positions <- grep("_", names(electionGroup_info), invert = TRUE)
-#   names(electionGroup_info)[single_level_positions] <- paste0("electionGroup_", names(electionGroup_info)[single_level_positions])
-#
-# browser()
-#   ## Election Information ------------------------------------------------------
-#
-#
-#   # Build an lapply for the elctionGroups
-#
-#
-#   ### Candidate and List Information -------------------------------------------
-#
-#
-#   # Number the names to create unique names
-#   names(electionInfo) <- paste0(1:length(electionInfo),"_", names(electionInfo))
-#
-#   # Unlist the list
-#   electionInfo_unlist <- unlist(electionInfo)
-#
-#   # List to df and add unique id
-#   electionInfo_df_long <- to_df(electionInfo_unlist, names(electionInfo_unlist)) |>
-#     dplyr::mutate(unique_id = gsub("^(\\d+)_.*", "\\1", var))
-#
-#   # Define candidate information
-#   candidate_info <- electionInfo_df_long |>
-#     dplyr::filter(grepl("candidate\\.", var)) |>
-#     to_wide() |>
-#     dplyr::select(-unique_id) |>
-#     tidyr::unnest_longer(
-#       tidyselect::everything(),
-#       keep_empty = TRUE
-#     )
-#
-#   # Define list information
-#   list_info <- electionInfo_df_long |>
-#     dplyr::filter(grepl("list\\.", var)) |>
-#     to_wide() |>
-#     dplyr::select(-unique_id) |>
-#     tidyr::unnest_longer(
-#       tidyselect::everything(),
-#       keep_empty = TRUE
-#     )
-#
-#   # Check if we are dealing with a proportional election
-#   if (length(list_info) > 0) {
-#
-#     # Define variables of both tables
-#     join_var <- intersect(names(candidate_info), names(list_info))
-#
-#     # Join info (start with list to keep the WoP)
-#     candidate_list_info <- list_info |>
-#       dplyr::left_join(candidate_info, by = c(join_var, "candidatePosition_candidateIdentification" = "candidate_candidateIdentification"))
-#
-#   } else {
-#
-#     candidate_list_info <- candidate_info
-#
-#   }
-#
-#
-#
-#
-#   ## Join All Data -------------------------------------------------------------
-#
-# browser()
-#   electionGroup_data_complete <- dplyr::bind_cols(candidate_list_info, electionGroup_info)
-#
-#   return(electionGroup_data_complete)
+  # # Get electionGroupInfo element
+  # electionGroupInfo_xml <- xml2::xml_child(xml_node, index)
+  #
+  #
+  # # SPECIFY SPECIAL NODES' NAMES ===============================================
+  #
+  #
+  # # Nodes containing language nodes
+  # specify_node(electionGroupInfo_xml, "language")
+  #
+  #
+  # # TURN TO DF =================================================================
+  #
+  #
+  # # Get structure of the indexed node as a list
+  # electionGroupInfo <- electionGroupInfo_xml |>
+  #   xml2::as_list()
+  #
+  # # Drop the countingCircle elements
+  # electionGroupInfo <- electionGroupInfo[["electionGroup"]]
+  #
+  # # Separate the electionInformation (candidates etc.)
+  # electionInfo <- electionGroupInfo[names(electionGroupInfo) == "electionInformation"]
+  #
+  # # Drop the electionInformation elements
+  # electionGroupInfo[names(electionGroupInfo) == "electionInformation"] <- NULL
+  #
+  # # Unlist the list
+  # electionGroupInfo_unlist <- unlist(electionGroupInfo)
+  #
+  # # List to df and add unique id
+  # electionGroupInfo_df_long <- to_df(electionGroupInfo_unlist, names(electionGroupInfo_unlist))
+  #
+  #
+  # ## Election Group Information ------------------------------------------------------
+  #
+  #
+  # # Define vote information
+  # electionGroup_info <- electionGroupInfo_df_long |>
+  #   to_wide() |>
+  #   tidyr::unnest_longer(
+  #     tidyselect::everything(),
+  #     keep_empty = TRUE
+  #   )
+  #
+  # # Add second level to names if not there already
+  # single_level_positions <- grep("_", names(electionGroup_info), invert = TRUE)
+  # names(electionGroup_info)[single_level_positions] <- paste0("electionGroup_", names(electionGroup_info)[single_level_positions])
+  #
+  #
+  # ## Election Information ------------------------------------------------------
+  #
+  #
+  # # Build an lapply for the elctionGroups
+  #
+  #
+  # ### Candidate and List Information -------------------------------------------
+  #
+  #
+  # # Number the names to create unique names
+  # names(electionInfo) <- paste0(1:length(electionInfo),"_", names(electionInfo))
+  #
+  # # Unlist the list
+  # electionInfo_unlist <- unlist(electionInfo)
+  #
+  # # List to df and add unique id
+  # electionInfo_df_long <- to_df(electionInfo_unlist, names(electionInfo_unlist)) |>
+  #   dplyr::mutate(unique_id = gsub("^(\\d+)_.*", "\\1", var))
+  #
+  # # Define candidate information
+  # candidate_info <- electionInfo_df_long |>
+  #   dplyr::filter(grepl("candidate\\.", var)) |>
+  #   to_wide() |>
+  #   dplyr::select(-unique_id) |>
+  #   tidyr::unnest_longer(
+  #     tidyselect::everything(),
+  #     keep_empty = TRUE
+  #   )
+  #
+  # # Define list information
+  # list_info <- electionInfo_df_long |>
+  #   dplyr::filter(grepl("list\\.", var)) |>
+  #   to_wide() |>
+  #   dplyr::select(-unique_id) |>
+  #   tidyr::unnest_longer(
+  #     tidyselect::everything(),
+  #     keep_empty = TRUE
+  #   )
+  #
+  # # Check if we are dealing with a proportional election
+  # if (length(list_info) > 0) {
+  #
+  #   # Define variables of both tables
+  #   join_var <- intersect(names(candidate_info), names(list_info))
+  #
+  #   # Join info (start with list to keep the WoP)
+  #   candidate_list_info <- list_info |>
+  #     dplyr::left_join(candidate_info, by = c(join_var, "candidatePosition_candidateIdentification" = "candidate_candidateIdentification"))
+  #
+  # } else {
+  #
+  #   candidate_list_info <- candidate_info
+  #
+  # }
+  #
+  #
+  # ## Join All Data -------------------------------------------------------------
+  #
+  #
+  # electionGroup_data_complete <- dplyr::bind_cols(candidate_list_info, electionGroup_info)
+  #
+  # return(electionGroup_data_complete)
 
 }
 
@@ -568,11 +568,8 @@ read_electionGroupInfo <- function(xml_node, index){
 #'
 parse_eCH_0252_elections_result <- function(input_path, doi = "all"){
 
-  # Load file
-  xml_data <- xml2::read_xml(input_path)
-
-  # Strip namespaces
-  xml_data_stripped <- strip_namespaces(xml_data)
+  # Load file and strip namespaces
+  xml_data_stripped <- strip_namespaces(input_path)
 
   # Load election information delivery part of the file
   node_electionResultDelivery <- xml2::xml_find_first(xml_data_stripped, ".//electionResultDelivery")

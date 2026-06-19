@@ -3,7 +3,7 @@
 #' @description
 #' This function strips all namespaces of eCH-0157 and eCH-0252 XML files.
 #'
-#' @param xml_data A list of class xml_document.
+#' @param input_path A character vector to an xml-document.
 #'
 #' @return A list of class xml_document.
 #'
@@ -22,21 +22,17 @@
 #' # Strip namespaces
 #' xml_data_stripped <- strip_namespaces(xml_data)
 #'
-strip_namespaces <- function(xml_data) {
+strip_namespaces <- function(input_path) {
 
-  # If we find the node deliveryHeader without prefix, remove all namespaces with xml_ns_strip()
-  if(grepl("<deliveryHeader>", as.character(xml_data))) {
+  xml_text <- paste(readLines(input_path, warn = FALSE), collapse = "\n")
 
-    xml_data_stripped <- xml2::xml_ns_strip(xml_data)
-
-  # Otherwise, handle the entire file as string and remove them using gsub().
+  if (grepl("<deliveryHeader>", xml_text)) {
+    xml_text <- gsub(' xmlns(?::[a-zA-Z0-9]+)?="[^"]*"', "", xml_text, perl = TRUE)
   } else {
-
-    xml_data_stripped <- xml2::as_xml_document(gsub("eCH-\\d{4}:", "", as.character(xml_data)))
-
+    xml_text <- gsub("eCH-\\d{4}:", "", xml_text)
   }
 
-  return(xml_data_stripped)
+  xml2::read_xml(xml_text)
 
 }
 
