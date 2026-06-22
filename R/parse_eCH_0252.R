@@ -414,16 +414,34 @@ read_electionGroupInfo <- function(xml_node, index){
   election_info <- electionGroup_df_long |>
     dplyr::filter(grepl("electionInformation\\.", var))
 
-  # Drop first and last element (these are descriptive elements of the election)
-  election_cand_list_info <- election_info |>
-    dplyr::group_by(unique_id) |>
-    dplyr::filter(cand_list_id != max(cand_list_id)) |>
-    dplyr::filter(cand_list_id != min(cand_list_id))
+  # # Split table into candidate/list information and proper election information (drop first and last element (these are descriptive elements of the election))
+  # election_cand_list_info <- election_info |>
+  #   dplyr::group_by(unique_id) |>
+  #   dplyr::filter(cand_list_id != max(cand_list_id)) |>
+  #   dplyr::filter(cand_list_id != min(cand_list_id))
+  #
+  # election_info_info <- election_info |>
+  #   dplyr::group_by(unique_id) |>
+  #   dplyr::filter(cand_list_id %in% (c(max(cand_list_id), min(cand_list_id))))
+
+  # Split table into candidate/list information and proper election information (drop first and last element (these are descriptive elements of the election))
+  election_cand_info <- election_info |>
+    dplyr::filter(grepl("candidate\\.", var))
+
+  election_list_info <- election_info |>
+    dplyr::filter(grepl("list\\.", var))
+
+  election_info_info <- election_info |>
+    dplyr::filter(!grepl("candidate\\.|list\\.", var))
+
+
+  # Expand to get every variable present in the data to every candidate/list in the data
+  election_cand_list_vars <- election_cand_list_info |>
+      tidyr::expand(cand_list_id, var_short)
 
   # Expand so that every element that is in the data exists for every candidate, then turn to df
   election_info <- election_cand_list_info |>
-    dplyr::right_join(
-      tidyr::expand(election_cand_list_info, cand_list_id, var_short)
+    dplyr::right_join(election_cand_list_vars
       # by = c("unique_id", "cand_list_id", "var_short")
     ) |> # This completes the vars in case there are some missing (like politischer Name etc.)
     dplyr::filter(!is.na(unique_id)) |>
@@ -434,7 +452,7 @@ read_electionGroupInfo <- function(xml_node, index){
 
   # Replace all NULL with NA
   election_info[election_info == "NULL"] <- NA
-
+browser()
   # Unnest
   election_info_full <- election_info |>
     tidyr::unnest_longer(
@@ -453,21 +471,21 @@ read_electionGroupInfo <- function(xml_node, index){
 
 
   # # Get electionGroupInfo element
-  # electionGroupInfo_xml <- xml2::xml_child(xml_node, index)
-  #
+  # electionGroup_xml <- xml2::xml_child(xml_node, index) |>
+  #   xml2::xml_child()
   #
   # # SPECIFY SPECIAL NODES' NAMES ===============================================
   #
   #
   # # Nodes containing language nodes
-  # specify_node(electionGroupInfo_xml, "language")
+  # specify_node(electionGroup_xml, "language")
   #
   #
   # # TURN TO DF =================================================================
   #
   #
   # # Get structure of the indexed node as a list
-  # electionGroupInfo <- electionGroupInfo_xml |>
+  # electionGroupInfo <- electionGroup_xml |>
   #   xml2::as_list()
   #
   # # Drop the countingCircle elements
