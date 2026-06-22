@@ -369,12 +369,21 @@ read_electionGroupInfo <- function(xml_node, index){
   # Number the names to create unique names
   names(electionGroup) <- paste0(1:length(electionGroup),"_", names(electionGroup))
 
+  # Number also the list elements of the sublists in here to create identifiers for the candidates and lists so we will be able to complete missing elements further down.
+  electionGroup <- lapply(electionGroup, function(sublist) {
+    names(sublist) <- paste0(seq_along(sublist), "_", names(sublist))
+    return(sublist)
+  })
+
   # Unlist the list
   electionGroup_unlist <- unlist(electionGroup)
 
   # List to df and add unique id
   electionGroup_df_long <- to_df(electionGroup_unlist, names(electionGroup_unlist)) |>
-    dplyr::mutate(unique_id = gsub("^(\\d+)_.*", "\\1", var))
+    dplyr::mutate(
+      unique_id = gsub("^(\\d+)_.*", "\\1", var),
+      cand_list_id = gsub(".*\\.(\\d+)_.*", "\\1", var)
+    )
 
 
   ## Vote Information ----------------------------------------------------------
@@ -383,7 +392,7 @@ read_electionGroupInfo <- function(xml_node, index){
   # Define vote information
   electionGroup_info <- electionGroup_df_long |>
     dplyr::filter(!grepl("electionInformation\\.", var)) |>
-    dplyr::select(-unique_id) |>
+    dplyr::select(-unique_id, -cand_list_id) |>
     to_wide() |>
     tidyr::unnest_longer(
       tidyselect::everything(),
@@ -394,8 +403,6 @@ read_electionGroupInfo <- function(xml_node, index){
   ## Vote Results --------------------------------------------------------------
 
 
-
-
   # STAND HIER ==========================================================================================================================
   # Problem: Wir wissen nicht, bei welchem Kand wir uns befinden, da unique_id die electionGroup bezeichnet und nicht den Kand
   # Entsprechen können wir so nicht completen. Allenfalls brauchen wir also noch eine id auf Kand-Ebene aber da muss man sich sicher
@@ -403,13 +410,25 @@ read_electionGroupInfo <- function(xml_node, index){
 
 
 
-  # Define vote results
+  # Filter
   election_info <- electionGroup_df_long |>
-    dplyr::filter(grepl("electionInformation\\.", var)) |>
+    dplyr::filter(grepl("electionInformation\\.", var))
+
+  # Drop first and last element (these are descriptive elements of the election)
+  election_cand_list_info <- election_info |>
+    dplyr::group_by(unique_id) |>
+    dplyr::filter(cand_list_id != max(cand_list_id)) |>
+    dplyr::filter(cand_list_id != min(cand_list_id))
+
+  # Expand so that every element that is in the data exists for every candidate, then turn to df
+  election_info <- election_cand_list_info |>
     dplyr::right_join(
-      tidyr::expand(electionGroup_df_long, unique_id, var_short),
-      by = c("unique_id", "var_short")
+      tidyr::expand(election_cand_list_info, cand_list_id, var_short)
+      # by = c("unique_id", "cand_list_id", "var_short")
     ) |> # This completes the vars in case there are some missing (like politischer Name etc.)
+    dplyr::filter(!is.na(unique_id)) |>
+    dplyr::bind_rows(election_info) |>
+    dplyr::select(-cand_list_id) |>
     to_wide() |>
     as.data.frame()
 
@@ -422,7 +441,7 @@ read_electionGroupInfo <- function(xml_node, index){
       tidyselect::everything(),
       keep_empty = TRUE
     )
-  browser()
+
   # Join result and information data
   election_data_complete <- election_info_full |>
     dplyr::bind_cols(electionGroup_info)
