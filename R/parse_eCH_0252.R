@@ -381,18 +381,18 @@ read_electionGroupInfo <- function(xml_node, index){
   # List to df and add unique id
   electionGroup_df_long <- to_df(electionGroup_unlist, names(electionGroup_unlist)) |>
     dplyr::mutate(
-      unique_id = gsub("^(\\d+)_.*", "\\1", var),
+      electionGroup_element_id = gsub("^(\\d+)_.*", "\\1", var),
       cand_list_id = gsub(".*\\.(\\d+)_.*", "\\1", var)
     )
 
 
-  ## Vote Information ----------------------------------------------------------
+  ## Election Group Information ------------------------------------------------
 
 
-  # Define vote information
+  # Define election group information
   electionGroup_info <- electionGroup_df_long |>
     dplyr::filter(!grepl("electionInformation\\.", var)) |>
-    dplyr::select(-unique_id, -cand_list_id) |>
+    dplyr::select(-electionGroup_element_id, -cand_list_id) |>
     to_wide() |>
     tidyr::unnest_longer(
       tidyselect::everything(),
@@ -400,71 +400,122 @@ read_electionGroupInfo <- function(xml_node, index){
     )
 
 
-  ## Vote Results --------------------------------------------------------------
+  ## Election Information and Results ------------------------------------------
 
 
   # STAND HIER ==========================================================================================================================
-  # Problem: Wir wissen nicht, bei welchem Kand wir uns befinden, da unique_id die electionGroup bezeichnet und nicht den Kand
+  # Problem: Wir wissen nicht, bei welchem Kand wir uns befinden, da electionGroup_element_id die electionGroup bezeichnet und nicht den Kand
   # Entsprechen können wir so nicht completen. Allenfalls brauchen wir also noch eine id auf Kand-Ebene aber da muss man sich sicher
   # Anschauen, wie sich das auf die restlichen Fälle auswirkt.
 
 
 
-  # Filter
+  # Define election information
   election_info <- electionGroup_df_long |>
     dplyr::filter(grepl("electionInformation\\.", var))
 
-  # # Split table into candidate/list information and proper election information (drop first and last element (these are descriptive elements of the election))
-  # election_cand_list_info <- election_info |>
-  #   dplyr::group_by(unique_id) |>
-  #   dplyr::filter(cand_list_id != max(cand_list_id)) |>
-  #   dplyr::filter(cand_list_id != min(cand_list_id))
-  #
-  # election_info_info <- election_info |>
-  #   dplyr::group_by(unique_id) |>
-  #   dplyr::filter(cand_list_id %in% (c(max(cand_list_id), min(cand_list_id))))
 
-  # Split table into candidate/list information and proper election information (drop first and last element (these are descriptive elements of the election))
+  ### Split Table --------------------------------------------------------------
+
+
+  # Split table into candidate/list information and proper election information
+  # This is necessary to complete potentially missing data on the candidate level
+  # so that to_wide() works.
+  election_info_info <- election_info |>
+    dplyr::filter(grepl("^election", var_short))
+
   election_cand_info <- election_info |>
-    dplyr::filter(grepl("candidate\\.", var))
+    dplyr::filter(!grepl("^election", var_short) & !grepl("list", var) & grepl("candidate", var))
 
   election_list_info <- election_info |>
-    dplyr::filter(grepl("list\\.", var))
+    dplyr::filter(grepl("list", var))
 
-  election_info_info <- election_info |>
-    dplyr::filter(!grepl("candidate\\.|list\\.", var))
+  # Expand to get every variable present in the candidate data to every candidate
+  election_cand_list_vars <- election_cand_info |>
+    tidyr::expand(cand_list_id, var_short)
+
+  # Complete the cand vars for every cand
+  election_cand_info <- election_cand_info |>
+    dplyr::left_join(election_cand_list_vars)
 
 
-  # Expand to get every variable present in the data to every candidate/list in the data
-  election_cand_list_vars <- election_cand_list_info |>
-      tidyr::expand(cand_list_id, var_short)
+  ### Widen Data ---------------------------------------------------------------
 
-  # Expand so that every element that is in the data exists for every candidate, then turn to df
-  election_info <- election_cand_list_info |>
-    dplyr::right_join(election_cand_list_vars
-      # by = c("unique_id", "cand_list_id", "var_short")
-    ) |> # This completes the vars in case there are some missing (like politischer Name etc.)
-    dplyr::filter(!is.na(unique_id)) |>
-    dplyr::bind_rows(election_info) |>
+
+  # Election information
+  election_info_info <- election_info_info |>
     dplyr::select(-cand_list_id) |>
     to_wide() |>
     as.data.frame()
 
-  # Replace all NULL with NA
-  election_info[election_info == "NULL"] <- NA
-browser()
-  # Unnest
-  election_info_full <- election_info |>
-    tidyr::unnest_longer(
-      tidyselect::everything(),
-      keep_empty = TRUE
-    )
+  # Candidate information
+  election_cand_list_info <- election_cand_info |>
+    # dplyr::select(-cand_list_id) |>
+    to_wide() |>
+    as.data.frame()
 
-  # Join result and information data
-  election_data_complete <- election_info_full |>
-    dplyr::bind_cols(electionGroup_info)
+  # List information
+  if (nrow(election_list_info) > 0) {
+    election_list_info <- election_list_info |>
+      to_wide() |>
+      as.data.frame()
 
-  return(election_data_complete)
+    # Add to election cand list info
+    election_cand_list_info <- election_cand_list_info |>
+      dplyr::bind_rows(election_list_info)
+  }
+
+  # Add election info
+  election_info <- election_info_info |>
+    dplyr::right_join(election_cand_list_info)
+
+  # Add election group info
+  electionGroup_info_complete <- electionGroup_info |>
+    dplyr::bind_cols(election_info)
+
+  return(electionGroup_info_complete)
+
+
+
+
+
+
+  # # Expand to get every variable present in the data to every candidate/list in the data
+  # election_cand_list_vars <- election_cand_list_info |>
+  #     tidyr::expand(cand_list_id, var_short)
+  #
+  # # Expand so that every element that is in the data exists for every candidate, then turn to df
+  # election_info <- election_cand_list_info |>
+  #   dplyr::right_join(election_cand_list_vars
+  #     # by = c("electionGroup_element_id", "cand_list_id", "var_short")
+  #   ) |> # This completes the vars in case there are some missing (like politischer Name etc.)
+  #   dplyr::filter(!is.na(electionGroup_element_id)) |>
+  #   dplyr::bind_rows(election_info) |>
+  #   dplyr::select(-cand_list_id) |>
+  #   to_wide() |>
+  #   as.data.frame()
+  #
+  # # Replace all NULL with NA
+  # election_info[election_info == "NULL"] <- NA
+  #
+  # # Unnest
+  # election_info_full <- election_info |>
+  #   tidyr::unnest_longer(
+  #     tidyselect::everything(),
+  #     keep_empty = TRUE
+  #   )
+  #
+  # # Join result and information data
+  # election_data_complete <- election_info_full |>
+  #   dplyr::bind_cols(electionGroup_info)
+  #
+  # return(election_data_complete)
+
+
+
+
+
+
 
 
 
@@ -537,13 +588,13 @@ browser()
   #
   # # List to df and add unique id
   # electionInfo_df_long <- to_df(electionInfo_unlist, names(electionInfo_unlist)) |>
-  #   dplyr::mutate(unique_id = gsub("^(\\d+)_.*", "\\1", var))
+  #   dplyr::mutate(electionGroup_element_id = gsub("^(\\d+)_.*", "\\1", var))
   #
   # # Define candidate information
   # candidate_info <- electionInfo_df_long |>
   #   dplyr::filter(grepl("candidate\\.", var)) |>
   #   to_wide() |>
-  #   dplyr::select(-unique_id) |>
+  #   dplyr::select(-electionGroup_element_id) |>
   #   tidyr::unnest_longer(
   #     tidyselect::everything(),
   #     keep_empty = TRUE
@@ -553,7 +604,7 @@ browser()
   # list_info <- electionInfo_df_long |>
   #   dplyr::filter(grepl("list\\.", var)) |>
   #   to_wide() |>
-  #   dplyr::select(-unique_id) |>
+  #   dplyr::select(-electionGroup_element_id) |>
   #   tidyr::unnest_longer(
   #     tidyselect::everything(),
   #     keep_empty = TRUE
