@@ -4,10 +4,10 @@
 \alias{strip_namespaces}
 \title{Strip namespaces.}
 \usage{
-strip_namespaces(xml_data)
+strip_namespaces(input_path)
 }
 \arguments{
-\item{xml_data}{A list of class xml_document.}
+\item{input_path}{A character vector to an xml-document.}
 }
 \value{
 A list of class xml_document.
