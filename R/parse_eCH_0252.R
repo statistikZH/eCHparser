@@ -340,18 +340,6 @@ parse_eCH_0252_elections_info <- function(input_path, doi = "all"){
       name_new  = gsub("_\\d+_", "_", name_new)
     )
 
-  # # This is a bit risky since it could lead to different names for the same variables, given different files and contents...
-  # names <- data.frame(names_long = names(out_df)) |>
-  #   dplyr::mutate(
-  #     names_long  = gsub("_\\d+_$", "", names_long),
-  #     names_long  = gsub("_\\d+_", "_", names_long),
-  #     names_short = gsub(".*_", "", names_long)
-  #   ) |>
-  #   dplyr::add_count(names_short, name = "n") |>
-  #   dplyr::mutate(
-  #     name_new = ifelse(n == 1, names_short, names_long)
-  #   )
-
   names(out_df) <- names$name_new
 
   return(out_df)
@@ -432,7 +420,11 @@ read_electionGroupInfo <- function(xml_node, index){
 
   # Define election information
   election_info <- electionGroup_df_long |>
-    dplyr::filter(grepl("electionInformation\\.", var))
+    dplyr::filter(grepl("electionInformation\\.", var)) |>
+    tidyr::unnest_longer(
+      tidyselect::everything(),
+      keep_empty = TRUE
+    )
 
 
   ### Split Table --------------------------------------------------------------
@@ -450,22 +442,16 @@ read_electionGroupInfo <- function(xml_node, index){
   election_list_info <- election_info |>
     dplyr::filter(grepl("list", var))
 
-  # Expand to get every variable present in the candidate data to every candidate
-  election_cand_list_vars <- election_cand_info |>
-    tidyr::expand(cand_list_id, var_short)
+  # Define all variables present in the candidate data
+  election_cand_list_vars <- election_cand_info$var_short |>
+    unique()
 
   # Complete the cand vars for every cand
   election_cand_info <- election_cand_info |>
-    dplyr::left_join(election_cand_list_vars, by = c("var_short", "cand_list_id"))
+    tidyr::complete(tidyr::nesting(cand_list_id, electionGroup_element_id), var_short = election_cand_list_vars)
 
 
   ### Widen Data ---------------------------------------------------------------
-
-
-
-  # STAND HIER =================================================================================================================
-  # These data.frames seem to contain lists. Check why and solve it.
-
 
 
   # Election information
@@ -476,25 +462,31 @@ read_electionGroupInfo <- function(xml_node, index){
 
   # Candidate information
   election_cand_list_info <- election_cand_info |>
-    # dplyr::select(-cand_list_id) |>
     to_wide() |>
+    tidyr::unnest_longer(
+      tidyselect::everything(),
+      keep_empty = TRUE
+    ) |>
     as.data.frame()
-browser()
+
   # List information
   if (nrow(election_list_info) > 0) {
+
     election_list_info <- election_list_info |>
       to_wide() |>
       tidyr::unnest_longer(
         tidyselect::everything(),
         keep_empty = TRUE
-      )
+      ) |>
+      as.data.frame() |>
+      dplyr::select(-cand_list_id)
 
     # Add to election cand list info
     election_cand_list_info <- election_cand_list_info |>
-      dplyr::bind_rows(election_list_info)
-
-    test <- election_cand_list_info |>
-      dplyr::left_join(election_list_info, by = c("candidate_candidateIdentification" = "candidatePosition_candidateIdentification"))
+      dplyr::right_join(election_list_info, by = c(
+        "electionGroup_element_id",
+        "candidate_candidateIdentification" = "candidatePosition_candidateIdentification")
+      )
 
   }
 
