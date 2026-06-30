@@ -32,6 +32,10 @@ strip_namespaces <- function(input_path) {
     xml_text <- gsub("eCH-\\d{4}:", "", xml_text)
   }
 
+  # Rename writeInCandidate -> candidate (both opening and closing tags): only relevant for majority result files
+  xml_text <- gsub("writeInCandidate", "candidate", xml_text, fixed = TRUE)
+  xml_text <- gsub("candidateOrWriteInCandidate", "candidate", xml_text, fixed = TRUE)
+
   xml2::read_xml(xml_text)
 
 }
