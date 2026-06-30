@@ -452,13 +452,22 @@ read_electionGroupInfo <- function(xml_node, index){
 
 
   ### Widen Data ---------------------------------------------------------------
-
+browser()
 
   # Election information
   election_info_info <- election_info_info |>
     dplyr::select(-cand_list_id) |>
     to_wide() |>
+    tidyr::unnest_longer(
+      tidyselect::everything(),
+      keep_empty = TRUE
+    ) |>
     as.data.frame()
+
+  # election_info_info <- election_info_info |>
+  #   dplyr::select(-cand_list_id) |>
+  #   to_wide() |>
+  #   as.data.frame()
 
   # Candidate information
   election_cand_list_info <- election_cand_info |>
