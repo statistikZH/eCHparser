@@ -452,7 +452,7 @@ read_electionGroupInfo <- function(xml_node, index){
 
 
   ### Widen Data ---------------------------------------------------------------
-browser()
+
 
   # Election information
   election_info_info <- election_info_info |>
