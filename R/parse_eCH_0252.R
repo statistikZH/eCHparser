@@ -653,8 +653,8 @@ read_electionGroupResult <- function(xml_node, index){
     # Get counting circle result indices
     countingCircleResult_indices <- which(grepl("ountingCircleResult", names(electionResult)))
 
-    # Get elected indices
-    elected_indices <- which(grepl("elected", names(electionResult)))
+    # Get elected index (always only one)
+    elected_index <- which(grepl("elected", names(electionResult)))
 
 
     ### Counting Circle Results ------------------------------------------------
@@ -773,165 +773,79 @@ read_electionGroupResult <- function(xml_node, index){
     ### Elected ----------------------------------------------------------------
 
 
-    # Parse through elected nodes
-    elected_list <- lapply(elected_indices, function(elected_index) {
+    if (length(elected_index) > 0) {
+
+      # Check for majority or proportional
+        if (grepl("majorityElection", names(electionResult[[elected_index]]))) {
+
+          # Define elected element
+          elected <- electionResult[[elected_index]][[1]]
+
+          # Define absolute majority
+          absoluteMajority <- elected[["absoluteMajority"]] |>
+            unlist()
+
+          # Define election result completion
+          isElectionResultComplete <- elected[["isElectionResultComplete"]] |>
+            unlist()
+
+          # Parse through candidates
+          electedCandidate <- elected[grep("electedCandidate", names(elected))]
+
+          # If there are elected candidates, turn into df
+          if (length(electedCandidate) > 0) {
+
+            # Number the names to create unique names
+            names(electedCandidate) <- paste0(1:length(electedCandidate),"_", names(electedCandidate))
+
+            # Unlist the list
+            electedCandidate_unlist <- unlist(electedCandidate)
+
+            # List to df and add unique id
+            electedCandidate_info <- to_df(electedCandidate_unlist, names(electedCandidate_unlist)) |>
+              dplyr::mutate(unique_id = gsub("^(\\d+)_.*", "\\1", var)) |>
+              dplyr::filter(grepl("candidateIdentification", var_short) | grepl("isElectedByDraw", var_short)) |>
+              to_wide() |>
+              dplyr::select(-unique_id) |>
+              tidyr::unnest_longer(
+                tidyselect::everything(),
+                keep_empty = TRUE
+              ) |>
+              dplyr::mutate(elected = "true")
+
+          } else {
+
+            electedCandidate_info <- NULL
+
+          }
+
+
+        } else if (grepl("proportionalElection", names(electionResult[[elected_index]]))) {
 browser()
-
-      # Define elected element
-      elected <- electionResult[[elected_index]]
-
-      absoluteMajority <- elected[["absoluteMajority"]] |>
-        unlist()
-
-      isElectionResultComplete <- elected[["isElectionResultComplete"]] |>
-        unlist()
-
-
-      # Define canton id
-      cantonId <- xml2::xml_find_first(node_voteBaseDelivery, paste0(".//cantonId")) |>
-        xml2::xml_integer()
-
-      # Define polling day
-      pollingDay <- xml2::xml_find_first(node_voteBaseDelivery, paste0(".//pollingDay")) |>
-        xml2::xml_text()
-
-
-
-    })
-
-
-
-
-      # Split into counting circle information and result data
-      if ("resultData" %in% names(countingCircleResult)) {
-        electionResult <- countingCircleResult[["resultData"]][["electionResult"]]
-        countingCircleResult[["resultData"]][["electionResult"]] <- NULL
-      }
-
-      # Unlist the list
-      countingCircleResult_unlist <- unlist(countingCircleResult)
-
-      # List to df and add unique id
-      countingCircleResult_df_long <- to_df(countingCircleResult_unlist, names(countingCircleResult_unlist))
-
-      # Transform to table
-      countingCircle_result <- countingCircleResult_df_long |>
-        to_wide() |>
-        tidyr::unnest_longer(
-          tidyselect::everything(),
-          keep_empty = TRUE
-        )
-
-
-      ## Election Results ------------------------------------------------------
-
-
-      if ("resultData" %in% names(countingCircleResult)) {
-
-        # Define election ID, then drop it
-        electionIdentification <- electionResult[["electionIdentification"]][[1]]
-        electionResult[["electionIdentification"]] <- NULL
-
-        # Divide into candidate/list result bit and rest
-        result_indices <- grep("Result", names(electionResult[[1]]))
-        votes_indices <- which(!grepl("Result", names(electionResult[[1]])))
-
-        # Apply through result list
-        out_list <- lapply(result_indices, function(result_index) {
-
-          # Define candidate or list result element
-          result <- electionResult[[1]][[result_index]]
-
-          # Unlist the list
-          result_unlist <- unlist(result)
-
-          # List to df and add unique id
-          result_df_long <- to_df(result_unlist, names(result_unlist))
-
-          # Transform to table
-          result <- result_df_long |>
-            to_wide() |>
-            tidyr::unnest_longer(
-              tidyselect::everything(),
-              keep_empty = TRUE
-            )
-
-          # return(candidate_result)
-
-        })
-
-        # Transform relevant data to df
-        out_df <- dplyr::bind_rows(out_list)
-
-        # Add invalid/empty votes
-        if (length(votes_indices) > 0) {
-          votes <- electionResult[[1]][votes_indices]
-
-          # Unlist
-          votes_unlist <- unlist(votes)
-
-          # List to df and add unique id
-          votes_df_long <- to_df(votes_unlist, names(votes_unlist))
-
-          # Transform to table
-          votes <- votes_df_long |>
-            to_wide() |>
-            tidyr::unnest_longer(
-              tidyselect::everything(),
-              keep_empty = TRUE
-            )
-
-          # Add votes to results
-          out_df <- out_df |>
-            dplyr::bind_cols(votes)
-
         }
 
-        # Add contest information
+
+      ## Finalise Data -----------------------------------------------------------
+
+
+      # Add contest information and elected info
+      out_df <- out_df |>
+        dplyr::mutate(
+          absoluteMajority = absoluteMajority,
+          isElectionResultComplete = isElectionResultComplete
+        )
+
+      if (!is.null(electedCandidate_info)) {
         out_df <- out_df |>
-          dplyr::mutate(
-            electionIdentification = electionIdentification
-          )
-
-        countingCircle_result <- countingCircle_result |>
-          dplyr::bind_cols(out_df)
-
+          dplyr::left_join(electedCandidate_info)
       }
 
-      return(countingCircle_result)
+      out_df <- out_df |>
+        dplyr::mutate(
+          electionResult_electionIdentification = electionResult_electionIdentification
+        )
 
-    })
-
-    # Transform relevant data to df
-    out_df <- dplyr::bind_rows(out_list)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    ## Finalise Data -----------------------------------------------------------
-
-
-    # Add contest information
-    out_df <- out_df |>
-      dplyr::mutate(
-        electionResult_electionIdentification = electionResult_electionIdentification
-      )
+    }
 
     # # Add additional values in case of proportional elections
     # if ("proportionalElection" %in% names(electionResult)) {
