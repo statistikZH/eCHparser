@@ -634,7 +634,7 @@ read_electionGroupResult <- function(xml_node, index){
     xml2::as_list()
 
   # Get election group ID
-  electionGroupId <- electionGroupResult[["electionGroupIdentification"]] |>
+  electionGroupIdentification <- electionGroupResult[["electionGroupIdentification"]] |>
     unlist()
 
   # Get election result indices
@@ -647,13 +647,20 @@ read_electionGroupResult <- function(xml_node, index){
     electionResult <- electionGroupResult[[electionResult_index]]
 
     # Get election ID
-    electionResult_electionId <- electionResult[["electionIdentification"]] |>
+    electionResult_electionIdentification <- electionResult[["electionIdentification"]] |>
       unlist()
 
     # Get counting circle result indices
     countingCircleResult_indices <- which(grepl("ountingCircleResult", names(electionResult)))
 
-    # Parse through election results
+    # Get elected indices
+    elected_indices <- which(grepl("elected", names(electionResult)))
+
+
+    ### Counting Circle Results ------------------------------------------------
+
+
+    # Parse through counting circle election results
     out_list <- lapply(countingCircleResult_indices, function(countingCircleResult_index) {
 
       # Define countingCircleResult element
@@ -686,7 +693,7 @@ read_electionGroupResult <- function(xml_node, index){
       if ("resultData" %in% names(countingCircleResult)) {
 
         # Define election ID, then drop it
-        electionId <- electionResult[["electionIdentification"]][[1]]
+        electionIdentification <- electionResult[["electionIdentification"]][[1]]
         electionResult[["electionIdentification"]] <- NULL
 
         # Divide into candidate/list result bit and rest
@@ -747,7 +754,7 @@ read_electionGroupResult <- function(xml_node, index){
         # Add contest information
         out_df <- out_df |>
           dplyr::mutate(
-            electionId = electionId
+            electionIdentification = electionIdentification
           )
 
         countingCircle_result <- countingCircle_result |>
@@ -763,13 +770,167 @@ read_electionGroupResult <- function(xml_node, index){
     out_df <- dplyr::bind_rows(out_list)
 
 
-    ## Finalise Data -------------------------------------------------------------
+    ### Elected ----------------------------------------------------------------
+
+
+    # Parse through elected nodes
+    elected_list <- lapply(elected_indices, function(elected_index) {
+browser()
+
+      # Define elected element
+      elected <- electionResult[[elected_index]]
+
+      absoluteMajority <- elected[["absoluteMajority"]] |>
+        unlist()
+
+      isElectionResultComplete <- elected[["isElectionResultComplete"]] |>
+        unlist()
+
+
+      # Define canton id
+      cantonId <- xml2::xml_find_first(node_voteBaseDelivery, paste0(".//cantonId")) |>
+        xml2::xml_integer()
+
+      # Define polling day
+      pollingDay <- xml2::xml_find_first(node_voteBaseDelivery, paste0(".//pollingDay")) |>
+        xml2::xml_text()
+
+
+
+    })
+
+
+
+
+      # Split into counting circle information and result data
+      if ("resultData" %in% names(countingCircleResult)) {
+        electionResult <- countingCircleResult[["resultData"]][["electionResult"]]
+        countingCircleResult[["resultData"]][["electionResult"]] <- NULL
+      }
+
+      # Unlist the list
+      countingCircleResult_unlist <- unlist(countingCircleResult)
+
+      # List to df and add unique id
+      countingCircleResult_df_long <- to_df(countingCircleResult_unlist, names(countingCircleResult_unlist))
+
+      # Transform to table
+      countingCircle_result <- countingCircleResult_df_long |>
+        to_wide() |>
+        tidyr::unnest_longer(
+          tidyselect::everything(),
+          keep_empty = TRUE
+        )
+
+
+      ## Election Results ------------------------------------------------------
+
+
+      if ("resultData" %in% names(countingCircleResult)) {
+
+        # Define election ID, then drop it
+        electionIdentification <- electionResult[["electionIdentification"]][[1]]
+        electionResult[["electionIdentification"]] <- NULL
+
+        # Divide into candidate/list result bit and rest
+        result_indices <- grep("Result", names(electionResult[[1]]))
+        votes_indices <- which(!grepl("Result", names(electionResult[[1]])))
+
+        # Apply through result list
+        out_list <- lapply(result_indices, function(result_index) {
+
+          # Define candidate or list result element
+          result <- electionResult[[1]][[result_index]]
+
+          # Unlist the list
+          result_unlist <- unlist(result)
+
+          # List to df and add unique id
+          result_df_long <- to_df(result_unlist, names(result_unlist))
+
+          # Transform to table
+          result <- result_df_long |>
+            to_wide() |>
+            tidyr::unnest_longer(
+              tidyselect::everything(),
+              keep_empty = TRUE
+            )
+
+          # return(candidate_result)
+
+        })
+
+        # Transform relevant data to df
+        out_df <- dplyr::bind_rows(out_list)
+
+        # Add invalid/empty votes
+        if (length(votes_indices) > 0) {
+          votes <- electionResult[[1]][votes_indices]
+
+          # Unlist
+          votes_unlist <- unlist(votes)
+
+          # List to df and add unique id
+          votes_df_long <- to_df(votes_unlist, names(votes_unlist))
+
+          # Transform to table
+          votes <- votes_df_long |>
+            to_wide() |>
+            tidyr::unnest_longer(
+              tidyselect::everything(),
+              keep_empty = TRUE
+            )
+
+          # Add votes to results
+          out_df <- out_df |>
+            dplyr::bind_cols(votes)
+
+        }
+
+        # Add contest information
+        out_df <- out_df |>
+          dplyr::mutate(
+            electionIdentification = electionIdentification
+          )
+
+        countingCircle_result <- countingCircle_result |>
+          dplyr::bind_cols(out_df)
+
+      }
+
+      return(countingCircle_result)
+
+    })
+
+    # Transform relevant data to df
+    out_df <- dplyr::bind_rows(out_list)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    ## Finalise Data -----------------------------------------------------------
 
 
     # Add contest information
     out_df <- out_df |>
       dplyr::mutate(
-        electionResult_electionId = electionResult_electionId
+        electionResult_electionIdentification = electionResult_electionIdentification
       )
 
     # # Add additional values in case of proportional elections
@@ -793,7 +954,7 @@ read_electionGroupResult <- function(xml_node, index){
   # Add contest information
   out_df <- out_df |>
     dplyr::mutate(
-      electionGroupId = electionGroupId
+      electionGroupIdentification = electionGroupIdentification
     )
 
   return(out_df)
