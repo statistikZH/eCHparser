@@ -768,61 +768,58 @@ read_electionGroupResult <- function(xml_node, index){
 
     # Transform relevant data to df
     out_df <- dplyr::bind_rows(out_list)
-
+    names(out_df)[grepl("candidateIdentification", names(out_df))] <- "candidateIdentification" # necessary for the join with maj/prop bellow
 
     ### Elected ----------------------------------------------------------------
 
 
     if (length(elected_index) > 0) {
 
-      # Check for majority or proportional
-        if (grepl("majorityElection", names(electionResult[[elected_index]]))) {
+      # Define elected element
+      elected <- electionResult[[elected_index]][[1]]
 
-          # Define elected element
-          elected <- electionResult[[elected_index]][[1]]
+      # Define absolute majority
+      absoluteMajority <- elected[["absoluteMajority"]] |>
+        unlist()
 
-          # Define absolute majority
-          absoluteMajority <- elected[["absoluteMajority"]] |>
-            unlist()
+      # Define election result completion
+      isElectionResultComplete <- elected[["isElectionResultComplete"]] |>
+        unlist()
 
-          # Define election result completion
-          isElectionResultComplete <- elected[["isElectionResultComplete"]] |>
-            unlist()
+      # Define your nodes of interest (either electedCandidate for majority of list [one node above] for proportion) --> this is the only difference between prop and maj
+      if (grepl("majorityElection", names(electionResult[[elected_index]]))) {
+        electedCandidate <- elected[grep("electedCandidate", names(elected))]
+      } else if (grepl("proportionalElection", names(electionResult[[elected_index]]))) {
+        electedCandidate <- elected[grep("list", names(elected))]
+      }
 
-          # Parse through candidates
-          electedCandidate <- elected[grep("electedCandidate", names(elected))]
+      # If there are elected candidates, turn into df
+      if (length(electedCandidate) > 0) {
 
-          # If there are elected candidates, turn into df
-          if (length(electedCandidate) > 0) {
+        # Number the names to create unique names
+        names(electedCandidate) <- paste0(1:length(electedCandidate),"_", names(electedCandidate))
 
-            # Number the names to create unique names
-            names(electedCandidate) <- paste0(1:length(electedCandidate),"_", names(electedCandidate))
+        # Unlist the list
+        electedCandidate_unlist <- unlist(electedCandidate)
 
-            # Unlist the list
-            electedCandidate_unlist <- unlist(electedCandidate)
+        # List to df and add unique id
+        electedCandidate_info <- to_df(electedCandidate_unlist, names(electedCandidate_unlist)) |>
+          dplyr::mutate(unique_id = gsub("^(\\d+)_.*", "\\1", var)) |>
+          dplyr::filter(grepl("candidateIdentification", var_short) | grepl("isElectedByDraw", var_short)) |>
+          to_wide() |>
+          dplyr::select(-unique_id) |>
+          tidyr::unnest_longer(
+            tidyselect::everything(),
+            keep_empty = TRUE
+          ) |>
+          dplyr::mutate(elected = "true")
+        names(electedCandidate_info)[grepl("candidateIdentification", names(electedCandidate_info))] <- "candidateIdentification" # necessary for maj/prop
 
-            # List to df and add unique id
-            electedCandidate_info <- to_df(electedCandidate_unlist, names(electedCandidate_unlist)) |>
-              dplyr::mutate(unique_id = gsub("^(\\d+)_.*", "\\1", var)) |>
-              dplyr::filter(grepl("candidateIdentification", var_short) | grepl("isElectedByDraw", var_short)) |>
-              to_wide() |>
-              dplyr::select(-unique_id) |>
-              tidyr::unnest_longer(
-                tidyselect::everything(),
-                keep_empty = TRUE
-              ) |>
-              dplyr::mutate(elected = "true")
+      } else {
 
-          } else {
+        electedCandidate_info <- NULL
 
-            electedCandidate_info <- NULL
-
-          }
-
-
-        } else if (grepl("proportionalElection", names(electionResult[[elected_index]]))) {
-browser()
-        }
+      }
 
 
       ## Finalise Data -----------------------------------------------------------
