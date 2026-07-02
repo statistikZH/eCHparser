@@ -507,6 +507,10 @@ read_electionGroupInfo <- function(xml_node, index){
   electionGroup_info_complete <- electionGroup_info |>
     dplyr::bind_cols(election_info)
 
+  # Change some names to adjust to result file
+  names(electionGroup_info_complete)[grepl("candidateIdentification", names(electionGroup_info_complete))] <- "candidateIdentification"
+  names(electionGroup_info_complete)[grepl("electionIdentification", names(electionGroup_info_complete))] <- "electionIdentification"
+
   return(electionGroup_info_complete)
 
 }
