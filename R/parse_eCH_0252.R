@@ -342,6 +342,15 @@ parse_eCH_0252_elections_info <- function(input_path, doi = "all"){
 
   names(out_df) <- names$name_new
 
+  # Mutate optional boolean
+  if("candidate_incumbentYesNo" %in% names(out_df)) {
+    out_df <- out_df |>
+      dplyr::mutate(candidate_incumbentYesNo = dplyr::case_when(
+        candidate_incumbentYesNo == TRUE ~ TRUE,
+        TRUE ~ FALSE
+      ))
+  }
+
   return(out_df)
 
 }
