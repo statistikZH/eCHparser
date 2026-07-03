@@ -586,12 +586,46 @@ parse_eCH_0252_elections_result <- function(input_path, doi = "all"){
   ## Finalise Data -------------------------------------------------------------
 
 
-  # Add contest information
+  # Add contest information and mutate non-optional boolean
   out_df <- out_df |>
     dplyr::mutate(
       cantonId = cantonId,
-      pollingDay = pollingDay
+      pollingDay = pollingDay,
+      resultData_isFullyCounted = dplyr::case_when(
+        resultData_isFullyCounted == "true" ~ TRUE,
+        TRUE ~ FALSE
+      ),
+      isElectionResultComplete = dplyr::case_when(
+        isElectionResultComplete == "true" ~ TRUE,
+        TRUE ~ FALSE
+      )
     )
+
+  # Mutate optional boolean
+  if ("electedCandidate_isElectedByDraw" %in% names(out_df)) {
+    out_df <- out_df |>
+      dplyr::mutate(electedCandidate_isElectedByDraw = dplyr::case_when(
+          electedCandidate_isElectedByDraw == "true" ~ TRUE,
+          electedCandidate_isElectedByDraw == "false" ~ FALSE,
+          TRUE ~ NA
+      ))
+  }
+
+  if ("elected" %in% names(out_df)) {
+  out_df <- out_df |>
+    dplyr::mutate(elected = dplyr::case_when(
+      elected == "true" ~ TRUE,
+      TRUE ~ FALSE
+    ))
+  }
+
+  if("candidate_incumbentYesNo" %in% names(out_df)) {
+    out_df <- out_df |>
+      dplyr::mutate(candidate_incumbentYesNo = dplyr::case_when(
+        candidate_incumbentYesNo == TRUE ~ TRUE,
+        TRUE ~ FALSE
+      ))
+  }
 
   return(out_df)
 
