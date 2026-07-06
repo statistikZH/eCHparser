@@ -510,7 +510,8 @@ read_electionGroupInfo <- function(xml_node, index){
 
   # Add election info
   election_info <- election_info_info |>
-    dplyr::right_join(election_cand_list_info, by = "electionGroup_element_id")
+    # dplyr::right_join(election_cand_list_info, by = "electionGroup_element_id")
+    dplyr::full_join(election_cand_list_info, by = "electionGroup_element_id") # full join necessary because there might be elecs without candidates
 
   # Add election group info
   electionGroup_info_complete <- electionGroup_info |>
