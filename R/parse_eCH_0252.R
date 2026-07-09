@@ -501,11 +501,14 @@ read_electionGroupInfo <- function(xml_node, index){
       dplyr::select(-cand_list_id)
 
     # Add to election cand list info
+    # election_cand_list_info_test1 <- election_cand_list_info |>
+    #   dplyr::right_join(election_list_info, by = c(
+    #     "electionGroup_element_id",
+    #     "candidate_candidateIdentification" = "candidatePosition_candidateIdentification")
+    #   )
     election_cand_list_info <- election_cand_list_info |>
-      dplyr::right_join(election_list_info, by = c(
-        "electionGroup_element_id",
-        "candidate_candidateIdentification" = "candidatePosition_candidateIdentification")
-      )
+      dplyr::rename("candidatePosition_candidateIdentification" = "candidate_candidateIdentification") |>
+      dplyr::right_join(election_list_info)
 
   }
 
