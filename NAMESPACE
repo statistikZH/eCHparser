@@ -3,6 +3,7 @@
 export(build_eCH_0157)
 export(convert_to_eCH_0157)
 export(get_election_template)
+export(join_eCH_0252_infos_results)
 export(new_election_template)
 export(parse_eCH_0157)
 export(parse_eCH_0252)

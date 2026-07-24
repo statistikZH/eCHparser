@@ -887,7 +887,7 @@ read_electionGroupResult <- function(xml_node, index){
 
       if (!is.null(electedCandidate_info)) {
         out_df <- out_df |>
-          dplyr::left_join(electedCandidate_info)
+          suppressMessages(dplyr::left_join(electedCandidate_info))
       }
 
       out_df <- out_df |>
