@@ -80,7 +80,7 @@ parse_eCH_0157 <- function(input_path){
   # Define all electionGroupBallot nodes.
   # This is needed to work with further down the tree.
   # For the next level, we already defined a named list above.
-  electionGroupBallot_nodes <- xml2::xml_find_all(node_initialDelivery, ".//electionGroupBallot")
+  electionGroupBallot_nodes <- xml2::xml_find_all(node_initialDelivery, ".//*[starts-with(local-name(), 'electionGroup')]")
 
   # Parse through all electionGroupBallot nodes
   electionGroup_list <- lapply(seq_along(electionGroupBallot_nodes), function(electionGroupBallot_index){
